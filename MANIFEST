@@ -29,6 +29,7 @@ t/argspec-bad.t         Test various bad argspec arguments
 t/cases.t		Test various interesting cases
 t/comment.t             Test comment parsing
 t/crashme.t             Parse random data
+t/declaration.t         Test declaration parsing
 t/default.t		Test default handler
 t/dtext.t               Test dtext decoding of entities
 t/entities.t		Test encoding/decoding of entities
