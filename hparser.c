@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.2 1999/12/03 12:58:29 gisle Exp $
+/* $Id: hparser.c,v 2.3 1999/12/03 20:26:09 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -12,6 +12,21 @@
 
 #include "hctype.h"    /* isH...() macros */
 #include "tokenpos.h"  /* dTOKEN; PUSH_TOKEN() */
+
+
+static
+struct literal_tag {
+  int len;
+  char* str;
+}
+literal_mode_elem[] =
+{
+  {6, "script"},
+  {5, "style"},
+  {3, "xmp"},
+  {9, "plaintext"},
+  {0, 0}
+};
 
 /*
  * Parser functions.
