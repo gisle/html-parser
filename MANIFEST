@@ -25,11 +25,13 @@ t/cases.t		Test various interesting cases
 t/default.t		Test default handler
 t/entities.t		Test encoding/decoding of entities
 t/filter.t		Test HTML::Filter
+t/handler.t		Test $p->handler method
 t/headparser.t		Test HTML::HeadParser
 t/headparser-http.t	Test HTML::HeadParser
 t/largetags.t		Test with very large tags
 t/linkextor-base.t	Test HTML::LinkExtor
 t/linkextor-rel.t	Test HTML::LinkExtor
+t/magic.t		Test that checking magic head in p_state works
 t/marked-sect.t         Test marked section support
 t/offset.t		Test attrspec offset
 t/parser.t		Test HTML::Parser subclassing
