@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.03';  # $Date: 2000/01/14 13:37:28 $
+$VERSION = '3.03';  # $Date: 2000/01/15 15:35:35 $
 
 require HTML::Entities;
 
@@ -22,7 +22,7 @@ my %allowed_handlers = map { ($_ => 1) }
     qw( declaration comment start end text process default );
 my %allowed_options = map { ($_ => 1) } # not netscape_buggy_comment!
     qw( strict_comment strict_names boolean_attribute_value
-	xml_mode unbroken_text marked_section );
+	xml_mode unbroken_text marked_sections );
 
 sub new
 {
@@ -417,7 +417,7 @@ enabled, blocks of text are always reported in one piece.  This will
 delay the text event until the following (non-text) event has been
 recognized by the parser.
 
-=item $p->marked_section( [$bool] )
+=item $p->marked_sections( [$bool] )
 
 By default, section markings like <![CDATA[...]]> are treated like
 ordinary text.  When this attribute is enabled section markings are
