@@ -4,7 +4,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.18";  # $Date: 1998/06/12 12:50:21 $
+$VERSION = "2.19";  # $Date: 1998/07/06 23:06:02 $
 
 
 sub new
@@ -67,7 +67,7 @@ sub parse
 		    $$buf = $1;
                 # Same treatment for chopped up entites and words.
 		# We must wait until we have it all.
-		} elsif ($text =~ s|(\S+)$||) {
+		} elsif ($text =~ s|(\s*\S+)$||) {
 		    $$buf = $1;
 		};
 		$self->text($text) if length $text;
