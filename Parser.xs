@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.34 1999/11/18 08:14:06 gisle Exp $
+/* $Id: Parser.xs,v 2.35 1999/11/18 08:25:36 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -88,7 +88,7 @@ struct p_state {
   bool keep_case;
   bool xml_mode;
   bool v2_compat;
-  bool pass_cbdata;
+  bool pass_self;
   bool unbroken_text;
   bool attr_pos;
 
@@ -235,7 +235,7 @@ decode_entities(SV* sv, HV* entity2char)
 }
 
 static void
-html_default(PSTATE* p_state, char* beg, char *end, SV* cbdata)
+html_default(PSTATE* p_state, char* beg, char *end, SV* self)
 {	
   SV *cb = p_state->default_cb;
   if (beg == end)
@@ -246,8 +246,8 @@ html_default(PSTATE* p_state, char* beg, char *end, SV* cbdata)
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     
     PUTBACK;
@@ -261,7 +261,7 @@ html_default(PSTATE* p_state, char* beg, char *end, SV* cbdata)
 }
 
 static void
-html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
+html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* self)
 {
   AV *accum = p_state->accum;
   SV *cb = p_state->text_cb;
@@ -277,7 +277,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 #endif
 
   if (!accum && !cb) {
-    html_default(p_state, beg, end, cbdata);
+    html_default(p_state, beg, end, self);
     return;
   }
 
@@ -310,8 +310,8 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     XPUSHs(sv_2mortal(text));
     XPUSHs(boolSV(cdata));
     PUTBACK;
@@ -325,7 +325,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 
 
 static void
-flush_pending_text(PSTATE* p_state, SV* cbdata)
+flush_pending_text(PSTATE* p_state, SV* self)
 {
   char *s;
   STRLEN len;
@@ -336,7 +336,7 @@ flush_pending_text(PSTATE* p_state, SV* cbdata)
   old_unbroken_text = p_state->unbroken_text;
   p_state->unbroken_text = 0;
   s = SvPV(p_state->pending_text, len);
-  html_text(p_state, s, s+len, 0, cbdata);
+  html_text(p_state, s, s+len, 0, self);
   SvREFCNT_dec(p_state->pending_text);
   p_state->pending_text = 0;
   p_state->unbroken_text = old_unbroken_text;
@@ -348,7 +348,7 @@ static void
 html_end(PSTATE* p_state,
 	 char *tag_beg, char *tag_end,
 	 char *beg, char *end,
-	 SV* cbdata)
+	 SV* self)
 {
   AV *accum;
   SV *cb;
@@ -358,7 +358,7 @@ html_end(PSTATE* p_state,
     return;
 #endif
 
-  flush_pending_text(p_state, cbdata);
+  flush_pending_text(p_state, self);
 
   accum = p_state->accum;
   if (accum) {
@@ -381,8 +381,8 @@ html_end(PSTATE* p_state,
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
     if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
@@ -397,7 +397,7 @@ html_end(PSTATE* p_state,
     return;
   }
 
-  html_default(p_state, beg, end, cbdata);
+  html_default(p_state, beg, end, self);
 }
 
 
@@ -407,7 +407,7 @@ html_start(PSTATE* p_state,
 	   AV* tokens,
 	   int empty_tag,
 	   char *beg, char *end,
-	   SV* cbdata)
+	   SV* self)
 {
   AV *accum = p_state->accum;
   SV *cb = p_state->start_cb;
@@ -420,7 +420,7 @@ html_start(PSTATE* p_state,
     return;
 #endif
 
-  flush_pending_text(p_state, cbdata);
+  flush_pending_text(p_state, self);
 
   if ((accum || cb) && p_state->v2_compat) {
     /* need to construct an attr hash and an attr_seq array */
@@ -464,8 +464,8 @@ html_start(PSTATE* p_state,
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
     if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
@@ -486,12 +486,12 @@ html_start(PSTATE* p_state,
     LEAVE;
   }
   else {
-    html_default(p_state, beg, end, cbdata);
+    html_default(p_state, beg, end, self);
     return;
   }
 
   if (empty_tag)
-    html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, cbdata);
+    html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, self);
 }
 
 
@@ -499,7 +499,7 @@ static void
 html_process(PSTATE* p_state,
 	     char *pi_beg, char *pi_end,
 	     char *beg, char *end,
-	     SV* cbdata)
+	     SV* self)
 {
   AV *accum;
   SV *cb;
@@ -509,7 +509,7 @@ html_process(PSTATE* p_state,
     return;
 #endif
 
-  flush_pending_text(p_state, cbdata);
+  flush_pending_text(p_state, self);
 
   accum = p_state->accum;
   if (accum) {
@@ -527,8 +527,8 @@ html_process(PSTATE* p_state,
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     XPUSHs(sv_2mortal(newSVpvn(pi_beg, pi_end - pi_beg)));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
@@ -540,12 +540,12 @@ html_process(PSTATE* p_state,
     return;
   }
 
-  html_default(p_state, beg, end, cbdata);
+  html_default(p_state, beg, end, self);
 }
 
 
 static void
-html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   AV *accum;
   SV *cb;
@@ -555,7 +555,7 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     return;
 #endif
 
-  flush_pending_text(p_state, cbdata);
+  flush_pending_text(p_state, self);
 
   accum = p_state->accum;
   if (accum) {
@@ -572,8 +572,8 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -586,7 +586,7 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
 
 static void
-html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
+html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* self)
 {
   AV *accum;
   SV *cb;
@@ -596,7 +596,7 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
     return;
 #endif
 
-  flush_pending_text(p_state, cbdata);
+  flush_pending_text(p_state, self);
 
   accum = p_state->accum;
   if (accum) {
@@ -615,8 +615,8 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
-    if (p_state->pass_cbdata)
-      XPUSHs(cbdata);
+    if (p_state->pass_self)
+      XPUSHs(self);
     if (!p_state->v2_compat)
       XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
@@ -629,13 +629,13 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
     return;
   }
 
-  html_default(p_state, beg-2, end+1, cbdata);
+  html_default(p_state, beg-2, end+1, self);
 }
 
 
 
 static char*
-html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
 
@@ -662,7 +662,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	
 	/* we are done recognizing all comments, make callbacks */
 	if (!p_state->accum && !p_state->com_cb)
-	    html_default(p_state, beg-4, s, cbdata);
+	    html_default(p_state, beg-4, s, self);
 	else {
 	  int i;
 	  int len = av_len(av);
@@ -671,7 +671,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	    if (svp) {
 	      STRLEN len;
 	      char *s = SvPV(*svp, len);
-	      html_comment(p_state, s, s+len, cbdata);
+	      html_comment(p_state, s, s+len, self);
 	    }
 	  }
 	}
@@ -718,9 +718,9 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	  s++;
 	  /* yup */
 	  if (!p_state->accum && !p_state->com_cb)
-	    html_default(p_state, beg-4, s, cbdata);
+	    html_default(p_state, beg-4, s, self);
 	  else
-	    html_comment(p_state, beg, end_com, cbdata);
+	    html_comment(p_state, beg, end_com, self);
 	  return s;
 	}
       }
@@ -786,7 +786,7 @@ marked_section_update(PSTATE* p_state)
 
 
 static char*
-html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
   AV* tokens = 0;
@@ -863,7 +863,7 @@ html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 #endif
 
 static char*
-html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg + 2;
 
@@ -881,7 +881,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     /* yes, two dashes seen */
     s++;
 
-    tmp = html_parse_comment(p_state, s, end, cbdata);
+    tmp = html_parse_comment(p_state, s, end, self);
     return (tmp == s) ? beg : tmp;
   }
 
@@ -890,7 +890,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     /* marked section */
     char *tmp;
     s++;
-    tmp = html_parse_marked_section(p_state, s, end, cbdata);
+    tmp = html_parse_marked_section(p_state, s, end, self);
     return (tmp == s) ? beg : tmp;
   }
 #endif
@@ -899,9 +899,9 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     /* make <!> into empty comment <SGML Handbook 36:32> */
     s++;
     if (!p_state->accum && !p_state->com_cb)
-      html_default(p_state, beg, s, cbdata);
+      html_default(p_state, beg, s, self);
     else
-      html_comment(p_state, s-1, s-1, cbdata);
+      html_comment(p_state, s-1, s-1, self);
     return s;
   }
 
@@ -976,7 +976,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       goto PREMATURE;
     if (*s == '>') {
       s++;
-      html_decl(p_state, tokens, beg+2, s-1, cbdata);
+      html_decl(p_state, tokens, beg+2, s-1, self);
       SvREFCNT_dec(tokens);
       return s;
     }
@@ -1028,7 +1028,7 @@ attr_val(PSTATE* p_state, char *tag_beg,
 
 
 static char*
-html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
   char *tag_end;
@@ -1146,7 +1146,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   if (*s == '>') {
     s++;
     /* done */
-    html_start(p_state, beg+1, tag_end, tokens, empty_tag, beg, s, cbdata);
+    html_start(p_state, beg+1, tag_end, tokens, empty_tag, beg, s, self);
     SvREFCNT_dec(tokens);
 
     if (1) {
@@ -1190,7 +1190,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 static char*
-html_parse_end(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg+2;
   hctype_t name_first, name_char;
@@ -1216,7 +1216,7 @@ html_parse_end(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       if (*s == '>') {
 	s++;
 	/* a complete end tag has been recognized */
-	html_end(p_state, tag_start, tag_end, beg, s, cbdata);
+	html_end(p_state, tag_start, tag_end, beg, s, self);
 	return s;
       }
     }
@@ -1228,7 +1228,7 @@ html_parse_end(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 static char*
-html_parse_process(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg + 2;
   /* processing instruction */
@@ -1249,7 +1249,7 @@ html_parse_process(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     }
 
     /* a complete processing instruction seen */
-    html_process(p_state, beg+2, pi_end, beg, s, cbdata);
+    html_process(p_state, beg+2, pi_end, beg, s, self);
     return s;
   }
   else {
@@ -1259,7 +1259,7 @@ html_parse_process(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 static char*
-html_parse_null(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+html_parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   return 0;
 }
@@ -1269,7 +1269,7 @@ html_parse_null(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 static void
 html_parse(PSTATE* p_state,
 	   SV* chunk,
-	   SV* cbdata)
+	   SV* self)
 {
   char *s, *t, *end, *new_pos;
   STRLEN len;
@@ -1280,8 +1280,8 @@ html_parse(PSTATE* p_state,
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
-      html_text(p_state, s, s+len, 0, cbdata);
-      flush_pending_text(p_state, cbdata);
+      html_text(p_state, s, s+len, 0, self);
+      flush_pending_text(p_state, self);
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -1339,9 +1339,9 @@ html_parse(PSTATE* p_state,
 	    s++;
 	  if (*s == '>') {
 	    s++;
-	    html_text(p_state, t, end_text, 1, cbdata);
+	    html_text(p_state, t, end_text, 1, self);
 	    html_end(p_state, end_text+2, end_tag,
-		     end_text, s, cbdata);
+		     end_text, s, self);
 	    p_state->literal_mode = 0;
 	    t = s;
 	  }
@@ -1363,7 +1363,7 @@ html_parse(PSTATE* p_state,
 	    if (*s == '\n')
 	      s++;
 	    /* marked section end */
-	    html_text(p_state, t, end_text, (p_state->ms == MS_CDATA), cbdata);
+	    html_text(p_state, t, end_text, (p_state->ms == MS_CDATA), self);
 	    t = s;
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);
@@ -1390,7 +1390,7 @@ html_parse(PSTATE* p_state,
 	    s++;
 	    if (*s == '\n')
 	      s++;
-	    html_text(p_state, t, end_text, 0, cbdata);
+	    html_text(p_state, t, end_text, 0, self);
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);    
 	    t = s;
@@ -1403,7 +1403,7 @@ html_parse(PSTATE* p_state,
     }
     if (s != t) {
       if (*s == '<') {
-	html_text(p_state, t, s, 0, cbdata);
+	html_text(p_state, t, s, 0, self);
 	t = s;
       }
       else {
@@ -1421,7 +1421,7 @@ html_parse(PSTATE* p_state,
 	    s--;
 	}
 	s++;
-	html_text(p_state, t, s, 0, cbdata);
+	html_text(p_state, t, s, 0, self);
 	break;
       }
     }
@@ -1432,7 +1432,7 @@ html_parse(PSTATE* p_state,
     /* next char is known to be '<' and pointed to by 't' as well as 's' */
     s++;
 
-    if ( (new_pos = html_parsefunc[*s](p_state, t, end, cbdata))) {
+    if ( (new_pos = html_parsefunc[*s](p_state, t, end, self))) {
       if (new_pos == t) {
 	/* no progress, need more data to know what it is */
 	s = t;
@@ -1564,7 +1564,7 @@ strict_comment(pstate,...)
         HTML::Parser::keep_case = 4
         HTML::Parser::xml_mode = 5
 	HTML::Parser::v2_compat = 6
-        HTML::Parser::pass_cbdata = 7
+        HTML::Parser::pass_self = 7
 	HTML::Parser::unbroken_text = 8
         HTML::Parser::attr_pos = 9
         HTML::Parser::marked_sections = 10
@@ -1578,7 +1578,7 @@ strict_comment(pstate,...)
 	case  4: attr = &pstate->keep_case;            break;
 	case  5: attr = &pstate->xml_mode;             break;
 	case  6: attr = &pstate->v2_compat;            break;
-	case  7: attr = &pstate->pass_cbdata;          break;
+	case  7: attr = &pstate->pass_self;            break;
 	case  8: attr = &pstate->unbroken_text;        break;
 	case  9: attr = &pstate->attr_pos;             break;
         case 10:
