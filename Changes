@@ -2,10 +2,10 @@
 
     Release 2.99_96
 
-    Some patches from Michael:
+    Patches from Michael:
 
        - A handler of "" means that the event will be ignored.
-         More efficient than using sub{} as handler.
+         More efficient than using 'sub {}' as handler.
 
        - Don't use a perl hash for looking up argspec keywords.
 
