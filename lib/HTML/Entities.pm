@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.25 2003/01/19 04:12:43 gisle Exp $
+# $Id: Entities.pm,v 1.26 2003/08/17 23:40:59 gisle Exp $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ character entities.  The module provides the following functions:
 =item decode_entities($string)
 
 This routine replaces HTML entities found in the $string with the
-corresponding ISO-8859-1 character, and if possible (under perl 5.7
+corresponding ISO-8859-1 character, and if possible (under perl 5.8
 or later) will replace to Unicode characters.  Unrecognized
 entities are left alone.
 
@@ -102,7 +102,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.25 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.26 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

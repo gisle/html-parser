@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.29';  # $Date: 2003/08/15 06:05:46 $
+$VERSION = '3.29';  # $Date: 2003/08/17 23:40:56 $
 
 require HTML::Entities;
 
@@ -720,7 +720,7 @@ was between literal start and end tags (C<script>, C<style>, C<textarea>,
 C<xmp>, and C<plaintext>).
 
 The Unicode character set is assumed for entity decoding.  With perl
-version < 5.7.1 only the Latin1 range is supported, and entities for
+version < 5.8 only the Latin1 range is supported, and entities for
 characters outside the 0..255 range is left unchanged.
 
 This passes undef except for C<text> events.
