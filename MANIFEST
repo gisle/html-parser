@@ -4,8 +4,10 @@ README
 Makefile.PL
 Parser.pm
 Parser.xs
-typemap
+TODO
 hints/solaris.pl
+hparser.h
+hparser.c
 lib/HTML/Entities.pm
 lib/HTML/Filter.pm
 lib/HTML/HeadParser.pm
@@ -14,6 +16,7 @@ lib/HTML/TokeParser.pm
 mkhctype
 mkpfunc
 tokenpos.h
+typemap
 t/cases.t
 t/default.t
 t/entities.t
@@ -29,3 +32,4 @@ t/parsefile.t
 t/process.t
 t/tokeparser.t
 t/xml-mode.t
+util.c

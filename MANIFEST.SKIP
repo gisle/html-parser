@@ -1,3 +1,10 @@
+^pfunc\.h$
+^hctype\.h$
+^speed-test\d
+^leak-test
+^test
+^xx
+^pod2html-(dir|item)cache$
 ^blib/
 \.old$
 \.bak$
