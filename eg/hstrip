@@ -6,7 +6,7 @@ use strict;
 use HTML::Parser ();
 
 my %ignore_attr = map {$_ => 1}
-    qw(bgcolor background color face style link alink x-vlink text
+    qw(bgcolor background color face style link alink vlink text
        onblur onchange onclick ondblclick onfocus onkeydown onkeyup onload
        onmousedown onmousemove onmouseout onmouseover onmouseup
        onreset onselect onunload
