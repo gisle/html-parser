@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.7 1999/11/09 14:43:37 gisle Exp $
+/* $Id: Parser.xs,v 2.8 1999/11/09 15:19:05 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1154,7 +1154,7 @@ bool_attr_value(pstate,...)
 				       : &PL_sv_undef;
 	if (items > 1) {
 	    SvREFCNT_dec(pstate->bool_attr_val);
-	    pstate->bool_attr_val = SvREFCNT_inc(ST(1));
+	    pstate->bool_attr_val = newSVsv(ST(1));
         }
     OUTPUT:
 	RETVAL
