@@ -1,6 +1,6 @@
-/* $Id: util.c,v 2.21 2004/11/10 13:32:56 gisle Exp $
+/* $Id: util.c,v 2.22 2004/11/16 17:57:47 gisle Exp $
  *
- * Copyright 1999-2001, Gisle Aas.
+ * Copyright 1999-2004, Gisle Aas.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.

@@ -1,6 +1,6 @@
-/* $Id: hparser.c,v 2.99 2004/11/15 22:19:49 gisle Exp $
+/* $Id: hparser.c,v 2.100 2004/11/16 17:57:47 gisle Exp $
  *
- * Copyright 1999-2002, Gisle Aas
+ * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
