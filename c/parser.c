@@ -52,6 +52,14 @@ void html_end(struct p_state* p_state,
   printf("]\n");
 }
 
+void html_process(struct p_state* p_state, char*beg, char *end)
+{
+  printf(">> process: [");
+  while (beg < end)
+    putchar(*beg++);
+  printf("]\n");
+}
+
 void html_parse(struct p_state* p_state,
 	       SV* chunk)
 {
@@ -174,6 +182,20 @@ void html_parse(struct p_state* p_state,
     }
     else if (*s == '?') {
       /* processing instruction */
+      s++;
+      while (s < end && *s != '>')
+	s++;
+      if (*s == '>') {
+	s++;
+	/* a complete processing instruction seen */
+	html_process(p_state, t+2, s-1);
+	t = s;
+      }
+      else {
+	/* need more */
+	s = t;
+	break;
+      }
     }
 
     /* if we get out here thene this was not a conforming tag, so
@@ -216,9 +238,9 @@ int main(int argc, char** argv, char** env)
   SV* sv4;
 
   memset(&p, 0, sizeof(p));
-  sv1 = newSVpv("bar <a href='foo'>foo</a>   ", 0);
-  sv2 = newSVpv("<font size=+3><a href=\"", 0);
-  sv3 = newSVpv("'>'\">bar</A></fo", 0);
+  sv1 = newSVpv("bar <a href='foo'>foo</a>   <!--foo", 0);
+  sv2 = newSVpv("<font size=+3> --><a href=\"", 0);
+  sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
   
 
