@@ -1,3 +1,12 @@
+2004-11-11   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.38
+
+     New boolean option; $p->closing_plaintext
+     Contributed by Alex Kapranoff <alex@kapranoff.ru>
+
+
+
 2004-11-10   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.37
