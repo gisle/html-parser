@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_93;  # $Date: 1999/12/06 10:17:31 $
+$VERSION = 2.99_93;  # $Date: 1999/12/07 00:54:40 $
 
 require HTML::Entities;
 
@@ -274,13 +274,13 @@ The official behaviour is enabled by enabling this attribute.  If
 enabled, it will cause the tag above to be reported as text
 since "LIST]" is not a legal attribute name.
 
-=item $p->bool_attr_value( $val )
+=item $p->boolean_attribute_value( $val )
 
 This method sets the value reported for boolean attributes inside
 HTML start tags.  By default, the name of the attribute is also used as
 its value.
 
-Once $p->bool_attr_value has been set,
+Once $p->boolean_attribute_value has been set,
 there is no way to restore the default behaviour.
 
 

@@ -10,8 +10,6 @@ BEFORE 3.00
 
 ISSUES
 
-  - Should we rename 'bool_attr_value'? It is kind of inconsistent.
-    I think it should be either 'bool_attr_val' or 'boolean_attribute_value'.
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
   - Should we rename 'cdata_flag'?  (candidates: 'is_cdata',...)
   - Should token0 go away?

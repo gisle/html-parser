@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.73 1999/12/06 10:27:59 gisle Exp $
+/* $Id: Parser.xs,v 2.74 1999/12/07 00:54:42 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -271,7 +271,7 @@ strict_comment(pstate,...)
 	RETVAL
 
 SV*
-bool_attr_value(pstate,...)
+boolean_attribute_value(pstate,...)
         PSTATE* pstate
     CODE:
 	RETVAL = pstate->bool_attr_val ? newSVsv(pstate->bool_attr_val)
