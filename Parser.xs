@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.98 2001/02/23 07:05:41 gisle Exp $
+/* $Id: Parser.xs,v 2.99 2001/03/02 21:04:01 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -388,4 +388,4 @@ UNICODE_SUPPORT()
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
 
 BOOT:
-    entity2char = perl_get_hv("HTML::Entities::entity2char", TRUE);
+    entity2char = get_hv("HTML::Entities::entity2char", TRUE);
