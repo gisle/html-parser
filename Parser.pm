@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_16;  # $Date: 1999/12/02 10:23:40 $
+$VERSION = 2.99_17;  # $Date: 1999/12/02 11:25:12 $
 
 require HTML::Entities;
 
@@ -22,27 +22,15 @@ sub new
     my $class = shift;
     my $self = bless {}, $class;
     _alloc_pstate($self);
-    if (@_ > 1) {
-	my %cfg = @_;
 
-	if (my $h = delete $cfg{handlers}) {
-	    $h = {@$h} if ref($h) eq "ARRAY";
-	    while (my($event, $cb) = each %$h) {
-		$self->handler($event => $cb);
-	    }
-	}
-
-	# In the end we try to assume plain attribute or callback
-	for (keys %cfg) {
-	    if (/^(\w+)_h$/) {
-		$self->handler($1 => $cfg{$_});
-	    }
-	    else {
-		$self->$_($cfg{$_});
-	    }
-	}
+    my %arg = @_;
+    my $api_version = delete $arg{version} || (@_ ? 3 : 2);
+    if ($api_version >= 4) {
+	require Carp;
+	Carp::croak("API version $api_version not supported by HTML::Parser $VERSION");
     }
-    elsif (!$_[0] || $_[0] < 3) {
+
+    if ($api_version < 3) {
 	# Set up method callbacks compatible with HTML-Parser-2.xx
 	$self->handler(text    => "text",    "self,origtext,cdata_flag");
 	$self->handler(end     => "end",     "self,tagname,origtext");
@@ -65,7 +53,25 @@ sub new
 			   # MAC: should that be -3 instead of -1?
 		       }, "self,origtext");
     }
-    $self;
+
+    if (my $h = delete $arg{handlers}) {
+	$h = {@$h} if ref($h) eq "ARRAY";
+	while (my($event, $cb) = each %$h) {
+	    $self->handler($event => $cb);
+	}
+    }
+
+    # In the end we try to assume plain attribute or handler
+    for (keys %arg) {
+	if (/^(\w+)_h$/) {
+	    $self->handler($1 => $arg{$_});
+	}
+	else {
+	    $self->$_($arg{$_});
+	}
+    }
+
+    return $self;
 }
 
 
@@ -109,7 +115,6 @@ sub netscape_buggy_comment  # legacy
     return $old;
 }
 
-
 # set up method stubs
 sub text { }
 *start       = \&text;
@@ -149,9 +154,6 @@ should be completely backwards compatible with HTML::Parser version
 2.2x, but has many new features.  This is currently an alpha release.
 The interface to the new features might still change.
 
-B<Warning: This manual page is not up to date.  Lot of the new stuff
-has changed recently.>
-
 =head1 DESCRIPTION
 
 The C<HTML::Parser> will tokenize an HTML document when the parse() or
@@ -159,19 +161,18 @@ parse_file() methods are called.  Tokens are reported by invoking
 various event handlers.
 The document to be parsed may be supplied in arbitrary chunks.
 
-[XXX Some more general talk...]
 
 =head1 METHODS
 
 =over
 
-=item $p = HTML::Parser->new( %options_and_callbacks )
+=item $p = HTML::Parser->new( %options_and_handlers )
 
 The object constructor creates a new C<HTML::Parser> object and
 returns it.  The constructor takes key/value arguments that can set up
 event handlers or configure various options.
 
-If the key ends with the suffix "_cb" then it sets up a callback
+If the key ends with the suffix "_h" then it sets up a callback
 handler, otherwise it simply assigns some plain attribute.
 See </$p->handler>.
 
@@ -181,7 +182,7 @@ See L</VERSION 2 COMPATIBILITY>.
 
 Examples:
 
-   $p = HTML::Parser->new(text_cb => [ sub {...}, "decoded_text" ]);
+   $p = HTML::Parser->new(text_h => [ sub {...}, "decoded_text" ]);
 
 This will create a new parser object, set up an text handler that receives
 the original text with general entities decoded.  As an alternative you can
@@ -281,6 +282,8 @@ XML processing instructions are terminated by "?>" instead of a simple
 
 =item $p->unbroken_text( [$bool] )
 
+B<Note: This option is not supported yet!>
+
 By default, blocks of text are given to the text handler as soon as
 possible.  This might create arbitrary breaks that make it hard to do
 transformations on the text. When this attribute is enabled, blocks of
@@ -302,8 +305,12 @@ C<http://www.sgml.u-net.com/book/sgml-8.htm>.
 
 =head1 HANDLERS
 
+=over
+
 =item $p->handler( event => \&subroutine, argspec )
+
 =item $p->handler( event => method_name, argspec )
+
 =item $p->handler( event => \@accum, argspec )
 
 This method assigns a subroutine, method, or array to handle an event.
@@ -317,9 +324,9 @@ Method_name is the name of a method of $p which is called to handle the event.
 
 Accum is an array that will hold the event information as sub-arrays.
 
-Argspec is a string containing a comma separated list that describes
-the information reported by the event.
-Any requested information that does not apply to an event is passed as undef.
+Argspec is a string that describes the information reported by the
+event.  Any requested information that does not apply to an event is
+passed as undef.
 
 Examples:
 
@@ -337,6 +344,14 @@ The callback signature is start(\%attr, \@attr_seq, $orig_text).
 
 This causes 'start' event information to be saved in @accum.
 The array elements will be ['start', \%attr, \@attr_seq, $orig_text].
+
+=back
+
+=head2 Argspec
+
+Argspec is a string containing a comma separated list that describes
+the information reported by the event.  The following names can be
+used:
 
 =over
 
@@ -382,6 +397,7 @@ For C<start> and C<end> events, this is the tag name.
 This is undef if there is no first token in the event.
 
 =item tagname
+
 =item gi
 
 Tagname and gi are identical to C<token1> except that
@@ -410,9 +426,9 @@ If $p->xml_mode is disabled, the attribute names are forced to lower case.
 
 Origtext causes the original event text (including delimiters) to be passed.
 
-=item decoded_text D
+=item decoded_text
 
-Decoded_text causes the original text (including delimiters)to be passed.
+Decoded_text causes the original text (including delimiters) to be passed.
 
 This is undef except for C<text> events.
 
@@ -420,26 +436,29 @@ General entities are decoded unless the event was inside a CDATA section
 or was between literal start and end tags
 (C<script>, C<style>, C<xmp>, and C<plaintext>).
 
-=item cdata_flag c
+=item cdata_flag
 
 Cdata_flag causes a TRUE value to be passed
 if the event inside a CDATA section
 or was between literal start and end tags
 (C<script>, C<style>, C<xmp>, and C<plaintext>).
 
-When the flag is FALSE for a text event, the you should either use decoded_text
-or decode the entities yourself before the text is processed further.
+When the flag is FALSE for a text event, the you should either use
+decoded_text or decode the entities yourself before the text is
+processed further.
 
-=item event E
+=item event
 
 Event causes the event name to be provided.
 
-The event name is one of C<text>, C<start>, C<end>, C<declaration>, C<comment>,
-C<process> or C<default>.
+The event name is one of C<text>, C<start>, C<end>, C<declaration>,
+C<comment>, C<process> or C<default>.
 
 =back
 
-=head1 EVENTS
+=head2 Events
+
+Handlers for the following events can be registered:
 
 =over
 
@@ -496,8 +515,9 @@ This event is triggered for events that do not have a specific handler.
 
 =head1 VERSION 2 COMPATIBILITY
 
-When new() is called with no arguments, a set of handlers is provided
-that is compatible with the HTML::Parser Version 2 callback methods.
+When an C<HTML::Parser> object is constructed with no arguments, a set
+of handlers is provided that is compatible with the old HTML::Parser
+Version 2 callback methods.
 
 This is equivilent to the following method calls:
 
@@ -513,10 +533,13 @@ This is equivilent to the following method calls:
    $p->handler(declaration =>
              sub {
 		 my $self = shift;
-		 $self->declaration(substr($_[0], 2, -1));}, 
+		 $self->declaration(substr($_[0], 2, -1));},
              "self,origtext");
 
 =head1 EXAMPLES
+
+B<Note: These examples are not updated yet to reflect the new handler
+API>
 
 Strip out <font> tags:
 
