@@ -10,9 +10,6 @@ ISSUES FOR THE 3.0 RELEASE
     is \r\n and sometimes just \r (from Mac servers).  Perhaps an option
     later?
 
-  - Calling $p->eof from a handler should abort parsing.
-  - Calling $p->parse from a handler should croak.
-
 
 FEATURES THAT CAN WAIT
 
