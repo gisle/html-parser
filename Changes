@@ -2,7 +2,7 @@
 
    Release 2.15
 
-   Removed remainind forced dependencies on libwww-perl modules.  It
+   Removed remaining forced dependencies on libwww-perl modules.  It
    means that all tests should now pass, even if libwww-perl was not
    installed previously.
 
