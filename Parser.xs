@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.79 1999/12/08 17:27:36 gisle Exp $
+/* $Id: Parser.xs,v 2.80 1999/12/09 15:25:26 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -100,7 +100,7 @@ get_pstate(SV* sv)                               /* used by XS typemap */
   if (!sv || SvTYPE(sv) != SVt_PVHV)
     croak("Not a reference to a hash");
   hv = (HV*)sv;
-  svp = hv_fetch(hv, "_parser_xs_state", 16, 0);
+  svp = hv_fetch(hv, "_hparser_xs_state", 17, 0);
   if (svp) {
     PSTATE* p = (PSTATE*)SvIV(*svp);
 #ifdef P_MAGIC
@@ -109,7 +109,7 @@ get_pstate(SV* sv)                               /* used by XS typemap */
 #endif
     return p;
   }
-  croak("Can't find '_parser_xs_state' element in HTML::Parser hash");
+  croak("Can't find '_hparser_xs_state' element in HTML::Parser hash");
   return 0;
 }
 
@@ -143,7 +143,7 @@ _alloc_pstate(self)
 	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
 
-	hv_store(hv, "_parser_xs_state", 16, sv, 0);
+	hv_store(hv, "_hparser_xs_state", 17, sv, 0);
 
 void
 DESTROY(pstate)
