@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.43 2000/06/28 08:34:31 gisle Exp $
+/* $Id: hparser.c,v 2.44 2000/06/28 11:35:05 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -149,6 +149,7 @@ report_event(PSTATE* p_state,
     if (SvOK(p_state->pend_text)) {
       if (p_state->is_cdata != p_state->pend_text_is_cdata) {
 	flush_pending_text(p_state, self);
+	SPAGAIN;
 	goto INIT_PEND_TEXT;
       }
     }
@@ -163,6 +164,7 @@ report_event(PSTATE* p_state,
   }
   else if (p_state->pend_text && SvOK(p_state->pend_text)) {
     flush_pending_text(p_state, self);
+    SPAGAIN;
   }
 
   h = &p_state->handlers[event];
@@ -345,7 +347,7 @@ report_event(PSTATE* p_state,
       break;
 
     case ARG_UNDEF:
-      arg = &PL_sv_undef;
+      arg = sv_mortalcopy(&PL_sv_undef);
       break;
       
     default:
@@ -354,7 +356,7 @@ report_event(PSTATE* p_state,
     }
 
     if (!arg)
-      arg = &PL_sv_undef;
+      arg = sv_mortalcopy(&PL_sv_undef);
 
     if (array) {
       /* have to fix mortality here or
