@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.32 1999/11/18 00:13:44 gisle Exp $
+/* $Id: Parser.xs,v 2.33 1999/11/18 07:21:11 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1002,16 +1002,24 @@ attr_val(PSTATE* p_state, char *tag_beg, char *attr_beg,
     AV* av = newAV();
     av_extend(av, 2);
     av_push(av, newSViv(attr_beg - tag_beg));
-    av_push(av, newSViv(val_beg - tag_beg));
+    if (val_beg)
+      av_push(av, newSViv(val_beg - tag_beg));
+    else
+      av_push(av, newSVsv(&PL_sv_undef));
     av_push(av, newSViv(val_end - tag_beg));
     return newRV_noinc((SV*)av);
   }
-  else {
+  else if (val_beg) {
     if (quote) {
       val_beg++;
       val_end--;
     }
     return decode_entities(newSVpvn(val_beg, val_end - val_beg), entity2char);
+  }
+  else {
+     if (p_state->bool_attr_val)
+        return newSVsv(p_state->bool_attr_val);
+     return newSVpvn(attr_beg, val_end - attr_beg);
   }
 }
 
@@ -1116,10 +1124,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	goto PREMATURE;
     }
     else {
-      SV* sv = p_state->bool_attr_val;
-      if (!sv)
-	sv = attr;
-      av_push(tokens, newSVsv(sv));
+      av_push(tokens, attr_val(p_state, beg, attr_beg,
+			       0, attr_beg + SvCUR(attr), 0));
     }
   }
 
