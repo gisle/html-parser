@@ -1,7 +1,7 @@
 package HTML::Parser;
 
-# Copyright 1996-1999, Gisle Aas.
-# Copyright 1999, Michael A. Chase.
+# Copyright 1996-2000, Gisle Aas.
+# Copyright 1999-2000, Michael A. Chase.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.02';  # $Date: 1999/12/21 09:42:48 $
+$VERSION = '3.03';  # $Date: 2000/01/14 13:37:28 $
 
 require HTML::Entities;
 
@@ -17,6 +17,12 @@ require DynaLoader;
 @ISA=qw(DynaLoader);
 HTML::Parser->bootstrap($VERSION);
 
+
+my %allowed_handlers = map { ($_ => 1) }
+    qw( declaration comment start end text process default );
+my %allowed_options = map { ($_ => 1) } # not netscape_buggy_comment!
+    qw( strict_comment strict_names boolean_attribute_value
+	xml_mode unbroken_text marked_section );
 
 sub new
 {
@@ -65,21 +71,35 @@ sub init
     if (my $h = delete $arg{handlers}) {
 	$h = {@$h} if ref($h) eq "ARRAY";
 	while (my($event, $cb) = each %$h) {
+            if (! $allowed_handlers{$event}) {
+		require Carp;
+	        Carp::croak("Bad constructor handler '$event'");
+	    }
+            if ('ARRAY' ne ref $cb) {
+		require Carp;
+	        Carp::croak("Constructor handler '$event' value must be " .
+			    "an array reference");
+	    }
 	    $self->handler($event => @$cb);
 	}
     }
 
     # In the end we try to assume plain attribute or handler
     while (my($option, $val) = each %arg) {
-	if ($option =~ /^(\w+)_h$/) {
-	    $self->handler($1 => @$val);
+	if ($allowed_options{$option}) {
+            $self->$option($val);
 	}
-        elsif ($option =~ /^(text|start|end|process|declaration|comment)$/) {
+        elsif ($option =~ /^(\w+)_h$/ && $allowed_handlers{$1}) {
+            if ('ARRAY' ne ref $val) {
 	    require Carp;
-	    Carp::croak("Bad constructor option '$option'");
+	        Carp::croak("Constructor handler '$option' value must be " .
+			    "an array reference");
+	    }
+            $self->handler($1 => @$val);
         }
 	else {
-	    $self->$option($val);
+	    require Carp;
+	    Carp::croak("Bad constructor option '$option'");
 	}
     }
 
@@ -266,6 +286,13 @@ that receives the $p and the tokens array.
 
 This creates a new parser object that stores the event type and the
 original text in @array for text and comment events.
+
+=item $obj->init( %options_and_handlers )
+
+This method adds the hash elements required by HTML::Parser to the
+hash referenced by $obj.
+$obj is normally an object of a class that inherits from HTML::Parser.
+See HTML::Parser->new for a description of %options_and_handlers.
 
 =back
 
@@ -831,34 +858,34 @@ recognized.
 
 =head1 DIAGNOSTICS
 
-The following diagnostics can occur with HTML::Parser.  The notation
-used for this listings is the same as for L<perldiag>:
+The following messages may be produced by HTML::Parser.  The notation
+in this listing is the same as used in L<perldiag>:
 
 =over
 
 =item Not a reference to a hash
 
-(F) The object that is blessed into (or isa) HTML::Parser is not a
-hash as the HTML::Parser methods assume.
+(F) The object blessed into or subclassed from HTML::Parser is not a
+hash as required by the HTML::Parser methods.
 
 =item Bad signature in parser state object at %p
 
-(F) The _hparser_xs_state element does not point to a valid 'struct
-p_state'.  Something must have changed the internal pointer value
+(F) The _hparser_xs_state element does not refer to a valid state structure.
+Something must have changed the internal value
 stored in this hash element, or the memory has been overwritten.
 
 =item _hparser_xs_state element is not a reference
 
-(F) The _hparser_xs_state element is destroyed.
+(F) The _hparser_xs_state element has been destroyed.
 
 =item Can't find '_hparser_xs_state' element in HTML::Parser hash
 
-(F) The _hparser_xs_state element has been deleted from the parser
-hash.
+(F) The _hparser_xs_state element is missing from the parser hash.
+It was either deleted, or not created when the object was created.
 
 =item API version %s not supported by HTML::Parser %s
 
-(F) The constructor option 'api_version' with an argument greater
+(F) The constructor option 'api_version' with an argument greater than
 or equal to 4 is reserved for future extentions.
 
 =item Bad constructor option '%s'
@@ -868,13 +895,13 @@ init() methods.
 
 =item Parse loop not allowed
 
-(F) A handler is not allowed to invoke the parse() or parse_file()
-methods.
+(F) A handler invoked the parse() or parse_file() method.
+This is not permitted.
 
 =item marked sections not supported
 
-(F) If the parser has been compiled without support for marked
-sections, and you try to invoke the $p->marked_sections() method.
+(F) The $p->marked_sections() method was invoked in a HTML::Parser
+module that was compiled without support for marked sections. 
 
 =item Unknown boolean attribute (%d)
 
@@ -884,7 +911,7 @@ boolean attributes.
 =item Only code or array references allowed as handler
 
 (F) The second argument for $p->handler must be either a subroutine
-reference, then name of a subroutine or method, or an reference to an
+reference, then name of a subroutine or method, or a reference to an
 array.
 
 =item No handler for %s events
@@ -894,31 +921,31 @@ of "start", "end", "text", "process", "declaration" or "comment".
 
 =item Unrecognized identifier %s in argspec
 
-(F) The argspec name is now known.  Use one of the names mentioned in
-the argspec section above.
+(F) The identifier is not a known argspec name.
+Use one of the names mentioned in the argspec section above.
 
 =item Literal string is longer than 255 chars in argspec
 
 (F) The current implementation limits the length of literals in
-argspec to 255 characters.  Use a shorted literal.
+an argspec to 255 characters.  Make the literal shorter.
 
 =item Backslash reserved for literal string in argspec
 
-(F) The backslash character "\" can't currently be used in argspec
-literals.  It is reserved so that we can implement quoting or quotes
-later.
+(F) The backslash character "\" is not allowed in argspec literals.
+It is reserved to permit quoting inside a literal in a later version.
 
 =item Unterminated literal string in argspec
 
-(F) No terminating quote character for a string literal was found.
+(F) The terminating quote character for a literal was not found.
 
 =item Bad argspec (%s)
 
-(F) Only identifier names, space and comma is allowed in argspec.
+(F) Only identifier names, literals, spaces and commas
+are allowed in argspecs.
 
 =item Missing comma separator in argspec
 
-(F) Identifiers in argspec must be separated with ","
+(F) Identifiers in an argspec must be separated with ",".
 
 =back
 
@@ -936,8 +963,8 @@ be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
- Copyright 1996-1999 Gisle Aas. All rights reserved.
- Copyright 1999 Michael A. Chase.  All rights reserved.
+ Copyright 1996-2000 Gisle Aas. All rights reserved.
+ Copyright 1999-2000 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
