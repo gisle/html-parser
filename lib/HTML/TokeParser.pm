@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.10 1999/11/29 11:07:28 gisle Exp $
+# $Id: TokeParser.pm,v 2.11 1999/11/30 20:37:12 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.11 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -22,9 +22,20 @@ sub new
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
     }
-    my $self = $class->SUPER::new(accum => [],
-				  v2_compat => 1,
-				 );
+    my $self = $class->SUPER::new(3);
+    $self->{accum} = [];
+    my $push_accum = sub { my $self = shift; push(@{$self->{accum}}, [@_])};
+    $self->handler(start => "self,'S',tagname,attr,attrseq,origtext", $push_accum);
+    $self->handler(end => "self,'E',tagname,origtext",                $push_accum);
+    $self->handler(text => "self,'T',origtext,cdata_flag",            $push_accum);
+    $self->handler(process => "self,'PI',token1,origtext",            $push_accum);
+
+    # These two really need some special treatment like we do in v2 backward
+    # compatibility section of HTML::Parser.  If we are lucky we can get away
+    # with it....
+    $self->handler(comment => "self,'C',origtext",                    $push_accum);
+    $self->handler(declaration => "self,'D',origtext",                $push_accum);
+
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
 	if (!defined $$file) {
@@ -47,7 +58,7 @@ sub new
 sub get_token
 {
     my $self = shift;
-    while (!@{$self->accum} && !$self->{toke_eof}) {
+    while (!@{$self->{accum}} && !$self->{toke_eof}) {
 	if (my $f = $self->{toke_file}) {
 	    # must try to parse more from the file
 	    my $buf;
@@ -79,14 +90,14 @@ sub get_token
 	    die;
 	}
     }
-    shift @{$self->accum};
+    shift @{$self->{accum}};
 }
 
 
 sub unget_token
 {
     my $self = shift;
-    unshift @{$self->accum}, @_;
+    unshift @{$self->{accum}}, @_;
     $self;
 }
 
