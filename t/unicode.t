@@ -11,7 +11,12 @@ use strict;
 use Test qw(plan ok);
 use HTML::Parser;
 
-plan tests => 61;
+plan tests => 75;
+
+my @warn;
+$SIG{__WARN__} = sub {
+    push(@warn, $_[0]);
+};
 
 my @parsed;
 my $p = HTML::Parser->new(
@@ -107,3 +112,36 @@ ok($parsed[7][0], "end_document");
 ok($parsed[7][3], length($doc));
 ok($parsed[7][5], length($doc));
 ok($parsed[7][6], length($doc));
+
+my $file = "test-$$.html";
+open(my $fh, ">:utf8", $file) || die;
+print $fh <<EOT;
+\x{FEFF}
+<title>\x{263A} Love! </title>
+<h1>&hearts Love \x{2665}<h1>
+EOT
+close($fh) || die;
+
+ok(!@warn);
+@parsed = ();
+$p->parse_file($file);
+ok(@parsed, "11");
+ok($parsed[7][0], "text");
+ok($parsed[7][1], "&hearts Love \xE2\x99\xA5");
+ok($parsed[7][2], "\x{2665} Love \xE2\x99\xA5");  # expected garbage
+ok($parsed[10][3], -s $file);
+ok(@warn, 1);
+ok($warn[0] =~ /^Parsing of undecoded UTF-8 will give garbage when decoding entities/);
+
+@warn = ();
+@parsed = ();
+open($fh, "<:utf8", $file) || die;
+$p->parse_file($fh);
+ok(@parsed, "11");
+ok($parsed[7][0], "text");
+ok($parsed[7][1], "&hearts Love \x{2665}");
+ok($parsed[7][2], "\x{2665} Love \x{2665}");
+ok($parsed[10][3], (-s $file) - 3 * 2);
+ok(@warn, 0);
+
+unlink($file);
