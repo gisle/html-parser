@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.12 2001/02/23 06:54:20 gisle Exp $
+/* $Id: util.c,v 2.13 2001/02/24 05:56:54 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -40,7 +40,7 @@ strnEQx(const char* s1, const char* s2, STRLEN n, int ignore_case)
 }
 
 static void
-grow_gap(SV* sv, STRLEN grow, char** t, char** s, char** e)
+grow_gap(pTHX_ SV* sv, STRLEN grow, char** t, char** s, char** e)
 {
     /*
      SvPVX ---> AAAAAA...BBBBBB
@@ -181,7 +181,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 			/* XXX It might already be enough gap, so we don't need this,
 			   but it should not hurt either.
 			*/
-			grow_gap(sv, grow, &t, &s, &end);
+			grow_gap(aTHX_ sv, grow, &t, &s, &end);
 			Copy(ustr, SvPVX(sv), len, char);
 			t = SvPVX(sv) + len;
 		    }
@@ -197,7 +197,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 
 	    if (t + repl_len > s) {
 		/* need to grow the string */
-		grow_gap(sv, repl_len - (s - t), &t, &s, &end);
+		grow_gap(aTHX_ sv, repl_len - (s - t), &t, &s, &end);
 	    }
 
 	    /* copy replacement string into string */
