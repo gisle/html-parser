@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.11 1999/11/04 22:07:46 gisle Exp $
+/* $Id: Parser.xs,v 1.12 1999/11/04 22:19:57 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -23,6 +23,7 @@ struct p_state {
   SV* buf;
 
   int strict_comment;
+  int keep_case;
   int pass_cbdata;
 
   SV* text_cb;
@@ -78,6 +79,7 @@ html_end(PSTATE* p_state,
 	 SV* cbdata)
 {
   SV *cb = p_state->end_cb;
+  SV *sv;
   if (cb) {
     SV tagsv;
     dSP;
@@ -86,7 +88,10 @@ html_end(PSTATE* p_state,
     PUSHMARK(SP);
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-    XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+    sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
+    if (!p_state->keep_case)
+      sv_lower(sv);
+    XPUSHs(sv);
     XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
     PUTBACK;
 
@@ -106,6 +111,7 @@ html_start(PSTATE* p_state,
 	   SV* cbdata)
 {
   SV *cb = p_state->start_cb;
+  SV *sv;
   if (cb) {
     dSP;
     ENTER;
@@ -113,7 +119,10 @@ html_start(PSTATE* p_state,
     PUSHMARK(SP);
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-    XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+    sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
+    if (!p_state->keep_case)
+      sv_lower(sv);
+    XPUSHs(sv);
     XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
@@ -400,6 +409,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   char *s = beg;
   char *tag_end;
   AV* tokens = 0;
+  SV* sv;
 
   assert(beg[0] == '<' && isALPHA(beg[1]) && end - beg > 2);
   s += 2;
@@ -420,7 +430,11 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     s++;
     while (s < end && isHALNUM(*s))
       s++;
-    av_push(tokens, sv_lower(newSVpv(attr_beg, s - attr_beg)));
+
+    sv = newSVpv(attr_beg, s - attr_beg);
+    if (!p_state->keep_case)
+      sv_lower(sv);
+    av_push(tokens, sv);
 
     while (s < end && isSPACE(*s))
       s++;
@@ -754,6 +768,14 @@ pass_cbdata(pstate,...)
 	RETVAL = pstate->pass_cbdata;
 	if (items > 1)
 	     pstate->pass_cbdata = SvTRUE(ST(1));
+
+int
+keep_case(pstate,...)
+	PSTATE* pstate
+    CODE:
+	RETVAL = pstate->keep_case;
+	if (items > 1)
+	     pstate->keep_case = SvTRUE(ST(1));
 
 
 void
