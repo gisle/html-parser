@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.1 1999/11/03 12:17:09 gisle Exp $ */
+/* $Id: Parser.xs,v 1.2 1999/11/03 13:07:27 gisle Exp $ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +23,8 @@ struct p_state {
   CV* decl_cb;
   CV* com_cb;
 };
+
+typedef struct p_state PSTATE;
 
 
 int isHALNUM(int c)
@@ -550,7 +552,57 @@ html_parse(struct p_state* p_state,
   return;
 }
 
+static PSTATE*
+get_pstate(SV* sv)
+{
+  HV* hv = SvRV(sv);
+  SV** svp;
+  svp = hv_fetch(hv, "_parser_state", 13, 0);
+  printf("svp=%p\n", svp);
+  if (svp)
+    return (PSTATE*)SvIV(*svp);
+  return 0;
+}
+
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
 
 PROTOTYPES: DISABLE
 
+void
+new(xclass)
+	SV* xclass;
+    PREINIT:
+	PSTATE* pstate;
+	STRLEN my_na;
+	char *sclass = SvPV(xclass, my_na);
+	SV* sv;
+	HV* hv;
+    PPCODE:
+	Newz(56, pstate, 1, PSTATE);
+	printf("Allocated pstate %p\n", pstate);
+	sv = newSViv(pstate);
+	SvREADONLY_on(sv);
+
+	hv = newHV();
+	hv_store(hv, "_parser_state", 13, sv, 0);
+
+	
+
+	ST(0) = sv_2mortal(newRV_noinc(hv));
+	sv_bless(ST(0), gv_stashpv(sclass, 1));
+
+	XSRETURN(1);
+
+void
+DESTROY(pstate)
+	PSTATE* pstate
+    CODE:
+	printf("Safefree %p\n", pstate);
+	Safefree(pstate);
+
+void
+parse(pstate, chunk)
+	PSTATE* pstate
+	SV* chunk
+    CODE:
+	html_parse(pstate, chunk);
