@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.111 2001/05/09 21:09:11 gisle Exp $
+/* $Id: Parser.xs,v 2.112 2001/05/10 19:18:07 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -74,7 +74,7 @@ newSVpvn(char *s, STRLEN len)
 #endif
 
 
-#if PATCHLEVEL > 5
+#if PATCHLEVEL > 6 || (PATCHLEVEL == 6 && SUBVERSION > 0)
    #define RETHROW	   croak(Nullch)
 #else
    #define RETHROW    { STRLEN my_na; croak("%s", SvPV(ERRSV, my_na)); }
@@ -247,7 +247,7 @@ parse(self, chunk)
 		PUSHMARK(SP);
 	        count = perl_call_sv(generator, G_SCALAR|G_EVAL);
 		SPAGAIN;
-		chunk = POPs;
+		chunk = count ? POPs : 0;
 
 	        if (SvTRUE(ERRSV)) {
 		    p_state->parsing = 0;
@@ -255,7 +255,7 @@ parse(self, chunk)
 		    RETHROW;
                 }
 
-		if (SvOK(chunk)) {
+		if (chunk && SvOK(chunk)) {
 		    (void)SvPV(chunk, len);  /* get length */
 		}
 		else {
