@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.13 1999/12/02 11:33:39 gisle Exp $
+# $Id: TokeParser.pm,v 2.14 1999/12/03 09:02:54 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.14 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -23,18 +23,17 @@ sub new
 	$file = IO::File->new($file, "r") || return;
     }
     my $self = $class->SUPER::new(api_version => 3);
-    $self->{accum} = [];
-    my $push_accum = sub { my $self = shift; push(@{$self->{accum}}, [@_])};
-    $self->handler(start => $push_accum, "self,'S',tagname,attr,attrseq,origtext");
-    $self->handler(end => $push_accum, "self,'E',tagname,origtext");
-    $self->handler(text => $push_accum, "self,'T',origtext,cdata_flag");
-    $self->handler(process => $push_accum, "self,'PI',token1,origtext");
+    my $accum = $self->{accum} = [];
+    $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,origtext");
+    $self->handler(end =>     $accum, "'E',tagname,origtext");
+    $self->handler(text =>    $accum, "'T',origtext,cdata_flag");
+    $self->handler(process => $accum, "'PI',token1,origtext");
 
-    # These two really need some special treatment like we do in v2 backward
-    # compatibility section of HTML::Parser.  If we are lucky we can get away
-    # with it.... XXX
-    $self->handler(comment => $push_accum, "self,'C',origtext");
-    $self->handler(declaration => $push_accum, "self,'D',origtext");
+    # XXX The following two are not strictly V2 compatible.  We used
+    # to return something that did not contain the "<!(--)?" and
+    # "(--)?>" markers.
+    $self->handler(comment => $accum, "'C',origtext");
+    $self->handler(declaration => $accum, "'D',origtext");
 
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
