@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_96;  # $Date: 1999/12/13 11:45:49 $
+$VERSION = 2.99_96;  # $Date: 1999/12/14 09:04:54 $
 
 require HTML::Entities;
 
@@ -27,7 +27,8 @@ sub new
     my $api_version = delete $arg{api_version} || (@_ ? 3 : 2);
     if ($api_version >= 4) {
 	require Carp;
-	Carp::croak("API version $api_version not supported by HTML::Parser $VERSION");
+	Carp::croak("API version $api_version not supported " .
+		    "by HTML::Parser $VERSION");
     }
 
     if ($api_version < 3) {
@@ -127,10 +128,10 @@ HTML::Parser - HTML parser class
 
 =head1 NOTE
 
-This is the new XS based HTML::Parser and is currently a B<beta
-release>.  It should be completely backwards compatible with
-HTML::Parser version 2.2x, but has many new features.  The interface
-should be fairly stable now.
+This is the new XS based HTML::Parser.
+It should be completely backwards compatible with
+HTML::Parser version 2.2x, but has many new features
+and is significantly faster.
 
 =head1 SYNOPSIS
 
@@ -183,14 +184,14 @@ HTML::Parser version 2 style subclassing and method callbacks:
 =head1 DESCRIPTION
 
 Objects of the C<HTML::Parser> class will recognize markup and
-separate it from the plain text (alias data content) in HTML
+separate it from plain text (alias data content) in HTML
 documents.  As different kinds of markup and text are recognized, the
 corresponding event handlers are invoked.
 
 C<HTML::Parser> in not a generic SGML parser.  We have tried to
 make it able to deal with the HTML that is actually "out there", and
-by default it parses as close as possible to the way the big web
-browsers do it, instead of strictly following one of the many HTML
+it normally parses as closely as possible to the way the popular web
+browsers do it instead of strictly following one of the many HTML
 specifications from W3C.  Where there is disagreement there is often
 an option that you can enable to get the official behaviour.
 
@@ -198,8 +199,8 @@ The document to be parsed may be supplied in arbitrary chunks.  This
 makes on-the-fly parsing as documents are received possible.
 
 If event driven parsing does not feel right for your application, you
-might want to take a look at C<HTML::TokeParser>.  It is a
-C<HTML::Parser> subclass that allow a more conventional program
+might want to use C<HTML::TokeParser>.  It is a
+C<HTML::Parser> subclass that allows a more conventional program
 structure.
 
 
@@ -211,14 +212,14 @@ The following method is used to construct a new C<HTML::Parser> object:
 
 =item $p = HTML::Parser->new( %options_and_handlers )
 
-The class method new() creates a new C<HTML::Parser> object and
-returns it.  Key/value pair arguments may be provided to set up event
-handlers or set initial parser options.  The handlers and parser
+This class method creates a new C<HTML::Parser> object and
+returns it.  Key/value pair arguments may be provided to assign event
+handlers or initialize parser options.  The handlers and parser
 options can also be set or modified by method calls described later.
 
 If a top level key is in the form "<event>_h" (e.g., "text_h"} then it
-assigns a handler to that event, otherwise it sets a parser
-option. The event handler specification must be wrapped in an array
+assigns a handler to that event, otherwise it initializes a parser
+option. The event handler specification value must be an array
 reference.  Multiple handlers may also be assigned with the 'handlers
 => [%handlers]' option.  See examples below.
 
@@ -256,7 +257,7 @@ original text in @array for text and comment events.
 
 =back
 
-The following methods are used to feed the HTML document to be parsed
+The following methods feed the HTML document
 to the C<HTML::Parser> object:
 
 =over
@@ -264,8 +265,9 @@ to the C<HTML::Parser> object:
 =item $p->parse( $string )
 
 Parse $string as the next chunk of the HTML document.  The return
-value is normally a reference to the parser object (i.e. $p).  If some
-of the handlers invoked aborts parsing by calling $p->eof, then
+value is normally a reference to the parser object (i.e. $p).
+
+If an invoked event handler aborts parsing by calling $p->eof, then
 $p->parse() will return a FALSE value.
 
 =item $p->parse_file( $file )
@@ -279,17 +281,20 @@ method returns an undefined value and $! tells why it failed.
 Otherwise the return value is a reference to the parser object.
 
 If a file handle is passed as the $file argument, then the file will
-be read until EOF, but not closed.
+normally be read until EOF, but not closed.
+
+If an invoked event handler aborts parsing by calling $p->eof,
+then $p->parse_file() may not have read the entire file.
 
 =item $p->eof
 
-Signals the end of the HTML document.  Calling the eof() method
+Signals the end of the HTML document.  Calling the $p->eof method
 outside a handler callback will flush any remaining buffered text
-(trigger the C<text> event).
+(which triggers the C<text> event if there is any remaining text).
 
 Calling $p->eof inside a handler will terminate parsing at that point
-and $p->parse will return a FALSE value.  This will also terminate
-parsing by $p->parse_file() at that point.
+and cause $p->parse to return a FALSE value.  This also terminates
+parsing by $p->parse_file().
 
 The return value is a reference to the parser object.
 
@@ -325,7 +330,7 @@ some broken tags with invalid attr values like:
 
    <IMG SRC=newprevlstGr.gif ALT=[PREV LIST] BORDER=0>
 
-By default, "LIST]" is parsed as the name of a boolean attribute, not as
+By default, "LIST]" is parsed as a boolean attribute, not as
 part of the ALT value as was clearly intended.  This is also what
 Netscape sees.
 
@@ -337,19 +342,19 @@ since "LIST]" is not a legal attribute name.
 
 This method sets the value reported for boolean attributes inside HTML
 start tags.  By default, the name of the attribute is also used as its
-value.  This affect the values reported for C<tokens> and C<attr>.
+value.  This affects the values reported for C<tokens> and C<attr>.
 
 =item $p->xml_mode( [$bool] )
 
 Enabling this attribute changes the parser to allow some XML
 constructs such as empty element tags and XML processing instructions.
-It also disables forcing tag and attr names to lower case when they
+It also disables forcing tag and attribute names to lower case when they
 are reported by the C<tagname> and C<attr> argspecs.
 
 Empty element tags look like start tags, but end with the character
 sequence "/>".  When recognized by HTML::Parser they cause an
 artificial end event in addition to the start event.  The
-C<text> for this generated end event will be empty
+C<text> for the artificial end event will be empty
 and the C<tokenpos> array will be undefined even though
 the only element in the token array will have the correct tag name.
 
@@ -375,8 +380,8 @@ By default, section markings like <![CDATA[...]]> are treated like
 ordinary text.  When this attribute is enabled section markings are
 honoured.
 
-There are currently no events assosiated with the marked section
-markup.
+There are currently no events associated with marked section
+elements.
 
 =back
 
@@ -390,6 +395,10 @@ method is used to set up handlers for different events:
 =item $p->handler( event => method_name, argspec )
 
 =item $p->handler( event => \@accum, argspec )
+
+=item $p->handler( event => "" );
+
+=item $p->handler( event => undef );
 
 =item $p->handler( event );
 
@@ -407,8 +416,11 @@ the event.
 I<Accum> is a array that will hold the event information as
 sub-arrays.
 
+If the second argument is "", the event is ignored.
+If it is undef, the default handler is invoked for the event.
+
 I<Argspec> is a string that describes the information to be reported
-from the event.  Any requested information that does not apply to an
+for the event.  Any requested information that does not apply to a
 specific event is passed as C<undef>.  If argspec is omitted, then it
 is left unchanged since last update.
 
@@ -440,12 +452,12 @@ The array elements will be ['S', \%attr, \@attr_seq, $text].
    $p->handler(start => "");
 
 This causes 'start' events to be ignored.  It also supresses
-invokations of any default handler for these events.  It is equivalent
+invokations of any default handler for start events.  It is equivalent
 to $p->handler(start => sub {}), but is more efficient.
 
    $p->handler(start => undef);
 
-This causes no handler to be assosiated with start events any more.
+This causes no handler to be assosiated with start events.
 If there is a default handler it will be invoked.
 
 =back
@@ -501,7 +513,7 @@ Boolean attributes in a C<start> event will have (0,0) for the
 attribute value offset and length.
 
 This passes undef if there are no tokens in the event (e.g., C<text>)
-and for artifical C<end> events triggered by empty start tags
+and for artifical C<end> events triggered by empty element tags.
 
 If you are using these offsets and lengths to modify C<text>, you
 should either work from right to left, or be very careful to calculate
@@ -511,7 +523,7 @@ the changes to the offsets.
 
 Token0 causes the original text of the first token string to be
 passed.  This should always be the same as $tokens->[0]
-except for artifical end tags generated by XML empty start tags.
+except for artifical end tags generated by XML empty element tags.
 
 For C<declaration> events, this is the declaration type.
 
@@ -522,22 +534,23 @@ This passes undef if there are no tokens in the event.
 =item C<tagname>
 
 This is the element name (or I<generic identifier> in SGML jargon) for
-the start and end tags.  Since HTML is case insensitive this name is
+start and end tags.  Since HTML is case insensitive this name is
 forced to lower case to ease string matching.
 
-Since XML on the other hand is case sensitive, the tagname case is not
-touched when C<xml_mode> is enabled.
+Since XML is case sensitive, the tagname case is not
+changed when C<xml_mode> is enabled.
 
-The declaration type is also made available as tagname, even if that
-is a bit strange.  In fact in the current implementation tagname is
-identical to C<token0> except that the name is forced to lower case.
+The declaration type of declaration elements is also passed as a tagname,
+even if that is a bit strange.
+In fact, in the current implementation tagname is
+identical to C<token0> except that the name may be forced to lower case.
 
 =item C<attr>
 
 Attr causes a reference to a hash of attribute name/value pairs to be
 passed.
 
-Boolean attributes' values will be either the value set by
+Boolean attributes' values are either the value set by
 $p->boolean_attribute_value or the attribute name if no value has been
 set by $p->boolean_attribute_value.
 
@@ -562,7 +575,7 @@ case.
 
 =item C<text>
 
-Text causes the source text (including delimiters for markup) to be
+Text causes the source text (including markup element delimiters) to be
 passed.
 
 =item C<dtext>
@@ -573,16 +586,18 @@ was between literal start and end tags (C<script>, C<style>, C<xmp>,
 and C<plaintext>).
 
 The ISO 8859-1 character set (aka Latin1) is assumed for entity
-decoding.  (It is planned that C<HTML::Parser> will get an C<utf8> option
+decoding.
+
+It is planned that C<HTML::Parser> will get an C<utf8> option
 at some point that will affect the byte sequence that characters with
-code > 127 will decode into.)
+codes greater than 127 will decode into.
 
 This passes undef except for C<text> events.
 
 =item C<is_cdata>
 
-Is_cdata causes a TRUE value to be passed if the event inside a CDATA
-section or was between literal start and end tags (C<script>,
+Is_cdata causes a TRUE value to be passed if the event is inside a CDATA
+section or is between literal start and end tags (C<script>,
 C<style>, C<xmp>, and C<plaintext>).
 
 When the flag is FALSE for a text event, then you should normally
@@ -644,7 +659,7 @@ of whitespace between two text events.
 
 This event is triggered when a start tag is recognized.
 
-Example of a start tag:
+Example:
 
   <A HREF="http://www.perl.com/">
 
@@ -676,8 +691,7 @@ This event is triggered when a markup comment is recognized.
 
 Example:
 
-  <!-- This is a comment --
-    -- So is this -->
+  <!-- This is a comment -- -- So is this -->
 
 =item C<process>
 
@@ -786,8 +800,8 @@ and odd "--" markers.
 Once $p->boolean_attribute_value has been set, there is no way to
 restore the default behaviour.
 
-There is currently no way to get both quote characters into an literal
-argspec.
+There is currently no way to get both quote characters
+into the same literal argspec.
 
 Empty tags, e.g. "<>" and "</>", are not recognized.  SGML allows them
 to repeat the previous start tag or close the previous start tag
