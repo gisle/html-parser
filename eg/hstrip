@@ -20,42 +20,31 @@ my %ignore_elem = map {$_ => 1}
 
 my %inside_ignore;
 
-sub shift2 { return shift(@{$_[0]}), shift(@{$_[0]}); }
 sub ignore { 0; }
 
 sub tag
 {
     my $tagname = shift;
     return if $ignore_tag{$tagname};
-    my $is_end  = shift;
 
+    my $deeper = shift;
     if ($ignore_elem{$tagname}) {
 	delete $inside_ignore{$tagname}
-	    unless $inside_ignore{$tagname} += ($is_end ? -1 : 1);
+	    unless $inside_ignore{$tagname} += $deeper;
 	return;
     }
     return if %inside_ignore;
 
     my($pos, $text) = @_;
-    unless ($is_end) {
-	# Should we kill some attributes?
-	my($t_offset, $t_len) = shift2($pos);  # tagname
-	my $attr_offset = $t_offset + $t_len;
-	my $offset = 0;  # to compensate as we kill stuff
-	while (@$pos) {
-	    my($k_offset, $k_len) = shift2($pos);
-	    $k_offset += $offset;
-	    my($v_offset, $v_len) = shift2($pos);
-	    my $attr_len = $v_offset ? $v_offset - $k_offset + $offset + $v_len
-		                     : $k_len;
-	    $attr_len += $k_offset - $attr_offset;
-	    if ($ignore_attr{lc substr($text, $k_offset, $k_len)}) {
-		substr($text, $attr_offset, $attr_len) = "";
-		$offset -= $attr_len;
-	    }
-	    else {
-		$attr_offset += $attr_len
-	    }
+    if (defined $pos && 4 <= @$pos) {
+	# kill some attributes
+	my($k_offset, $k_len, $v_offset, $v_len) = @{$pos}[-4 .. -1];
+	my $next_attr = $v_offset ? $v_offset + $v_len : $k_offset + $k_len;
+	while (4 <= @$pos) {
+	    ($k_offset, $k_len, $v_offset, $v_len) = splice @$pos, -4;
+	    substr($text, $k_offset, $next_attr - $k_offset) = ""
+		if $ignore_attr{lc substr($text, $k_offset, $k_len)};
+	    $next_attr = $k_offset;
 	}
     }
     print $text;
@@ -63,8 +52,8 @@ sub tag
 
 sub decl
 {
-    my $t0 = shift;
-    print shift if $t0 eq "DOCTYPE";
+    my $type = shift;
+    print shift if $type eq "doctype";
 }
 
 sub text
@@ -73,11 +62,11 @@ sub text
 }
 
 HTML::Parser->new(api_version   => 3,
-		  start_h       => [\&tag,   "tagname, '',  tokenpos, text"],
-		  end_h         => [\&tag,   "tagname, '/', undef,    text"],
+		  start_h       => [\&tag,   "tagname, '+1', tokenpos, text"],
+		  end_h         => [\&tag,   "tagname, '-1', undef,    text"],
                   process_h     => [\&ignore, ""],
 		  comment_h     => [\&ignore, ""],
-                  declaration_h => [\&decl,   "token0, text"],
+                  declaration_h => [\&decl,   "tagname, text"],
                   default_h     => [\&text,   "text"],
                  )
     ->parse_file(shift) || die "Can't open file: $!\n";
