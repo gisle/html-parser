@@ -2,7 +2,7 @@
 # when a base URL is given to the constructor.
 
 eval {
-   require URI::URL;
+   require URI;
 };
 if ($@) {
    print "1..0\n";
