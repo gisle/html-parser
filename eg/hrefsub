@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# Perform transformations on link attributes in an HTML document.
+# Examples:
+#
+#  $ hrefsub 's/foo/bar/g' index.html
+#  $ hrefsub 'URI->new_abs($_, "http://foo")' index.html
+#
+
 use strict;
 use HTML::Parser ();
 use URI;
@@ -34,14 +41,14 @@ $p->handler(default => sub { print @_ }, "text");
 $p->handler(start => sub {
 		my($tagname, $pos, $text) = @_;
 		if (my $link_attr = $link_attr{$tagname}) {
-		    shift_pair($pos);  # tagname
+		    shift2($pos);  # tagname
 		    my $offset = 0;
 		    while (@$pos) {
-			my($k_offset, $k_len) = shift_pair($pos);
+			my($k_offset, $k_len) = shift2($pos);
 			$k_offset += $offset;
 			my $attrname = lc(substr($text, $k_offset, $k_len));
 			next unless $link_attr->{$attrname};
-			my($v_offset, $v_len) = shift_pair($pos);
+			my($v_offset, $v_len) = shift2($pos);
 			next unless $v_offset;
 			$v_offset += $offset;
 			my $v = substr($text, $v_offset, $v_len);
@@ -56,7 +63,7 @@ $p->handler(start => sub {
 		print $text;
 	    },
 	    "tagname, tokenpos, text");
-$p->parse_file($file) || die;
+$p->parse_file($file) || die "Can't open file: $!";
 
-sub shift_pair { return shift(@{$_[0]}), shift(@{$_[0]}); }
+sub shift2 { return shift(@{$_[0]}), shift(@{$_[0]}); }
 
