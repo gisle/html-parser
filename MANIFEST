@@ -8,6 +8,7 @@ TODO			Ideas and things still left to do
 eg/hrefsub		Do substitutions on link attributes
 eg/hstrip		Stip away certains tags/elements and attributes
 eg/htext		Leave only the text
+eg/htitle               Extract document title
 hints/solaris.pl	Avoid compiler bug
 hparser.h		Parser implementation (data structures)
 hparser.c		Parser implementation
@@ -20,12 +21,17 @@ mkhctype		Generates 'hctype.h'
 mkpfunc			Generates 'pfunc.h'
 tokenpos.h		Dynamically sized token_pos arrays
 typemap			Convert between HTML::Parser and 'struct p_state'
+t/api_version.t         Test api_version constructor option
 t/argspec.t		Test argspec
+t/argspec-bad.t         Test various bad argspec arguments
 t/cases.t		Test various interesting cases
+t/crashme.t             Parse random data
 t/default.t		Test default handler
+t/dtext.t               Test dtext decoding of entities
 t/entities.t		Test encoding/decoding of entities
 t/filter.t		Test HTML::Filter
 t/handler.t		Test $p->handler method
+t/handler-eof.t         Test invocation of $p->eof in handlers
 t/headparser.t		Test HTML::HeadParser
 t/headparser-http.t	Test HTML::HeadParser
 t/largetags.t		Test with very large tags
@@ -34,6 +40,7 @@ t/linkextor-rel.t	Test HTML::LinkExtor
 t/magic.t		Test that checking magic head in p_state works
 t/marked-sect.t         Test marked section support
 t/offset.t		Test attrspec offset
+t/options.t             Test set/get for various parser options
 t/parser.t		Test HTML::Parser subclassing
 t/parsefile.t		Test the $p->parse_file() method
 t/process.t		Test process instruction support
