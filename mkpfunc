@@ -23,7 +23,7 @@ for my $c (0..255) {
     elsif ($_ eq "?") {
 	$func = "process";
     }
-    printf "  %-20s /* %3d */\n", "parse_$func,", $c;
+    printf "    %-15s /* %3d */\n", "parse_$func,", $c;
 }
 
 print "};\n";

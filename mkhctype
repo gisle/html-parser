@@ -29,7 +29,7 @@ EOT
 print "static hctype_t hctype[] = {\n";
 
 for my $c (0 .. 255) {
-    print "  " unless $c % 8;
+    print "    " unless $c % 8;
 
     local $_ = chr($c);
     my $v = 0;
