@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_91;  # $Date: 1999/12/04 12:48:18 $
+$VERSION = 2.99_91;  # $Date: 1999/12/04 23:08:02 $
 
 require HTML::Entities;
 
@@ -279,7 +279,8 @@ are reported by the C<tagname> and C<attr> argspecs.
 Empty element tags look like start tags, but end with the character
 sequence "/>".  When recognized by HTML::Parser they cause an
 artificial end event in addition to the start event.  The
-C<text> for this generated end event will be empty.
+C<text> for this generated end event will be empty and
+the tokens and tokenpos arrays will be ('') and (0,0) respectively.
 
 XML processing instructions are terminated by "?>" instead of a simple
 ">" as is the case for HTML.
@@ -386,6 +387,8 @@ For C<start> events, this contains the original tag name followed by
 the attribute name/value pairs.
 
 For C<end> events, this contains the original tag name.
+This will be an empty string for artifical C<end> events
+triggered by empty start tags.
 
 For C<process> events, this contains the process instructions.
 
@@ -465,6 +468,17 @@ Event causes the event name to be provided.
 
 The event name is one of C<text>, C<start>, C<end>, C<declaration>,
 C<comment>, C<process> or C<default>.
+
+=item bytepos
+
+Bytepos causes the byte position of the start of the event to be passed.
+The first byte in the document is 0.
+
+=item linepos
+
+Linepos causes the line number of the start of the event to be passed.
+The first line in the document is 1.
+Line counting doesn't start until at least one handler requests this value.
 
 =back
 
