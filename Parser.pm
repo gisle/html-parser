@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.26';  # $Date: 2002/12/26 23:28:35 $
+$VERSION = '3.26';  # $Date: 2003/01/02 08:36:27 $
 
 require HTML::Entities;
 
@@ -929,7 +929,7 @@ An alternative implementation is:
                     comment_h      => [""],
                    )->parse_file(shift || die) || die $!;
 
-This will in most cases be much more efficient since only a sigle
+This will in most cases be much more efficient since only a single
 callback will be made.
 
 The next example prints out the text that is inside the <title>
