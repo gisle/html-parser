@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.2 1999/11/08 15:06:56 gisle Exp $
+/* $Id: Parser.xs,v 2.3 1999/11/08 15:09:35 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1099,7 +1099,7 @@ parse(self, chunk)
 	XSRETURN(1); /* self */
 
 SV*
-bool_parser_attr(pstate,...)
+strict_comment(pstate,...)
 	PSTATE* pstate
     ALIAS:
 	HTML::Parser::strict_comment = 1
@@ -1111,11 +1111,11 @@ bool_parser_attr(pstate,...)
 	int *attr;
     CODE:
         switch (ix) {
-	case 1: attr = &pstate->strict_comment; break;
+	case 1: attr = &pstate->strict_comment;       break;
 	case 2: attr = &pstate->decode_text_entities; break;
-	case 3: attr = &pstate->keep_case; break;
-	case 4: attr = &pstate->xml_mode; break;
-	case 5: attr = &pstate->pass_cbdata; break;
+	case 3: attr = &pstate->keep_case;            break;
+	case 4: attr = &pstate->xml_mode;             break;
+	case 5: attr = &pstate->pass_cbdata;          break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }
