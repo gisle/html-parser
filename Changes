@@ -1,3 +1,13 @@
+1998-04-02   Gisle Aas <aas@sn.no>
+
+   Release 2.15
+
+   Removed remainind forced dependencies on libwww-perl modules.  It
+   means that all tests should now pass, even if libwww-perl was not
+   installed previously.
+
+
+
 1998-04-01   Gisle Aas <aas@sn.no>
 
    Release 2.14, HTML::* modules unbundled from libwww-perl-5.22.
