@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.13 1999/11/09 20:52:51 gisle Exp $
+/* $Id: Parser.xs,v 2.14 1999/11/09 21:06:45 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -332,7 +332,7 @@ html_start(PSTATE* p_state,
     
     av_push(av, newSVpv("S", 1));
     av_push(av, tag);
-    av_push(av, SvREFCNT_inc((SV*)tokens));
+    av_push(av, newRV_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, newRV_noinc((SV*)av));
   }
@@ -442,7 +442,7 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
   if (accum) {
     AV* av = newAV();
     av_push(av, newSVpv("D", 1));
-    av_push(av, SvREFCNT_inc((SV*)tokens));
+    av_push(av, newRV_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, newRV_noinc((SV*)av));
     return;
