@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.25 1999/11/08 10:22:48 gisle Exp $
+/* $Id: Parser.xs,v 1.26 1999/11/08 10:43:41 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -8,8 +8,7 @@
 
 /* TODO:
  *   - direct method calls
- *   - accum flags
- *   - specify which value boolean attributes takes
+ *   - accum flags (filter out what enters @accum)
  *   - embed entity encode/decode
  *   - return partial text from literal mode
  *   - <plaintext> should not end with </plaintext>
@@ -35,6 +34,8 @@ extern "C" {
  *
  *  <A HREF="..." ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">
  *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
+ *
+ *  HTML 4.0.1 now allows this.
  */
 
 #define isHALPHA(c) (isALPHA(c) || (c) == '_' || (c) == ':')
@@ -50,6 +51,7 @@ struct p_state {
   int pass_cbdata;
   int xml_mode;
 
+  SV* bool_attr_val;
   AV* accum;
 
   SV* text_cb;
@@ -102,7 +104,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     av_push(av, newSVpv("T", 1));
     av_push(av, newSVpv(beg, end - beg));
     if (cdata)
-      av_push(av, &PL_sv_yes);
+      av_push(av, newSVsv(&PL_sv_yes));
     av_push(accum, (SV*)av);
     return;
   }
@@ -199,7 +201,7 @@ html_start(PSTATE* p_state,
     av_push(av, (SV*)tokens);
     SvREFCNT_inc(tokens);
     if (p_state->xml_mode)
-      av_push(av, boolSV(empty_tag));
+      av_push(av, newSVsv(boolSV(empty_tag)));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, (SV*)av);
     return;
@@ -616,7 +618,10 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	goto PREMATURE;
     }
     else {
-      av_push(tokens, &PL_sv_yes);  /* XXX configurable? */
+      SV* sv = p_state->bool_attr_val;
+      if (!sv)
+	sv = &PL_sv_yes;
+      av_push(tokens, newSVsv(sv));
     }
   }
 
@@ -965,6 +970,7 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	SvREFCNT_dec(pstate->buf);
+        SvREFCNT_dec(pstate->bool_attr_val);
         SvREFCNT_dec(pstate->accum);
 	SvREFCNT_dec(pstate->text_cb);
 	SvREFCNT_dec(pstate->start_cb);
@@ -1022,6 +1028,19 @@ xml_mode(pstate,...)
 	RETVAL = pstate->xml_mode;
 	if (items > 1)
 	    pstate->xml_mode = SvTRUE(ST(1));
+    OUTPUT:
+	RETVAL
+
+SV*
+bool_attr_val(pstate,...)
+        PSTATE* pstate
+    CODE:
+	RETVAL = pstate->bool_attr_val ? newSVsv(pstate->bool_attr_val)
+				       : &PL_sv_undef;
+	if (items > 1) {
+	    SvREFCNT_dec(pstate->bool_attr_val);
+	    pstate->bool_attr_val = SvREFCNT_inc(ST(1));
+        }
     OUTPUT:
 	RETVAL
 
