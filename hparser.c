@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.70 2001/04/18 02:26:07 gisle Exp $
+/* $Id: hparser.c,v 2.71 2001/04/27 14:54:09 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -185,19 +185,6 @@ report_event(PSTATE* p_state,
 	return;
 #endif
 
-    h = &p_state->handlers[event];
-    if (!h->cb) {
-	/* event = E_DEFAULT; */
-	h = &p_state->handlers[E_DEFAULT];
-	if (!h->cb)
-	    return;
-    }
-
-    if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
-	/* FALSE scalar ('' or 0) means IGNORE this event */
-	return;
-    }
-
     /* tag filters */
     if (p_state->ignore_tags || p_state->report_tags || p_state->ignore_elements) {
 
@@ -246,6 +233,19 @@ report_event(PSTATE* p_state,
 	else if (p_state->ignoring_element) {
 	    return;
 	}
+    }
+
+    h = &p_state->handlers[event];
+    if (!h->cb) {
+	/* event = E_DEFAULT; */
+	h = &p_state->handlers[E_DEFAULT];
+	if (!h->cb)
+	    return;
+    }
+
+    if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
+	/* FALSE scalar ('' or 0) means IGNORE this event */
+	return;
     }
 
     if (p_state->unbroken_text && event == E_TEXT) {
