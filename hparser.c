@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.107 2004/11/22 16:08:57 gisle Exp $
+/* $Id: hparser.c,v 2.108 2004/11/22 18:01:56 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1678,12 +1678,13 @@ parse(pTHX_
 	    /* flush it */
 	    s = SvPV(p_state->buf, len);
 	    end = s + len;
+	    utf8 = SvUTF8(p_state->buf);
 	    assert(len);
 	    if (!p_state->strict_comment && !p_state->is_cdata) {
 		if (*s == '<') {
 		    /* try to parse with comments terminated with a plain '>' first */
 		    p_state->no_dash_dash_comment_end = 1;
-		    s = parse_buf(aTHX_ p_state, s, end, SvUTF8(p_state->buf), self);
+		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
 		}
 		if (*s == '<') {
 		    /* some kind of unterminated markup.  Report rest as as comment */
