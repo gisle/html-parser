@@ -5,9 +5,8 @@ my $tag;
 my $text;
 
 use HTML::Parser ();
-my $p = HTML::Parser->new(start_cb => sub { $tag = shift  },
-	                  text_cb =>  sub { $text .= shift },
-			  decode_text_entities => 1,
+my $p = HTML::Parser->new(start_h => ["tagname", sub { $tag = shift  }],
+	                  text_h  => ["decoded_text", sub { $text .= shift }],
                          );
 
 eval {
