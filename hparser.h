@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.24 2002/03/17 20:07:57 gisle Exp $
+/* $Id: hparser.h,v 2.25 2003/08/15 00:39:11 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -97,6 +97,7 @@ struct p_state {
     /* various boolean configuration attributes */
     bool strict_comment;
     bool strict_names;
+    bool strict_end;
     bool xml_mode;
     bool unbroken_text;
     bool attr_encoded;

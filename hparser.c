@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.88 2003/08/15 00:22:57 gisle Exp $
+/* $Id: hparser.c,v 2.89 2003/08/15 00:39:11 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1304,7 +1304,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 	    s++;
 	tagname.end = s;
 
-	if (p_state->strict_names) {
+	if (p_state->strict_end) {
 	    while (isHSPACE(*s))
 		s++;
 	}
