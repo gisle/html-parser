@@ -3,10 +3,12 @@
 # This program will print out all <a href=".."> links in a
 # document together with the text that goes with it.
 
-use HTML::Parser 3;
+use HTML::Parser;
 
 my $p = HTML::Parser->new(api_version => 3,
-     start_h => [\&a_start_handler, "self,tagname,attr"]);
+     start_h => [\&a_start_handler, "self,tagname,attr"],
+     report_only_tags => [qw(a img)],
+    );
 $p->parse_file(shift || die) || die $!;
 
 sub a_start_handler
@@ -25,7 +27,7 @@ sub img_handler
 {
     my($self, $tag, $attr) = @_;
     return unless $tag eq "img";
-    push(@{$self->handler("text")}, [$attr->{alt} || "[IMG]"]);
+    push(@{$self->handler("text")}, $attr->{alt} || "[IMG]");
 }
 
 sub a_end_handler
