@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.8 1999/11/03 18:22:15 gisle Exp $
+/* $Id: Parser.xs,v 1.9 1999/11/03 20:46:23 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -16,10 +16,11 @@ extern "C" {
 }
 #endif
 
+#define isHALNUM(c) (isALNUM(c) || (c) == '.' || (c) == '-')
+
 
 struct p_state {
   SV* buf;
-  int bufpos;
 
   int strict_comment;
 
@@ -28,17 +29,10 @@ struct p_state {
   SV* end_cb;
   SV* decl_cb;
   SV* com_cb;
-  SV* proc_cb;
+  SV* pi_cb;
 };
-
 typedef struct p_state PSTATE;
 
-
-int
-isHALNUM(int c)
-{
-  return isALNUM(c) || c == '.' || c == '-';
-}
 
 static SV*
 sv_lower(SV* sv)
@@ -49,6 +43,7 @@ sv_lower(SV* sv)
 	*s = toLOWER(*s);
    return sv;
 }
+
 
 static void
 html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
@@ -72,6 +67,7 @@ html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
       LEAVE;
   }
 }
+
 
 static void
 html_end(PSTATE* p_state,
@@ -97,6 +93,7 @@ html_end(PSTATE* p_state,
       LEAVE;
   }
 }
+
 
 static void
 html_start(PSTATE* p_state,
@@ -124,10 +121,11 @@ html_start(PSTATE* p_state,
   }
 }
 
+
 static void
 html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 {
-  SV *cb = p_state->proc_cb;
+  SV *cb = p_state->pi_cb;
   if (cb) {
       dSP;
       ENTER;
@@ -143,6 +141,7 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
       LEAVE;
   }
 }
+
 
 static void
 html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
@@ -164,6 +163,7 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   }
 }
 
+
 static void
 html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 {
@@ -184,6 +184,7 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
       LEAVE;
   }
 }
+
 
 
 static char*
@@ -330,6 +331,8 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   return 0;
 }
 
+
+
 static char*
 html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
@@ -356,7 +359,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     s++;
     while (s < end && isHALNUM(*s))
       s++;
-    av_push(tokens, newSVpv(attr_beg, s - attr_beg));
+    av_push(tokens, sv_lower(newSVpv(attr_beg, s - attr_beg)));
 
     while (s < end && isSPACE(*s))
       s++;
@@ -422,6 +425,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   return beg;
 }
 
+
+
 static void
 html_parse(PSTATE* p_state,
 	   SV* chunk,
@@ -461,7 +466,7 @@ html_parse(PSTATE* p_state,
   }
 
 
-  if (p_state->buf) {
+  if (p_state->buf && SvOK(p_state->buf)) {
     sv_catsv(p_state->buf, chunk);
     s = SvPV(p_state->buf, len);
   }
@@ -501,7 +506,6 @@ html_parse(PSTATE* p_state,
 	}
 	s++;
 	html_text(p_state, t, s, cbdata);
-	t = s;
 	break;
       }
     }
@@ -514,9 +518,9 @@ html_parse(PSTATE* p_state,
 
     if (isALPHA(*s)) {
       /* start tag */
-      char *new_pos = html_parse_start(p_state, s-1, end, cbdata);
-      if (new_pos == s-1) {
-	s--;
+      char *new_pos = html_parse_start(p_state, t, end, cbdata);
+      if (new_pos == t) {
+	s = t;
 	break;
       }	
       else if (new_pos)
@@ -587,18 +591,17 @@ html_parse(PSTATE* p_state,
 
   if (s == end) {
     if (p_state->buf) {
-      /* XXX it is probably more efficient to always have a buffer variable,
-	 and then just mark it as unused by clearing SvOK
-       */
-      SvREFCNT_dec(p_state->buf);
-      p_state->buf = 0;
+      SvOK_off(p_state->buf);
     }
   }
   else {
     /* need to keep rest in buffer */
     if (p_state->buf) {
       /* chop off some chars at the beginning */
-      sv_chop(p_state->buf, s);
+      if (SvOK(p_state->buf))
+	sv_chop(p_state->buf, s);
+      else
+	sv_setpvn(p_state->buf, s, end - s);
     }
     else {
       p_state->buf = newSVpv(s, end - s);
@@ -606,6 +609,8 @@ html_parse(PSTATE* p_state,
   }
   return;
 }
+
+
 
 static PSTATE*
 get_pstate(SV* sv)
@@ -615,7 +620,7 @@ get_pstate(SV* sv)
 
   sv = SvRV(sv);
   if (!sv || SvTYPE(sv) != SVt_PVHV)
-    croak("No a reference to a hash");
+    croak("Not a reference to a hash");
   hv = (HV*)sv;
   svp = hv_fetch(hv, "_parser_state", 13, 0);
   if (svp)
@@ -623,6 +628,8 @@ get_pstate(SV* sv)
   croak("Can't find '_parser_state' element in HTML::Parser hash");
   return 0;
 }
+
+
 
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
 
@@ -636,26 +643,28 @@ _alloc_pstate(self)
 	SV* sv;
 	HV* hv;
     CODE:
+	sv = SvRV(self);
+        if (!sv || SvTYPE(sv) != SVt_PVHV)
+            croak("Self is not a reference to a hash");
+	hv = (HV*)sv;
+
 	Newz(56, pstate, 1, PSTATE);
-	/* printf("Allocated pstate %p\n", pstate); */
 	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
-	hv = SvRV(self);
+
 	hv_store(hv, "_parser_state", 13, sv, 0);
 
 void
 DESTROY(pstate)
 	PSTATE* pstate
     CODE:
-	/* printf("Safefree %p\n", pstate); */
 	SvREFCNT_dec(pstate->buf);
 	SvREFCNT_dec(pstate->text_cb);
 	SvREFCNT_dec(pstate->start_cb);
 	SvREFCNT_dec(pstate->end_cb);
 	SvREFCNT_dec(pstate->decl_cb);
 	SvREFCNT_dec(pstate->com_cb);
-	SvREFCNT_dec(pstate->proc_cb);
-	printf("HTML::Parser::DESTROY\n");
+	SvREFCNT_dec(pstate->pi_cb);
 	Safefree(pstate);
 
 
@@ -704,7 +713,7 @@ callback(pstate, name_sv, cb)
 	    if (strEQ(name, "comment"))
 		svp = &pstate->com_cb;
 	    if (strEQ(name, "process"))
-		svp = &pstate->proc_cb;
+		svp = &pstate->pi_cb;
 	    break;
 	case 11:
 	    if (strEQ(name, "declaration"))
