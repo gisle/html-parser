@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.20 1999/11/15 11:28:48 gisle Exp $
+/* $Id: Parser.xs,v 2.21 1999/11/15 12:22:57 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -81,13 +81,13 @@ struct p_state {
   char* literal_mode;
 
   /* various boolean configuration attributes */
-  int strict_comment;
-  int strict_names;
-  int decode_text_entities;
-  int keep_case;
-  int xml_mode;
-  int v2_compat;
-  int pass_cbdata;
+  bool strict_comment;
+  bool strict_names;
+  bool decode_text_entities;
+  bool keep_case;
+  bool xml_mode;
+  bool v2_compat;
+  bool pass_cbdata;
 
   SV* bool_attr_val;
   AV* accum;
@@ -1217,7 +1217,7 @@ strict_comment(pstate,...)
 	HTML::Parser::v2_compat = 6
         HTML::Parser::pass_cbdata = 7
     PREINIT:
-	int *attr;
+	bool *attr;
     CODE:
         switch (ix) {
 	case 1: attr = &pstate->strict_comment;       break;
