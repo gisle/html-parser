@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.42 2000/05/23 10:44:59 gisle Exp $
+/* $Id: hparser.c,v 2.43 2000/06/28 08:34:31 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -198,7 +198,7 @@ report_event(PSTATE* p_state,
     switch( argcode ) {
 
     case ARG_SELF:
-      arg = self;
+      arg = sv_mortalcopy(self);
       break;
 
     case ARG_TOKENS:
