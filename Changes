@@ -1,3 +1,16 @@
+2000-01-22   Gisle Aas <gisle@aas.no>
+
+     Release 3.05
+
+     Implemented $p->unbroken_text option
+
+     Don't parse content of certain HTML elements as CDATA when
+     xml_mode is enabled.
+
+     Offset was reported with wrong sign for text at end of chunk.
+
+
+
 2000-01-15   Gisle Aas <gisle@aas.no>
 
     Release 3.04
