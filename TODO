@@ -24,5 +24,4 @@ POSSIBLE OPTIMIZATIONS
 
 MINOR "BUGS" (alias FEATURES)
  - no way to clear "boolean_attribute_value".
- - <plaintext> ends with </plaintext> and can't be escaped.
  - <style> and <script> do not end with the first "</".
