@@ -1,6 +1,6 @@
-/* $Id: util.c,v 2.9 2000/12/26 08:52:44 gisle Exp $
+/* $Id: util.c,v 2.10 2001/02/23 06:06:55 gisle Exp $
  *
- * Copyright 1999-2000, Gisle Aas.
+ * Copyright 1999-2001, Gisle Aas.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
@@ -39,6 +39,29 @@ strnEQx(const char* s1, const char* s2, STRLEN n, int ignore_case)
     return 1;
 }
 
+static void
+grow_gap(SV* sv, STRLEN grow, char** t, char** s, char** e)
+{
+    /*
+     SvPVX ---> AAAAAA...BBBBBB
+                     ^   ^     ^
+                     t   s     e
+    */
+    STRLEN t_offset = *t - SvPVX(sv);
+    STRLEN s_offset = *s - SvPVX(sv);
+    STRLEN e_offset = *e - SvPVX(sv);
+    
+    SvGROW(sv, e_offset + grow + 1);
+
+    *t = SvPVX(sv) + t_offset;
+    *s = SvPVX(sv) + s_offset;
+    *e = SvPVX(sv) + e_offset;
+
+    Move(*s, *s+grow, *e - *s, char);
+    *s += grow;
+    *e += grow;
+}
+
 EXTERN SV*
 decode_entities(pTHX_ SV* sv, HV* entity2char)
 {
@@ -52,12 +75,10 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
   STRLEN repl_len;
 #ifdef UNICODE_ENTITIES
   char buf[UTF8_MAXLEN];
-  int has_utf8 = 0;
   int repl_utf8;
 #else
   char buf[1];
 #endif
-  
 
   while (s < end) {
     assert(t <= s);
@@ -143,46 +164,48 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     }
 
     if (repl) {
+      char *repl_allocated = 0;
       if (*s == ';')
 	s++;
       t--;  /* '&' already copied, undo it */
 
 #ifdef UNICODE_ENTITIES
       if (!SvUTF8(sv) && repl_utf8) {
-	  /* need to upgrade */
-	  int old_len = t - SvPVX(sv);
-	  int len = old_len;
-	  char *ustr = bytes_to_utf8(SvPVX(sv), &len);
-	  int grow = len - old_len;
-	  if (grow) {
-	      int entity_len = s - t;
-	      SvGROW(sv, SvCUR(sv) + grow + 1);
-	      s = SvPVX(sv) + old_len + entity_len;
-	      Move(s, s+grow, SvEND(sv) - s + 1, char);
-	      s += grow;
-	      Copy(ustr, SvPVX(sv), len, char);
-	      t = SvPVX(sv) + len;
+	  int len = t - SvPVX(sv);
+	  if (len) {
+	      /* need to upgrade the part that we have looked though */
+	      int old_len = len;
+	      char *ustr = bytes_to_utf8(SvPVX(sv), &len);
+	      int grow = len - old_len;
+	      if (grow) {
+		  /* XXX It might already be enough gap, so we don't need this,
+		     but it should not hurt either.
+		   */
+		  grow_gap(sv, grow, &t, &s, &end);
+		  Copy(ustr, SvPVX(sv), len, char);
+		  t = SvPVX(sv) + len;
+	      }
+	      Safefree(ustr);
 	  }
-	  Safefree(ustr);
 	  SvUTF8_on(sv);
+      }
+      else if (SvUTF8(sv) && !repl_utf8) {
+	  repl = bytes_to_utf8(repl, &repl_len);
+	  repl_allocated = repl;
       }
 #endif
 
       if (t + repl_len > s) {
 	/* need to grow the string */
-	STRLEN t_offset = t - SvPVX(sv);
-	STRLEN s_offset = s - SvPVX(sv);
-	int grow = repl_len - (s - t);
-	SvGROW(sv, SvCUR(sv) + grow + 1);
-	t = SvPVX(sv) + t_offset;
-	s = SvPVX(sv) + s_offset;
-	Move(s, s+grow, SvEND(sv) - s + 1, char);
-	s += grow;
+	grow_gap(sv, repl_len - (s - t), &t, &s, &end);
       }
 
       /* copy replacement string into string */
       while (repl_len--)
 	*t++ = *repl++;
+
+      if (repl_allocated)
+	  Safefree(repl_allocated);
     }
     else {
       while (ent_start < s)
@@ -194,5 +217,6 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     *t = '\0';
     SvCUR_set(sv, t - SvPVX(sv));
   }
+  //sv_dump(sv);
   return sv;
 }
