@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3991';  # $Date: 2004/11/23 11:42:18 $
+$VERSION = '3.3991';  # $Date: 2004/11/23 17:29:42 $
 
 require HTML::Entities;
 
@@ -156,8 +156,8 @@ HTML::Parser - HTML parser class
  # Parse directly from file
  $p->parse_file("foo.html");
  # or
- open(F, "foo.html") || die;
- $p->parse_file(*F);
+ open(my $fh, "<:utf8", "foo.html") || die;
+ $p->parse_file($fh);
 
 =head1 DESCRIPTION
 
@@ -683,6 +683,10 @@ names are forced to lower case.
 General entities are decoded in the attribute values and
 one layer of matching quotes enclosing the attribute values is removed.
 
+The Unicode character set is assumed for entity decoding.  With Perl
+version 5.6 or earlier only the Latin-1 range is supported, and
+entities for characters outside the range 0..255 are left unchanged.
+
 =item C<attrseq>
 
 Attrseq causes a reference to an array of attribute names to be
@@ -721,8 +725,8 @@ was between literal start and end tags (C<script>, C<style>,
 C<xmp>, and C<plaintext>).
 
 The Unicode character set is assumed for entity decoding.  With Perl
-version < 5.8 only the Latin1 range is supported, and entities for
-characters outside the range 0..255 are left unchanged.
+version 5.6 or earlier only the Latin-1 range is supported, and
+entities for characters outside the range 0..255 are left unchanged.
 
 This passes undef except for C<text> events.
 
@@ -891,6 +895,32 @@ handler.  You can set up a handler for this event to catch stuff you
 did not want to catch explicitly.
 
 =back
+
+=head2 Unicode
+
+The C<HTML::Parser> can parse Unicode strings when running under
+perl-5.8 or better.  If Unicode is passed to $p->parse() then chunks
+of Unicode will be reported to the handlers.  The offset and length
+argspecs will also report their position in terms of characters.
+
+It is safe to parse raw undecoded UTF-8 if you avoid decoding entities
+and make sure to not use I<argspecs> that do; C<attr>, C<@attr> and
+C<dtext>.  Parsing of undecoded UTF-8 might be useful when parsing
+from a file where you need the reported offsets and lengths to match
+the byte offsets in the file.
+
+If a filename is passed to $p->parse_file() then the file will be read
+in binary mode.  This will be fine if the file contains only ASCII or
+Latin-1 characters.  If the file contains UTF-8 encoded text then care
+must be taken when decoding entities as described in the previous
+paragraph, but better is to open the file with the UTF-8 layer so that
+it is decoded properly:
+
+   open(my $fh, "<:utf8", "index.html") || die "...: $!";
+   $p->parse_file($fh);
+
+If the file contains text encoded in a charset besides ASCII, Latin-1
+or UTF-8 then decoding will always be needed.
 
 =head1 VERSION 2 COMPATIBILITY
 
@@ -1104,7 +1134,8 @@ The sequence "\xEF\xBB\xBF" is the UTF-8 encoded Unicode BOM
 character.
 
 The result of parsing will be a mix of encoded and decoded characters
-for any entities that expand to characters with code above 127.
+for any entities that expand to characters with code above 127.  This
+is not a good thing.
 
 The solution is to use the Encode::encode_utf8() on the data before
 feeding it to the $p->parse().  For $p->parse_file() pass a file that
