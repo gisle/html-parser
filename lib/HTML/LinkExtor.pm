@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.26 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.27 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -83,9 +83,7 @@ non-link attributes are removed.
 sub new
 {
     my($class, $cb, $base) = @_;
-    my $self = $class->SUPER::new(start_cb => \&_start_tag,
-				  pass_self => 1,
-				 );
+    my $self = $class->SUPER::new(start_h => ["self,tagname,attr", "_start_tag"]);
     $self->{extractlink_cb} = $cb;
     if ($base) {
 	require URI;
@@ -97,7 +95,6 @@ sub new
 sub _start_tag
 {
     my($self, $tag, $attr) = @_;
-    my %attr = @$attr;
     return unless exists $LINK_ELEMENT{$tag};
 
     my $base = $self->{extractlink_base};
@@ -107,9 +104,9 @@ sub _start_tag
     my @links;
     my $a;
     for $a (@$links) {
-	next unless exists $attr{$a};
-	push(@links, $a, $base ? URI->new($attr{$a}, $base)->abs($base)
-                               : $attr{$a});
+	next unless exists $attr->{$a};
+	push(@links, $a, $base ? URI->new($attr->{$a}, $base)->abs($base)
+                               : $attr->{$a});
     }
     return unless @links;
     $self->_found_link($tag, @links);
