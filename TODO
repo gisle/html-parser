@@ -1,0 +1,23 @@
+/* TODO:
+ *   - write test scritps
+ *   - update/write documentation
+ *   - pic attribute (">" or "?>" are defaults)
+ *   - utf8 mode (entities expand to utf8 chars)
+ *   - count chars, line numbers
+ *   - return partial text from literal/cdata mode
+ *   - option to avoid attribute value decoding
+ *   - unbroken_text option
+ *
+ * POSSIBLE OPTIMIZATIONS:
+ *   - direct method calls
+ *   - less need for leaving things in buf when unbroken_text
+ *     option is enabled.
+ *
+ * MINOR "BUGS" (alias FEATURES):
+ *   - no way to clear "bool_attr_val" which gives the name of
+ *     the attribute as value.  Perhaps not really a problem.
+ *   - <plaintext> should not end with </plaintext>; can't be
+ *     escaped.
+ *   - xml_mode should demand ";" at end of entity references
+ */
+
