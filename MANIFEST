@@ -10,5 +10,7 @@ lib/HTML/LinkExtor.pm
 t/entities.t
 t/filter.t
 t/headparser.t
-t/linkextractor.t
+t/headparser-http.t
+t/linkextor-base.t
+t/linkextor-rel.t
 t/parser.t
