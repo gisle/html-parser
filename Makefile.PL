@@ -14,6 +14,9 @@ WriteMakefile(
     H            => [ "hparser.h", "hctype.h", "tokenpos.h", "pfunc.h",
 		      "hparser.c", "util.c",
 		    ],
+    PREREQ_PM    => {
+		      'HTML::Tagset' => 3,
+                    },
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     @extra,
 );
