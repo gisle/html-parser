@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.117 2003/08/15 16:37:45 gisle Exp $
+/* $Id: Parser.xs,v 2.118 2003/08/15 16:56:20 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -273,7 +273,7 @@ parse(self, chunk)
 	    PUSHs(self);
 	}
 
-SV *
+void
 eof(self)
 	SV* self;
     PREINIT:
@@ -406,7 +406,7 @@ handler(pstate, eventname,...)
         int event = -1;
         int i;
         struct p_handler *h;
-    CODE:
+    PPCODE:
 	/* map event name string to event_id */
 	for (i = 0; i < EVENT_COUNT; i++) {
 	    if (strEQ(name, event_id_str[i])) {
@@ -421,12 +421,12 @@ handler(pstate, eventname,...)
 
 	/* set up return value */
 	if (h->cb) {
-	    ST(0) = (SvTYPE(h->cb) == SVt_PVAV)
+	    PUSHs((SvTYPE(h->cb) == SVt_PVAV)
 	                 ? sv_2mortal(newRV_inc(h->cb))
-	                 : sv_2mortal(newSVsv(h->cb));
+	                 : sv_2mortal(newSVsv(h->cb)));
 	}
         else {
-	    ST(0) = &PL_sv_undef;
+	    PUSHs(&PL_sv_undef);
         }
 
         /* update */
