@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.20 1999/11/05 13:04:41 gisle Exp $
+/* $Id: Parser.xs,v 1.21 1999/11/05 13:23:39 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -13,7 +13,13 @@
  *   - embed entity encode/decode
  *   - return partial text from literal mode
  *   - <plaintext> should not end with </plaintext>
+ *   - XML mode
+ *        - processing instructions ends with "?>" instead of ">"
+ *        - start tags might end with "/" which should mark them
+ *          as empty
+ *        - unicode characters in names
  *   - marked sections?
+ *   - unicode support
  */
 
 #ifdef __cplusplus
