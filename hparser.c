@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.73 2001/05/08 01:53:46 gisle Exp $
+/* $Id: hparser.c,v 2.74 2001/05/08 17:39:33 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -546,8 +546,11 @@ report_event(PSTATE* p_state,
     return;
 
 IGNORE:
-    if (p_state->skipped_text)
+    if (p_state->skipped_text) {
+	if (event != E_TEXT && p_state->pend_text && SvOK(p_state->pend_text))
+	    flush_pending_text(p_state, self);
 	sv_catpvn(p_state->skipped_text, beg, end - beg);
+    }
     return;
 }
 
