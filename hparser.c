@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.19 1999/12/07 09:47:02 gisle Exp $
+/* $Id: hparser.c,v 2.20 1999/12/07 10:56:57 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -43,6 +43,7 @@ enum argcode {
   ARG_LENGTH,
   ARG_EVENT,
   ARG_LITERAL,
+  ARG_UNDEF,
 };
 
 
@@ -293,6 +294,10 @@ report_event(PSTATE* p_state,
 	s += len + 1;
       }
       break;
+
+    case ARG_UNDEF:
+      arg = &PL_sv_undef;
+      break;
       
     default:
       arg = sv_2mortal(newSVpvf("Bad argspec %d", *s));
@@ -357,6 +362,7 @@ argspec_compile(SV* src)
     hv_store(names, "offset", 6,      newSViv(ARG_OFFSET),     0);
     hv_store(names, "length", 6,      newSViv(ARG_LENGTH),     0);
     hv_store(names, "event", 5,       newSViv(ARG_EVENT),      0);
+    hv_store(names, "undef", 5,       newSViv(ARG_UNDEF),      0);
   }
 
   while (isHSPACE(*s))

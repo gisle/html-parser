@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/07 09:42:45 $
+$VERSION = 2.99_94;  # $Date: 1999/12/07 10:56:57 $
 
 require HTML::Entities;
 
@@ -510,6 +510,10 @@ until at least one handler requests this value.
 
 A literal string enclosed in single or double quotes is passed as
 written.
+
+=item C<undef>
+
+Pass an undefined value.  Useful as padding.
 
 =back
 
