@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.36 2000/01/21 22:15:30 gisle Exp $
+/* $Id: hparser.c,v 2.37 2000/01/21 22:19:50 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -97,7 +97,7 @@ report_event(PSTATE* p_state,
 	     SV* self
 	    )
 {
-  struct p_handler *h = &p_state->handlers[event];
+  struct p_handler *h;
   dSP;
   AV *array;
   STRLEN my_na;
@@ -142,6 +142,7 @@ report_event(PSTATE* p_state,
     return;
 #endif
 
+  h = &p_state->handlers[event];
   if (!h->cb) {
     /* event = E_DEFAULT; */
     h = &p_state->handlers[E_DEFAULT];
