@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.18 1999/12/07 01:26:46 gisle Exp $
+/* $Id: hparser.c,v 2.19 1999/12/07 09:47:02 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1076,7 +1076,7 @@ parse(PSTATE* p_state,
 	if (!*l) {
 	  /* matched it all */
 	  token_pos_t end_token;
-	  end_token.beg = end_text + 1;
+	  end_token.beg = end_text + 2;
 	  end_token.end = s;
 
 	  while (isHSPACE(*s))
