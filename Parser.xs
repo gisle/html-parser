@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.42 1999/11/25 13:37:42 gisle Exp $
+/* $Id: Parser.xs,v 2.43 1999/11/26 15:23:54 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -16,6 +16,7 @@
  *   - option that make start tag attrs be returned as a hash
  *   - return partial text from literal/cdata mode
  *   - accum flags (filter out what enters @accum)
+ *   - option to avoid attribute value decoding
  *
  * PLAIN BUGS:
  *   - unbroken_text does not handle cdata sections.
