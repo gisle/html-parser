@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.28 2003/10/14 10:11:05 gisle Exp $
+# $Id: TokeParser.pm,v 2.29 2004/11/15 09:50:55 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.28 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.29 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -217,7 +217,7 @@ like this:
   ["PI", $token0, $text]
 
 where $attr is a hash reference, $attrseq is an array reference and
-the rest are plain scalars.  The L<HTML::Parser/Attrspec> explains the
+the rest are plain scalars.  The L<HTML::Parser/Argspec> explains the
 details.
 
 =item $p->unget_token( @tokens )
