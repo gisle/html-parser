@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_95;  # $Date: 1999/12/10 04:10:47 $
+$VERSION = 2.99_96;  # $Date: 1999/12/13 11:45:49 $
 
 require HTML::Entities;
 
@@ -437,6 +437,17 @@ The callback signature is start(\%attr, \@attr_seq, $text).
 This causes 'start' event information to be saved in @accum.
 The array elements will be ['S', \%attr, \@attr_seq, $text].
 
+   $p->handler(start => "");
+
+This causes 'start' events to be ignored.  It also supresses
+invokations of any default handler for these events.  It is equivalent
+to $p->handler(start => sub {}), but is more efficient.
+
+   $p->handler(start => undef);
+
+This causes no handler to be assosiated with start events any more.
+If there is a default handler it will be invoked.
+
 =back
 
 =head2 Argspec
@@ -729,7 +740,7 @@ does nothing and a default handler that will print out anything else:
 
   use HTML::Parser;
   HTML::Parser->new(default_h => [sub { print shift }, 'text'],
-                    comment_h => [sub { }, ''],
+                    comment_h => [""],
                    )->parse_file(shift || die) || die $!;
 
 The next example prints out the text that is inside the <title>

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.28 1999/12/13 11:18:59 gisle Exp $
+/* $Id: hparser.c,v 2.29 1999/12/13 11:45:49 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -149,6 +149,10 @@ report_event(PSTATE* p_state,
   if (SvTYPE(h->cb) == SVt_PVAV) {
     /* start sub-array for accumulator array */
     array = newAV();
+  }
+  else if (!SvTRUE(h->cb)) {
+    /* FALSE scalar ('' or 0) means IGNORE this event */
+    return;
   }
   else {
     array = 0;

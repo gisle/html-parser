@@ -34,6 +34,7 @@ t/handler.t		Test $p->handler method
 t/handler-eof.t         Test invocation of $p->eof in handlers
 t/headparser.t		Test HTML::HeadParser
 t/headparser-http.t	Test HTML::HeadParser
+t/ignore.t		Test elements ignored by handler = '' or 0
 t/largetags.t		Test with very large tags
 t/linkextor-base.t	Test HTML::LinkExtor
 t/linkextor-rel.t	Test HTML::LinkExtor

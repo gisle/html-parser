@@ -13,7 +13,6 @@ ISSUES FOR THE 3.0 RELEASE
 
 FEATURES THAT CAN WAIT
 
- - official interface to $self->{parse_file_stop}
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
  - report 'line'
@@ -22,9 +21,6 @@ FEATURES THAT CAN WAIT
  - <![%app1;[...]]> (parameter entities)
  - $p->ignore_element("script", "style");
  - $p->ignore_tag("font", "big", "small");
- - "IGNORE" as handler destination (similar to $SIG{IGNORE}) might
-   be more efficient than 'sub {}'  Empty string as handler is a
-   nice way to do it I think.  $p->handler(start => "");
  - limit the length of markup elements that never end.   Perhaps by
    configurable limits on the length that markup can have and still
    be recongnized.
