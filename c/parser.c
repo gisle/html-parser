@@ -68,14 +68,111 @@ void html_comment(struct p_state* p_state, char *beg, char *end)
   printf("]\n");
 }
 
+void html_decl(struct p_state* p_state, AV* tokens, char *beg, char *end)
+{
+  int i, len;
+  printf(">> decl: [");
+  while (beg < end)
+    putchar(*beg++);
+  printf("]\n");
+  printf(" tokens:");
+  len = av_len(tokens);
+  for (i = 0; i <= len; i++) {
+    SV** svp = av_fetch(tokens, i, 0);
+    STRLEN len;
+    char *s = SvPV(*svp, len);
+    printf(" [");
+    while (len--)
+      putchar(*s++);
+    putchar(']');
+  }
+  putchar('\n');
+}
 
-		      
 
 char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 {
   char *s = beg;
 
-  if (*s == '-') {
+  assert(end - beg >= 1);
+
+  if (isALPHA(*s)) {
+    AV* tokens = newAV();
+    s++;
+    /* declaration */
+    while (s < end && isHALNUM(*s))
+      s++;
+    /* first word available */
+    av_push(tokens, newSVpv(beg, s - beg));
+
+    while (s < end && isSPACE(*s)) {
+      s++;
+      while (s < end && isSPACE(*s))
+	s++;
+
+      if (s == end)
+	return beg;
+
+      if (*s == '"' || *s == '\'') {
+	char *str_beg = s;
+	s++;
+	while (s < end && *s != *str_beg)
+	  s++;
+	if (s == end)
+	  return beg;
+	s++;
+	av_push(tokens, newSVpv(str_beg, s - str_beg));
+      }
+      else if (*s == '-') {
+	/* comment */
+	char *com_beg = s;
+	s++;
+	if (s == end)
+	  return beg;
+	if (*s != '-')
+	  return 0;
+	s++;
+
+	while (1) {
+	  while (s < end && *s != '-')
+	    s++;
+	  if (s == end)
+	    return beg;
+	  s++;
+	  if (s == end)
+	    return beg;
+	  if (*s == '-') {
+	    s++;
+	    av_push(tokens, newSVpv(com_beg, s - com_beg));
+	    break;
+	  }
+	}
+      }
+      else if (*s != '>') {
+	/* plain word */
+	char *word_beg = s;
+	s++;
+	while (s < end && !isSPACE(*s) && *s != '>')
+	  s++;
+	if (s == end)
+	  return beg;
+	av_push(tokens, newSVpv(word_beg, s - word_beg));
+      }
+      else {
+	break;
+      }
+    }
+
+    if (s == end)
+      return beg;
+    if (*s == '>') {
+      s++;
+      html_decl(p_state, tokens, beg, s-1);
+      return s;
+    }
+    return 0;
+
+  } else if (*s == '-') {
     s++;
     /* comment? */
     if (s == end)
@@ -85,13 +182,16 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
       s++;
       /* yes, it is really a comment */
       
+# if 0
       if (p_state->strict_comment) {
 	/* XXX */
       }
-      else {
+      else
+#endif
+      {
 	char *end_com;
 	/* try to locate /--\s*>/ which signals end-of-comment */
-      END_COM:
+      LOCATE_END:
 	while (s < end && *s != '-')
 	  s++;
 	end_com = s - 1;
@@ -110,7 +210,7 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	  }
 	  if (s < end) {
 	    s = end_com + 2;
-	    goto END_COM;
+	    goto LOCATE_END;
 	  }
 	}
 	
@@ -311,7 +411,7 @@ int main(int argc, char** argv, char** env)
   SV* sv4;
 
   memset(&p, 0, sizeof(p));
-  sv1 = newSVpv("bar <a href='foo'>foo</a>   <!--foo", 0);
+  sv1 = newSVpv("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\nbar <a href='foo'>foo</a>   <!--foo", 0);
   sv2 = newSVpv("<font size=+3> -> --- --><a href=\"", 0);
   sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
