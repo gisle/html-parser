@@ -15,7 +15,7 @@ typedef struct token_pos token_pos_t;
    STMT_START { \
        ++num_tokens; \
        if (num_tokens == token_lim) \
-           tokens_grow(&tokens, &token_lim, (tokens != token_buf)); \
+           tokens_grow(&tokens, &token_lim, (bool)(tokens != token_buf)); \
        tokens[num_tokens-1].beg = p_beg; \
        tokens[num_tokens-1].end = p_end; \
    } STMT_END
