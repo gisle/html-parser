@@ -14,7 +14,7 @@ unless (&HTML::Entities::UNICODE_SUPPORT) {
     exit;
 }
 
-print "1..13\n";
+print "1..14\n";
 
 print "not " unless decode_entities("&euro") eq "\x{20AC}";
 print "ok 1\n";
@@ -90,3 +90,6 @@ print "ok 12\n";
 
 print "not " unless decode_entities("&#56256") eq chr(0xFFFD);
 print "ok 13\n";
+
+print "not " unless decode_entities("\260&rsquo;\260") eq "\x{b0}\x{2019}\x{b0}";
+print "ok 14\n";

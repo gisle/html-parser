@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.20 2004/11/08 14:14:35 gisle Exp $
+/* $Id: util.c,v 2.21 2004/11/10 13:32:56 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -209,23 +209,21 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 	    }
 
 	    if (!SvUTF8(sv) && repl_utf8) {
-		STRLEN len = t - SvPVX(sv);
-		if (len) {
-		    /* need to upgrade the part that we have looked though */
-		    STRLEN old_len = len;
-		    char *ustr = bytes_to_utf8(SvPVX(sv), &len);
-		    STRLEN grow = len - old_len;
-		    if (grow) {
-			/* XXX It might already be enough gap, so we don't need this,
-			   but it should not hurt either.
-			*/
-			grow_gap(aTHX_ sv, grow, &t, &s, &end);
-			Copy(ustr, SvPVX(sv), len, char);
-			t = SvPVX(sv) + len;
-		    }
-		    Safefree(ustr);
-		}
+		/* need to upgrade sv before we continue */
+		STRLEN before_gap_len = t - SvPVX(sv);
+		char *before_gap = bytes_to_utf8(SvPVX(sv), &before_gap_len);
+		STRLEN after_gap_len = end - s;
+		char *after_gap = bytes_to_utf8(s, &after_gap_len);
+
+		sv_setpvn(sv, before_gap, before_gap_len);
+		sv_catpvn(sv, after_gap, after_gap_len);
 		SvUTF8_on(sv);
+
+		Safefree(before_gap);
+		Safefree(after_gap);
+
+		s = t = SvPVX(sv) + before_gap_len;
+		end = SvPVX(sv) + before_gap_len + after_gap_len;
 	    }
 	    else if (SvUTF8(sv) && !repl_utf8) {
 		repl = bytes_to_utf8(repl, &repl_len);
