@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.77 2001/05/09 07:55:36 gisle Exp $
+/* $Id: hparser.c,v 2.78 2001/05/10 19:23:05 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -182,11 +182,11 @@ report_event(PSTATE* p_state,
     }
 
     if (event == E_NONE)
-	goto IGNORE;
+	goto IGNORE_EVENT;
     
 #ifdef MARKED_SECTION
     if (p_state->ms == MS_IGNORE)
-	goto IGNORE;
+	goto IGNORE_EVENT;
 #endif
 
     /* tag filters */
@@ -210,7 +210,7 @@ report_event(PSTATE* p_state,
 			p_state->ignoring_element = 0;
 		    }
 		}
-		goto IGNORE;
+		goto IGNORE_EVENT;
 	    }
 
 	    PERL_HASH(hash, SvPVX(tagname), SvCUR(tagname));
@@ -220,22 +220,22 @@ report_event(PSTATE* p_state,
 	    {
 		p_state->ignoring_element = newSVsv(tagname);
 		p_state->ignore_depth = 1;
-		goto IGNORE;
+		goto IGNORE_EVENT;
 	    }
 
 	    if (p_state->ignore_tags &&
 		hv_fetch_ent(p_state->ignore_tags, tagname, 0, hash))
 	    {
-		goto IGNORE;
+		goto IGNORE_EVENT;
 	    }
 	    if (p_state->report_tags &&
 		!hv_fetch_ent(p_state->report_tags, tagname, 0, hash))
 	    {
-		goto IGNORE;
+		goto IGNORE_EVENT;
 	    }
 	}
 	else if (p_state->ignoring_element) {
-	    goto IGNORE;
+	    goto IGNORE_EVENT;
 	}
     }
 
@@ -244,7 +244,7 @@ report_event(PSTATE* p_state,
 	/* event = E_DEFAULT; */
 	h = &p_state->handlers[E_DEFAULT];
 	if (!h->cb)
-	    goto IGNORE;
+	    goto IGNORE_EVENT;
     }
 
     if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
@@ -551,7 +551,7 @@ report_event(PSTATE* p_state,
 	SvCUR_set(p_state->skipped_text, 0);
     return;
 
-IGNORE:
+IGNORE_EVENT:
     if (p_state->skipped_text) {
 	if (event != E_TEXT && p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
