@@ -1,20 +1,51 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.20 2000/12/04 18:12:49 gisle Exp $
+# $Id: TokeParser.pm,v 2.21 2001/03/19 23:42:30 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.20 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.21 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
 use HTML::Entities qw(decode_entities);
 
+my %DEF_ARG =
+(
+ # event        # argspec ('|' marks start of user changeable stuff)
+ start       => "'S',tagname|attr,attrseq,text",
+ end         => "'E',tagname|text",
+ text        => "'T',text,is_cdata",
+ process     => "'PI'|token0,text",
+ comment     => "'C'|text",
+ declaration => "'D'|text",
+);
+
 
 sub new
 {
     my $class = shift;
-    my $file = shift;
+    my %cnf = (@_ == 1) ? (file => $_[0]) : @_;
+
+    # Construct argspecs for the various events
+    my %argspec;
+    while (my($event, $def_arg) = each %DEF_ARG) {
+	my $args = delete $cnf{$event . "_args"};
+	my $ignore = delete $cnf{"ignore_" . $event};
+	next if $ignore;
+	if (defined $args) {
+	    my $tmp = $args;
+	    $args = $def_arg;
+	    $args =~ s/\|.*//;
+	    $args .= ",$tmp";
+	}
+	else {
+	    ($args = $def_arg) =~ s/\|/,/;
+	}
+	$argspec{$event} = $args;
+    }
+
+    my $file = delete $cnf{file};
     Carp::croak("Usage: $class->new(\$file)")
 	  unless defined $file;
 
@@ -22,20 +53,19 @@ sub new
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
     }
-    my $self = $class->SUPER::new(api_version => 3);
+
+    my $textify = delete $cnf{textify} || {img => "alt", applet => "alt"};
+
+    # Create object
+    $cnf{api_version} = 3;
+    my $self = $class->SUPER::new(%cnf);
+    $self->{textify} = $textify;
+
     my $accum = $self->{accum} = [];
-    $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,text");
-    $self->handler(end =>     $accum, "'E',tagname,text");
-    $self->handler(text =>    $accum, "'T',text,is_cdata");
-    $self->handler(process => $accum, "'PI',token0,text");
+    while (my($event, $argspec) = each %argspec) {
+	$self->handler($event => $accum, $argspec);
+    }
 
-    # XXX The following two are not strictly V2 compatible.  We used
-    # to return something that did not contain the "<!(--)?" and
-    # "(--)?>" markers.
-    $self->handler(comment => $accum, "'C',text");
-    $self->handler(declaration => $accum, "'D',text");
-
-    $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
 	if (!defined $$file) {
 	    Carp::carp("HTML::TokeParser got undefined value as document")
@@ -126,7 +156,9 @@ sub get_text
     while (my $token = $self->get_token) {
 	my $type = $token->[0];
 	if ($type eq "T") {
-	    push(@text, decode_entities($token->[1]));
+	    my $text = $token->[1];
+	    decode_entities($text) unless $token->[2];
+	    push(@text, $text);
 	} elsif ($type =~ /^[SE]$/) {
 	    my $tag = $token->[1];
 	    if ($type eq "S") {
