@@ -1,10 +1,10 @@
 HTML-Parser-XS
 --------------
 
-This is currently an alpha release of a new XS based implementation of
-HTML::Parser.  This new implementation speeds up things about 4 times
-if you use the direct callbacks instead of method callbacks.  For
-method callbacks we currently have a speedup of about 30%.
+This is an alpha release of a new XS based implementation of
+HTML::Parser.  It should be completely compatible with the old
+HTML-Parser-2.xx, but adds parsing speed as well as several new
+options that control how parsing takes place.
 
 
 
