@@ -1,0 +1,11 @@
+This is an XS implementation of HTML::Parser.  This speeds up things
+about 4 times if you use the direct callbacks instead of method
+callbacks.  For method callbacks we have a speedup of about 30%.
+
+
+COPYRIGHT
+
+  © 1995-1999 Gisle Aas. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
