@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.43 1999/11/26 15:23:54 gisle Exp $
+/* $Id: Parser.xs,v 2.44 1999/11/30 05:45:10 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -74,7 +74,21 @@ newSVpvn(char *s, STRLEN len)
 
 #define P_MAGIC 0x16091964
 
+enum event_id {
+  E_DECLARATION = 0,
+  E_COMMENT,
+  E_START,
+  E_END,
+  E_TEXT,
+  E_PROCESS,
+  E_DEFAULT,
+  /**/
+  EVENT_COUNT,
+};
+typedef enum event_id event_id_t;
+
 #include "hctype.h" /* isH...() macros */
+#include "tokenpos.h"
 
 #ifdef MARKED_SECTION
 enum marked_section_t {
@@ -143,8 +157,7 @@ literal_mode_elem[] =
   {0, 0}
 };
 
-static HV* entity2char;
-
+static HV* entity2char;  /* %HTML::Entities::entity2char */
 
 static SV*
 sv_lower(SV* sv)
@@ -244,6 +257,36 @@ decode_entities(SV* sv, HV* entity2char)
   }
   return sv;
 }
+
+static void
+html_handle(PSTATE* p_state,
+	    event_id_t event,
+	    char *beg, char *end,
+	    token_pos_t *tokens, int num_tokens,
+	    SV* self
+	    )
+{
+  int i;
+  char *s = beg;
+  printf("handle %d [", event);
+  while (s < end) {
+    if (*s == '\n') {
+      putchar('\\'); putchar('n');
+    }
+    else
+      putchar(*s);
+    s++;
+  }
+  printf("] %d\n", end - beg);
+  for (i = 0; i < num_tokens; i++) {
+    printf("  token %d: %d %d\n",
+	   i,
+	   tokens[i].beg - beg,
+	   tokens[i].end - tokens[i].beg);
+  }
+}
+
+#if 0 /*********************************************************/
 
 static void
 html_default(PSTATE* p_state, char* beg, char *end, SV* self)
@@ -643,6 +686,8 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* self)
   html_default(p_state, beg-2, end+1, self);
 }
 
+#endif /*********************************************************/
+
 
 
 static char*
@@ -651,7 +696,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
   char *s = beg;
 
   if (p_state->strict_comment) {
-    AV* av = newAV();  /* used to collect comments until we seen them all */
+    dTOKENS(4);
     char *start_com = s;  /* also used to signal inside/outside */
 
     while (1) {
@@ -662,7 +707,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	s++;
 
       if (s == end) {
-	SvREFCNT_dec(av);
+	FREE_TOKENS;
 	return beg;
       }
 
@@ -670,30 +715,20 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	s++;
 	if (start_com)
 	  goto FIND_DASH_DASH;
-	
-	/* we are done recognizing all comments, make callbacks */
-	if (!p_state->accum && !p_state->com_cb)
-	    html_default(p_state, beg-4, s, self);
-	else {
-	  int i;
-	  int len = av_len(av);
-	  for (i = 0; i <= len; i++) {
-	    SV** svp = av_fetch(av, i, 0);
-	    if (svp) {
-	      STRLEN len;
-	      char *s = SvPV(*svp, len);
-	      html_comment(p_state, s, s+len, self);
-	    }
-	  }
-	}
 
-	SvREFCNT_dec(av);
+	/* we are done recognizing all comments, make callbacks */
+	html_handle(p_state, E_COMMENT,
+		    beg - 4, s,
+		    tokens, num_tokens,
+		    self);
+	FREE_TOKENS;
+
 	return s;
       }
 
       s++;
       if (s == end) {
-	SvREFCNT_dec(av);
+	FREE_TOKENS;
 	return beg;
       }
 
@@ -702,7 +737,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	s++;
 	/* do something */
 	if (start_com) {
-	  av_push(av, newSVpvn(start_com, s - start_com - 2));
+	  PUSH_TOKEN(start_com, s-2);
 	  start_com = 0;
 	}
 	else {
@@ -713,30 +748,28 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
   }
 
   else { /* non-strict comment */
-    char *end_com;
+    token_pos_t token_pos;
+    token_pos.beg = beg;
     /* try to locate /--\s*>/ which signals end-of-comment */
   LOCATE_END:
     while (s < end && *s != '-')
       s++;
-    end_com = s;
+    token_pos.end = s;
     if (s < end) {
       s++;
-      if (s < end && *s == '-') {
+      if (*s == '-') {
 	s++;
 	while (isHSPACE(*s))
 	  s++;
-	if (s < end && *s == '>') {
+	if (*s == '>') {
 	  s++;
 	  /* yup */
-	  if (!p_state->accum && !p_state->com_cb)
-	    html_default(p_state, beg-4, s, self);
-	  else
-	    html_comment(p_state, beg, end_com, self);
+	  html_handle(p_state, E_COMMENT, beg-4, s, &token_pos, 1, self);
 	  return s;
 	}
       }
       if (s < end) {
-	s = end_com + 2;
+	s = token_pos.end + 2;
 	goto LOCATE_END;
       }
     }
@@ -908,22 +941,23 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 
   if (*s == '>') {
     /* make <!> into empty comment <SGML Handbook 36:32> */
+    token_pos_t empty;
+    empty.beg = s;
+    empty.end = s;
     s++;
-    if (!p_state->accum && !p_state->com_cb)
-      html_default(p_state, beg, s, self);
-    else
-      html_comment(p_state, s-1, s-1, self);
+    html_handle(p_state, E_COMMENT, beg, s, &empty, 1, self);
     return s;
   }
 
   if (isALPHA(*s)) {
-    AV* tokens = newAV();
+    dTOKENS(8);
+
     s++;
     /* declaration */
     while (s < end && isHNAME_CHAR(*s))
       s++;
     /* first word available */
-    av_push(tokens, newSVpv(beg+2, s - beg - 2));
+    PUSH_TOKEN(beg+2, s);
 
     while (s < end && isHSPACE(*s)) {
       s++;
@@ -941,7 +975,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	if (s == end)
 	  goto PREMATURE;
 	s++;
-	av_push(tokens, newSVpv(str_beg, s - str_beg));
+	PUSH_TOKEN(str_beg, s);
       }
       else if (*s == '-') {
 	/* comment */
@@ -963,7 +997,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	    goto PREMATURE;
 	  if (*s == '-') {
 	    s++;
-	    av_push(tokens, newSVpv(com_beg, s - com_beg));
+	    PUSH_TOKEN(com_beg, s);
 	    break;
 	  }
 	}
@@ -976,7 +1010,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	  s++;
 	if (s == end)
 	  goto PREMATURE;
-	av_push(tokens, newSVpv(word_beg, s - word_beg));
+	PUSH_TOKEN(word_beg, s);
       }
       else {
 	break;
@@ -987,54 +1021,21 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
       goto PREMATURE;
     if (*s == '>') {
       s++;
-      html_decl(p_state, tokens, beg+2, s-1, self);
-      SvREFCNT_dec(tokens);
+      html_handle(p_state, E_DECLARATION, beg, s, tokens, num_tokens, self);
+      FREE_TOKENS;
       return s;
     }
 
   FAIL:
-    SvREFCNT_dec(tokens);
+    FREE_TOKENS;
     return 0;
 
   PREMATURE:
-    SvREFCNT_dec(tokens);
+    FREE_TOKENS;
     return beg;
 
   }
   return 0;
-}
-
-
-static SV*
-attr_val(PSTATE* p_state, char *tag_beg,
-         char *prev_end, char *attr_beg,
-	 char *val_beg, char *val_end,
-         bool quote)
-{
-  if (p_state->attr_pos) {
-    AV* av = newAV();
-    av_extend(av, 3);
-    av_push(av, newSViv(prev_end - tag_beg));
-    av_push(av, newSViv(attr_beg - tag_beg));
-    if (val_beg)
-      av_push(av, newSViv(val_beg - tag_beg));
-    else
-      av_push(av, newSVsv(&PL_sv_undef));
-    av_push(av, newSViv(val_end - tag_beg));
-    return newRV_noinc((SV*)av);
-  }
-  else if (val_beg) {
-    if (quote) {
-      val_beg++;
-      val_end--;
-    }
-    return decode_entities(newSVpvn(val_beg, val_end - val_beg), entity2char);
-  }
-  else {
-     if (p_state->bool_attr_val)
-        return newSVsv(p_state->bool_attr_val);
-     return newSVpvn(attr_beg, val_end - attr_beg);
-  }
 }
 
 
@@ -1215,19 +1216,19 @@ html_parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
   }
 
   if (isHCTYPE(*s, name_first)) {
-    char *tag_start = s;
-    char *tag_end;
+    token_pos_t tagname;
+    tagname.beg = s;
     s++;
     while (s < end && isHCTYPE(*s, name_char))
       s++;
-    tag_end = s;
+    tagname.end = s;
     while (isHSPACE(*s))
       s++;
     if (s < end) {
       if (*s == '>') {
 	s++;
 	/* a complete end tag has been recognized */
-	html_end(p_state, tag_start, tag_end, beg, s, self);
+	html_handle(p_state, E_END, beg, s, &tagname, 1, self);
 	return s;
       }
     }
@@ -1243,24 +1244,25 @@ html_parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg + 2;
   /* processing instruction */
-  char *pi_end;
+  token_pos_t token_pos;
+  token_pos.beg = s;
 
  FIND_PI_END:
   while (s < end && *s != '>')
     s++;
   if (*s == '>') {
-    pi_end = s;
+    token_pos.end = s;
     s++;
 
     if (p_state->xml_mode) {
       /* XML processing instructions are ended by "?>" */
       if (s - beg < 4 || s[-2] != '?')
 	goto FIND_PI_END;
-      pi_end = s - 2;
+      token_pos.end = s - 2;
     }
 
     /* a complete processing instruction seen */
-    html_process(p_state, beg+2, pi_end, beg, s, self);
+    html_handle(p_state, E_PROCESS, beg, s, &token_pos, 1, self);
     return s;
   }
   else {
@@ -1291,8 +1293,10 @@ html_parse(PSTATE* p_state,
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
-      html_text(p_state, s, s+len, 0, self);
+      html_handle(p_state, E_TEXT, s, s+len, 0, 0, self);
+#if 0
       flush_pending_text(p_state, self);
+#endif
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -1345,14 +1349,16 @@ html_parse(PSTATE* p_state,
 
 	if (!*l) {
 	  /* matched it all */
-	  char *end_tag = s;
+	  token_pos_t end_token;
+	  end_token.beg = end_text + 1;
+	  end_token.end = s;
+
 	  while (isHSPACE(*s))
 	    s++;
 	  if (*s == '>') {
 	    s++;
-	    html_text(p_state, t, end_text, 1, self);
-	    html_end(p_state, end_text+2, end_tag,
-		     end_text, s, self);
+	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
+	    html_handle(p_state, E_END,  end_text, s, &end_token, 1, self);
 	    p_state->literal_mode = 0;
 	    t = s;
 	  }
@@ -1374,7 +1380,7 @@ html_parse(PSTATE* p_state,
 	    if (*s == '\n')
 	      s++;
 	    /* marked section end */
-	    html_text(p_state, t, end_text, (p_state->ms == MS_CDATA), self);
+	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
 	    t = s;
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);
@@ -1401,7 +1407,7 @@ html_parse(PSTATE* p_state,
 	    s++;
 	    if (*s == '\n')
 	      s++;
-	    html_text(p_state, t, end_text, 0, self);
+	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);    
 	    t = s;
@@ -1414,7 +1420,7 @@ html_parse(PSTATE* p_state,
     }
     if (s != t) {
       if (*s == '<') {
-	html_text(p_state, t, s, 0, self);
+	html_handle(p_state, E_TEXT, t, s, 0, 0, self);
 	t = s;
       }
       else {
@@ -1432,7 +1438,7 @@ html_parse(PSTATE* p_state,
 	    s--;
 	}
 	s++;
-	html_text(p_state, t, s, 0, self);
+	html_handle(p_state, E_TEXT, t, s, 0, 0, self);
 	break;
       }
     }
