@@ -2,16 +2,6 @@ require 5.005;
 use strict;
 use ExtUtils::MakeMaker;
 
-my @extra;
-my @define;
-my $ans = "y"; #prompt("Do you want to compile with support for marked sections?", "yes");
-if ($ans =~ /^y(es)?$/i) {
-    push(@define, "-DMARKED_SECTION");
-}
-
-push(@extra, "DEFINE" => "@define") if @define;
-
-
 WriteMakefile(
     NAME	 => 'HTML::Parser',
     VERSION_FROM => 'Parser.pm',
@@ -21,9 +11,9 @@ WriteMakefile(
     PREREQ_PM    => {
 		      'HTML::Tagset' => 3,
                     },
+    DEFINE       => "-DMARKED_SECTION",
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean        => { FILES => 'hctype.h pfunc.h' },
-    @extra,
 );
 
 
