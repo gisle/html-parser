@@ -2,7 +2,7 @@
 
    Release 2.99_13
 
-   New Parser.pm POD based on intial work by Michael A. Chase.
+   New Parser.pm POD based on initial work by Michael A. Chase.
    All new features should now be described.
 
    $p->callback(start => undef) will not reset the callback.
@@ -10,7 +10,7 @@
    $p->xml_mode() did not parse attributes correct because
    HCTYPE_NOT_SPACE_EQ_SLASH_GT flag was never set.
 
-   More few more tests.
+   A few more tests.
 
 
 
