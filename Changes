@@ -1,3 +1,14 @@
+2000-03-20   Gisle Aas <gisle@aas.no>
+
+     Release 3.07
+
+     Fix perl5.004 builds (was broken in 3.06)
+
+     Declaration parsing mode now only triggers for <!DOCTYPE ...> and
+     <!ENTITY ...>.  Based on patch by la mouton <kero@3sheep.com>.
+
+
+
 2000-03-06   Gisle Aas <gisle@aas.no>
 
      Release 3.06
