@@ -1,3 +1,15 @@
+1999-11-26   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_14
+
+   Documentation update by Michael A. Chase.
+
+   Fix for declaration parsing by Michael A. Chase.
+
+   Workaround for perl5.004_05 bug. Can't return &PL_sv_undef.
+
+
+
 1999-11-22   Gisle Aas <gisle@aas.no>
 
    Release 2.99_13
