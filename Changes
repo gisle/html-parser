@@ -1,3 +1,16 @@
+2004-11-29   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.40
+
+     Make utf8_mode only available on perl-5.8 or better.  It produced
+     garbage with older versions of perl.
+
+     Emit warning if entities are decoded and something in the first
+     chunk looks like hibit UTF-8.  Previously this warning was only
+     triggered for documents with BOM.
+
+
+
 2004-11-23   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.39_92
