@@ -1,3 +1,15 @@
+1999-12-04   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_91
+
+    Implemented attrspec 'offset'
+
+    Documentation fra by Michael
+
+    Some more cleanup/updated TODO
+
+
+
 1999-12-03   Gisle Aas <gisle@aas.no>
 
     Release 2.99_90 (first beta for 3.00)
