@@ -40,7 +40,7 @@ my $p;
 
 
 $p = HTML::TokeParser->new($file) || die "Can't open $file: $!";
-if ($p->get_tag("title")) {
+if ($p->get_tag("foo", "title")) {
     my $title = $p->get_trimmed_text;
     #print "Title: $title\n";
     print "not " unless $title eq "This is the <title>";
