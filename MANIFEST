@@ -34,6 +34,7 @@ t/declaration.t         Test declaration parsing
 t/default.t		Test default handler
 t/dtext.t               Test dtext decoding of entities
 t/entities.t		Test encoding/decoding of entities
+t/entities2.t		Test _decode_entities()
 t/filter.t		Test HTML::Filter
 t/handler.t		Test $p->handler method
 t/handler-eof.t         Test invocation of $p->eof in handlers
