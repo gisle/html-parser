@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.25 1999/11/17 12:37:09 gisle Exp $
+/* $Id: Parser.xs,v 2.26 1999/11/17 13:52:19 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1225,18 +1225,20 @@ html_parse(PSTATE* p_state,
       }
     }
 
-    while (0 && p_state->ms) {  /* XXX */
+    while (p_state->ms == MS_CDATA || p_state->ms == MS_RCDATA) {
       while (s < end && *s != ']')
 	s++;
       if (*s == ']') {
+	char *end_text = s;
 	s++;
 	if (*s == ']') {
 	  s++;
 	  if (*s == '>') {
 	    /* marked section end */
+	    html_text(p_state, t, end_text, (p_state->ms == MS_CDATA), cbdata);
+	    t = s;
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);
-	    t = s;
 	    continue;
 	  }
 	}
