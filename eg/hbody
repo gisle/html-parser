@@ -1,0 +1,35 @@
+$doc = <<'EOT';
+
+<!-- This is not where <BODY> starts -->
+<title>foo</title>
+
+<script language="Perl" description="Print out <BODY>">
+   open(BODY, "body.txt");
+   while (<BODY>) {
+     print;
+   }
+</script>
+
+<!-- The next thing will be <BODY> the body -->
+
+<Body>
+
+Howdy!
+
+</body>
+
+EOT
+
+use HTML::Parser 3;
+
+my $body_offset;
+HTML::Parser->new(start_h => [sub {
+		                return unless shift eq "body";
+				$body_offset = shift;
+				shift->eof;  # tell the parser to stop
+		             }, "tagname,offset,self"])->parse($doc);
+
+die "No <body> found" unless defined $body_offset;
+
+my $head = substr($doc, 0, $body_offset, "");
+print $doc;
