@@ -12,7 +12,7 @@ ISSUES
 
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
   - Should we rename 'cdata_flag'?  (candidates: 'is_cdata',...)
-  - Should token1 go away?
+  - Should token0 go away?
   - Should we report tokens for 'text'?  If all you want is to know
     the length of a text segment, then 'tokenpos' could be used instead
     of asking for 'text' and then applying length($text).
