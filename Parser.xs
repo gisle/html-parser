@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.97 2001/02/01 06:01:38 gisle Exp $
+/* $Id: Parser.xs,v 2.98 2001/02/23 07:05:41 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -95,78 +95,78 @@ HV* entity2char;            /* %HTML::Entities::entity2char */
 static SV*
 check_handler(SV* h)
 {
-  dTHX;
-  if (SvROK(h)) {
-    SV* myref = SvRV(h);
-    if (SvTYPE(myref) == SVt_PVCV)
-      return newSVsv(h);
-    if (SvTYPE(myref) == SVt_PVAV)
-      return SvREFCNT_inc(myref);
-    croak("Only code or array references allowed as handler");
-  }
-  return SvOK(h) ? newSVsv(h) : 0;
+    dTHX;
+    if (SvROK(h)) {
+	SV* myref = SvRV(h);
+	if (SvTYPE(myref) == SVt_PVCV)
+	    return newSVsv(h);
+	if (SvTYPE(myref) == SVt_PVAV)
+	    return SvREFCNT_inc(myref);
+	croak("Only code or array references allowed as handler");
+    }
+    return SvOK(h) ? newSVsv(h) : 0;
 }
 
 
 static PSTATE*
 get_pstate_iv(SV* sv)
 {
-  dTHX;
-  PSTATE* p = INT2PTR(PSTATE*, SvIV(sv));
-  if (p->signature != P_SIGNATURE)
-    croak("Bad signature in parser state object at %p", p);
-  return p;
+    dTHX;
+    PSTATE* p = INT2PTR(PSTATE*, SvIV(sv));
+    if (p->signature != P_SIGNATURE)
+	croak("Bad signature in parser state object at %p", p);
+    return p;
 }
 
 
 static PSTATE*
 get_pstate_hv(SV* sv)                               /* used by XS typemap */
 {
-  dTHX;
-  HV* hv;
-  SV** svp;
+    dTHX;
+    HV* hv;
+    SV** svp;
 
-  sv = SvRV(sv);
-  if (!sv || SvTYPE(sv) != SVt_PVHV)
-    croak("Not a reference to a hash");
-  hv = (HV*)sv;
-  svp = hv_fetch(hv, "_hparser_xs_state", 17, 0);
-  if (svp) {
-    if (SvROK(*svp))
-      return get_pstate_iv(SvRV(*svp));
-    else
-      croak("_hparser_xs_state element is not a reference");
-  }
-  croak("Can't find '_hparser_xs_state' element in HTML::Parser hash");
-  return 0;
+    sv = SvRV(sv);
+    if (!sv || SvTYPE(sv) != SVt_PVHV)
+	croak("Not a reference to a hash");
+    hv = (HV*)sv;
+    svp = hv_fetch(hv, "_hparser_xs_state", 17, 0);
+    if (svp) {
+	if (SvROK(*svp))
+	    return get_pstate_iv(SvRV(*svp));
+	else
+	    croak("_hparser_xs_state element is not a reference");
+    }
+    croak("Can't find '_hparser_xs_state' element in HTML::Parser hash");
+    return 0;
 }
 
 
 static void
 free_pstate(PSTATE* pstate)
 {
-  dTHX;
-  int i;
-  SvREFCNT_dec(pstate->buf);
-  SvREFCNT_dec(pstate->pend_text);
+    dTHX;
+    int i;
+    SvREFCNT_dec(pstate->buf);
+    SvREFCNT_dec(pstate->pend_text);
 #ifdef MARKED_SECTION
-  SvREFCNT_dec(pstate->ms_stack);
+    SvREFCNT_dec(pstate->ms_stack);
 #endif
-  SvREFCNT_dec(pstate->bool_attr_val);
-  for (i = 0; i < EVENT_COUNT; i++) {
-    SvREFCNT_dec(pstate->handlers[i].cb);
-    SvREFCNT_dec(pstate->handlers[i].argspec);
-  }
-  pstate->signature = 0;
-  Safefree(pstate);
+    SvREFCNT_dec(pstate->bool_attr_val);
+    for (i = 0; i < EVENT_COUNT; i++) {
+	SvREFCNT_dec(pstate->handlers[i].cb);
+	SvREFCNT_dec(pstate->handlers[i].argspec);
+    }
+    pstate->signature = 0;
+    Safefree(pstate);
 }
 
 
 static int
 magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
-  free_pstate(get_pstate_iv(sv));
-  return 0;
+    free_pstate(get_pstate_iv(sv));
+    return 0;
 }
 
 
@@ -349,6 +349,28 @@ decode_entities(...)
 	    decode_entities(aTHX_ ST(i), entity2char);
 	}
 	SP += items;
+
+void
+_decode_entities(string, entities)
+    SV* string
+    SV* entities
+    PREINIT:
+	HV* entities_hv;
+    CODE:
+        if (SvOK(entities)) {
+	    if (SvROK(entities) && SvTYPE(SvRV(entities)) == SVt_PVHV) {
+		entities_hv = (HV*)SvRV(entities);
+	    }
+            else {
+		croak("2nd argument must be hash reference");
+            }
+        }
+        else {
+            entities_hv = 0;
+        }
+	if (SvREADONLY(string))
+	    croak("Can't inline decode readonly string");
+	decode_entities(aTHX_ string, entities_hv);
 
 int
 UNICODE_SUPPORT()
