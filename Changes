@@ -4,7 +4,8 @@
 
    $p->parse_file() will not close a handle passed to it any more.
    If passed a filename that can't be opened it will return undef
-   instead of raising an exception.
+   instead of raising an exception, and strings like "*STDIN" are not
+   treated as globs any more.
 
    HTML::LinkExtor knowns about background attribute of <tables>.
    Patch by Clinton Wong <clintdw@netcom.com>
