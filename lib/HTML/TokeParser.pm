@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.12 1999/11/30 21:51:02 gisle Exp $
+# $Id: TokeParser.pm,v 2.13 1999/12/02 11:33:39 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.12 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -22,7 +22,7 @@ sub new
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
     }
-    my $self = $class->SUPER::new(3);
+    my $self = $class->SUPER::new(api_version => 3);
     $self->{accum} = [];
     my $push_accum = sub { my $self = shift; push(@{$self->{accum}}, [@_])};
     $self->handler(start => $push_accum, "self,'S',tagname,attr,attrseq,origtext");
