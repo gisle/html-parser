@@ -1,3 +1,29 @@
+1999-12-03   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_90 (first beta for 3.00)
+
+    Using "realloc" as a parameter name in grow_tokens created
+    problems in some places.  Fix by Paul Schinder <schinder@pobox.com>
+
+    Patch by Michael that makes array handler destinations really work.
+
+    Patch by Michael that make HTML::TokeParser use this.  This gave a
+    a speedup of about 80%.
+
+    Patch by Michael that makes t/cases into a real test.
+
+    Small HTML::Parser documentation patch by Michael.
+
+    Renamed attrspec 'origtext' to 'text' and 'decoded_text' to 'dtext'
+
+    Splitted up Parser.xs.  Moved stuff into hparser.c and util.c
+
+    Dropped html_ prefix from internal parser functions.
+
+    Renamed internal function html_handle() to report_event().
+
+
+
 1999-12-02   Gisle Aas <gisle@aas.no>
 
    Release 2.99_17
