@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.18 1999/12/08 19:46:54 gisle Exp $
+# $Id: TokeParser.pm,v 2.19 2000/06/09 06:44:41 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.18 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.19 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -223,14 +223,15 @@ single character string denoting the type of this token: "S" for start
 tag, "E" for end tag, "T" for text, "C" for comment, "D" for
 declaration, and "PI" for process instructions.  The rest of the array
 is the same as the arguments passed to the corresponding HTML::Parser
-callbacks (see L<HTML::Parser>).  Returned tokens look like this:
+v2 compatible callbacks (see L<HTML::Parser>).  In summary, returned
+tokens look like this:
 
   ["S",  $tag, %$attr, @$attrseq, $text]
   ["E",  $tag, $text]
-  ["T",  $text]
+  ["T",  $text, $is_data]
   ["C",  $text]
   ["D",  $text]
-  ["PI", $text]
+  ["PI", $token0, $text]
 
 =item $p->unget_token($token,...)
 
@@ -313,7 +314,7 @@ L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1998-1999 Gisle Aas.
+Copyright 1998-2000 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
