@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.4 1998/11/13 21:27:46 aas Exp $
+# $Id: TokeParser.pm,v 2.5 1999/06/09 10:20:02 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp qw(croak);
@@ -174,8 +174,9 @@ If the argument is a reference to a plain scalar, then this scalar is
 taken to be the document to parse.
 
 Otherwise the argument is taken to be some object that the
-C<HTML::TokeParser> can read() from when it need more data.  The
-stream will be read() until EOF, but not closed.
+C<HTML::TokeParser> can read() from when it need more data.  Typically
+it will be a filehandle of some kind.The stream will be read() until
+EOF, but not closed.
 
 =item $p->get_token
 
@@ -185,8 +186,8 @@ array reference.  The first element of the array will be a single
 character string denoting the type of this token; "S" for start tag,
 "E" for end tag, "T" for text, "C" for comment, and "D" for
 declaration.  The rest of the array is the same as the arguments
-passed to the HTML::Parser callbacks (see L<HTML::Parser>).  This
-summarize the tokens that can occur:
+passed to the corresponding HTML::Parser callbacks (see
+L<HTML::Parser>).  This summarize the tokens that can occur:
 
   ["S", $tag, %$attr, @$attrseq, $origtext]
   ["E", $tag, $origtext]
@@ -201,33 +202,34 @@ so that they are returned the next time $p->get_token is called.
 
 =item $p->get_tag( [$tag] )
 
-This method return the next tag (skipping any other tokens), or undef
-if there is no more tags in the document.  If an argument is given,
-then we skip tokens until the specified tag is found.  The tags are
-returned as a hash reference of the same form as for $p->get_token
-above, but the type code (first element) is missing and the name of
-end tags is prefixed with "/".  This means that the tags returned look
-like this:
+This method return the next start or end tag (skipping any other
+tokens), or C<undef> if there is no more tags in the document.  If an
+argument is given, then we skip tokens until the specified tag is
+found.  A tag is returned as an array reference of the same form as
+for $p->get_token above, but the type code (first element) is missing
+and the name of end tags are prefixed with "/".  This means that the
+tags returned look like this:
 
   [$tag, %$attr, @$attrseq, $origtext]
   ["/$tag", $origtext]
 
 =item $p->get_text( [$endtag] )
 
-This method returns all text found at the current position. It might
-return a zero length string if there is no text.  The optional $endtag
-argument specify that any text occurring before the given tag is to be
-returned.  Any entities will be expanded to their corresponding
-character.
+This method returns all text found at the current position. It will
+return a zero length string if the next token is not text.  The
+optional $endtag argument specify that any text occurring before the
+given tag is to be returned.  Any entities will be expanded to their
+corresponding character.
 
 The $p->{textify} attribute is a hash that define how certain tags can
 be treated as text.  If the name of a start tag match a key in this
 hash then this tag is converted to text.  The hash value is used to
-specify which tag attribute to obtain the text from.  If this
+specify which tag attribute to obtain the text from.  If this tag
 attribute is missing, then the upper case name of the tag enclosed in
 brackets is returned, e.g. "[IMG]".  The hash value can also be a
 subroutine reference.  In this case the routine is called with the
-token content as parameters to obtain the text.
+start tag token content as arguments and the return values is treated
+as the text.
 
 The default $p->{textify} value is:
 
@@ -274,7 +276,7 @@ L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1998 Gisle Aas.
+Copyright 1998-1999 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
