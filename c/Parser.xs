@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.7 1999/11/03 17:54:47 gisle Exp $
+/* $Id: Parser.xs,v 1.8 1999/11/03 18:22:15 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -489,7 +489,7 @@ html_parse(PSTATE* p_state,
 	s--;
 	if (isSPACE(*s)) {
 	  /* wait with white space at end */
-	  while (s > t && isSPACE(*s))
+	  while (s >= t && isSPACE(*s))
 	    s--;
 	}
 	else {
