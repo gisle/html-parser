@@ -1,3 +1,11 @@
+2001-02-23   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.17
+
+     The 3.16 release broke MULTIPLICITY builds.  Fixed.
+
+
+
 2001-02-22   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.16
