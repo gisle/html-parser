@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.61 2001/03/27 16:42:10 gisle Exp $
+/* $Id: hparser.c,v 2.62 2001/03/27 20:29:35 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -35,6 +35,7 @@ enum argcode {
     ARG_TOKENPOS,
     ARG_TOKEN0,
     ARG_TAGNAME,
+    ARG_TAG,
     ARG_ATTR,
     ARG_ATTRARR,
     ARG_ATTRSEQ,
@@ -58,6 +59,7 @@ char *argname[] = {
     "tokenpos", /* ARG_TOKENPOS */
     "token0",   /* ARG_TOKEN0 */
     "tagname",  /* ARG_TAGNAME */
+    "tag",      /* ARG_TAG */
     "attr",     /* ARG_ATTR */
     "@attr",    /* ARG_ATTRARR */
     "attrseq",  /* ARG_ATTRSEQ */
@@ -320,14 +322,19 @@ report_event(PSTATE* p_state,
 	    break;
 
 	case ARG_TOKEN0:
+	case ARG_TAGNAME:
 	    /* fall through */
 
-	case ARG_TAGNAME:
+	case ARG_TAG:
 	    if (num_tokens >= 1) {
 		arg = sv_2mortal(newSVpvn(tokens[0].beg,
 					  tokens[0].end - tokens[0].beg));
-		if (!p_state->xml_mode && argcode == ARG_TAGNAME)
+		if (!p_state->xml_mode && argcode != ARG_TAGNAME)
 		    sv_lower(aTHX_ arg);
+		if (argcode == ARG_TAG && event != E_START) {
+		    char *e_type = "!##/#?#";
+		    sv_insert(arg, 0, 0, &e_type[event], 1);
+		}
 	    }
 	    break;
 
