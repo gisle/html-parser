@@ -10,7 +10,6 @@ if ($ans =~ /^y(es)?$/i) {
 
 WriteMakefile(
     NAME	 => 'HTML::Parser',
-    DISTNAME     => 'HTML-Parser-XS',
     VERSION_FROM => 'Parser.pm',
     H            => [ "hparser.h", "hctype.h", "tokenpos.h", "pfunc.h",
 		      "hparser.c", "util.c",
