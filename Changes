@@ -1,3 +1,19 @@
+1999-11-22   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_13
+
+   New Parser.pm POD based on intial work by Michael A. Chase.
+   All new features should now be described.
+
+   $p->callback(start => undef) will not reset the callback.
+
+   $p->xml_mode() did not parse attributes correct because
+   HCTYPE_NOT_SPACE_EQ_SLASH_GT flag was never set.
+
+   More few more tests.
+
+
+
 1999-11-18   Gisle Aas <gisle@aas.no>
 
    Release 2.99_12
