@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.48 2000/12/26 08:36:27 gisle Exp $
+/* $Id: hparser.c,v 2.49 2000/12/26 08:52:44 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -254,7 +254,7 @@ report_event(PSTATE* p_state,
 	arg = sv_2mortal(newSVpvn(tokens[0].beg,
 				  tokens[0].end - tokens[0].beg));
 	if (!p_state->xml_mode && argcode == ARG_TAGNAME)
-	  sv_lower(arg);
+	  sv_lower(aTHX_ arg);
       }
       break;
 
@@ -275,7 +275,7 @@ report_event(PSTATE* p_state,
 	      beg++; len -= 2;
 	    }
 	    attrval = newSVpvn(beg, len);
-	    decode_entities(attrval, entity2char);
+	    decode_entities(aTHX_ attrval, entity2char);
 	  }
 	  else { /* boolean */
 	    if (p_state->bool_attr_val)
@@ -285,7 +285,7 @@ report_event(PSTATE* p_state,
 	  }
 
 	  if (!p_state->xml_mode)
-	    sv_lower(attrname);
+	    sv_lower(aTHX_ attrname);
 	  if (!hv_store_ent(hv, attrname, attrval, 0)) {
 	    SvREFCNT_dec(attrval);
 	  }
@@ -303,7 +303,7 @@ report_event(PSTATE* p_state,
 	  SV* attrname = newSVpvn(tokens[i].beg,
 				  tokens[i].end-tokens[i].beg);
 	  if (!p_state->xml_mode)
-	    sv_lower(attrname);
+	    sv_lower(aTHX_ attrname);
 	  av_push(av, attrname);
 	}
 	arg = sv_2mortal(newRV_noinc((SV*)av));
@@ -318,7 +318,7 @@ report_event(PSTATE* p_state,
       if (event == E_TEXT) {
 	arg = sv_2mortal(newSVpvn(beg, end - beg));
 	if (!p_state->is_cdata)
-	  decode_entities(arg, entity2char);
+	  decode_entities(aTHX_ arg, entity2char);
       }
       break;
       
@@ -667,7 +667,7 @@ parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 
     if (!tokens)
       tokens = newAV();
-    av_push(tokens, sv_lower(newSVpvn(name_start, name_end - name_start)));
+    av_push(tokens, sv_lower(aTHX_ newSVpvn(name_start, name_end - name_start)));
   }
   if (*s == '-') {
     s++;
@@ -871,7 +871,6 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 static char*
 parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
-  dTHX;
   char *s = beg;
   SV* attr;
   int empty_tag = 0;  /* XML feature */
@@ -890,8 +889,6 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
     attr_name_char  = HCTYPE_NOT_SPACE_EQ_GT;
   }
 
-
-  assert(beg[0] == '<' && isHNAME_FIRST(beg[1]) && end - beg > 2);
   s += 2;
 
   while (s < end && isHCTYPE(*s, tag_name_char))
@@ -1104,11 +1101,11 @@ parse_null(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 #include "pfunc.h"                   /* declares the parsefunc[] */
 
 EXTERN void
-parse(PSTATE* p_state,
-	   SV* chunk,
-	   SV* self)
+parse(pTHX_
+      PSTATE* p_state,
+      SV* chunk,
+      SV* self)
 {
-  dTHX;
   char *s, *t, *beg, *end, *new_pos;
   STRLEN len;
 

@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.94 2000/12/26 08:36:27 gisle Exp $
+/* $Id: Parser.xs,v 2.95 2000/12/26 08:52:44 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -60,6 +60,8 @@ newSVpvn(char *s, STRLEN len)
 #endif
 #ifndef dTHX
    #define dTHX dNOOP
+   #define pTHX_
+   #define aTHX_
 #endif
 
 #ifndef MEMBER_TO_FPTR
@@ -159,10 +161,6 @@ free_pstate(PSTATE* pstate)
 }
 
 
-#ifndef pTHX_
-#define pTHX_
-#endif
-
 static int
 magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -220,7 +218,7 @@ parse(self, chunk)
 	if (p_state->parsing)
     	    croak("Parse loop not allowed");
         p_state->parsing = 1;
-	parse(p_state, chunk, self);
+	parse(aTHX_ p_state, chunk, self);
         p_state->parsing = 0;
 	if (p_state->eof) {
 	    p_state->eof = 0;
@@ -237,7 +235,7 @@ eof(self)
             p_state->eof = 1;
         else {
 	    p_state->parsing = 1;
-	    parse(p_state, 0, self); /* flush */
+	    parse(aTHX_ p_state, 0, self); /* flush */
 	    p_state->parsing = 0;
 	}
 
@@ -347,7 +345,7 @@ decode_entities(...)
 	        ST(i) = sv_2mortal(newSVsv(ST(i)));
 	    else if (SvREADONLY(ST(i)))
 		croak("Can't inline decode readonly string");
-	    decode_entities(ST(i), entity2char);
+	    decode_entities(aTHX_ ST(i), entity2char);
 	}
 	SP += items;
 
