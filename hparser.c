@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.34 2000/01/21 21:59:07 gisle Exp $
+/* $Id: hparser.c,v 2.35 2000/01/21 22:06:09 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -620,13 +620,13 @@ marked_section_update(PSTATE* p_state)
 	      token = MS_NONE;
 	    if (p_state->ms < token)
 	      p_state->ms = token;
-	    p_state->is_cdata = (p_state->ms == MS_CDATA);
 	  }
 	}
       }
     }
   }
   /* printf("MS %d\n", p_state->ms); */
+  p_state->is_cdata = (p_state->ms == MS_CDATA);
   return;
 }
 
