@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.76 2001/05/09 07:50:20 gisle Exp $
+/* $Id: hparser.c,v 2.77 2001/05/09 07:55:36 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1350,6 +1350,8 @@ parse(pTHX_
 	if (p_state->line)
 	    p_state->line = 1;
 	p_state->column = 0;
+	p_state->literal_mode = 0;
+	p_state->is_cdata = 0;
 	return;
     }
 
