@@ -51,6 +51,7 @@ t/parser.t		Test HTML::Parser subclassing
 t/parsefile.t		Test the $p->parse_file() method
 t/process.t		Test process instruction support
 t/tokeparser.t		Test HTML::TokeParser
+t/uentities.t           Test encoding/decoding of Unicode entities
 t/unbroken-text.t       Test unbroken_text option
 t/xml-mode.t		Test parsing in XML mode
 util.c			Some utility functions
