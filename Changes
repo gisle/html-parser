@@ -1,3 +1,11 @@
+2000-09-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.13
+
+     Experimental support for decoding of Unicode entities.
+
+
+
 2000-09-14   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.12
