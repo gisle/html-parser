@@ -55,6 +55,7 @@ package main;
 @tests =
     (
      '<a ">' => ['START[a]', "\t\": \""],
+     '<å >' => ['TEXT[<å]', 'TEXT[ >]'],
      '2 < 5' => ['TEXT[2 ]', 'TEXT[<]', 'TEXT[ 5]'],
      '2 <5> 2' => ['TEXT[2 ]', 'TEXT[<5>]', 'TEXT[ 2]'],
      '2 <a' => ['TEXT[2 ]', 'TEXT[<a]'],
