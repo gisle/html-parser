@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.56 1999/11/30 19:36:40 gisle Exp $
+/* $Id: Parser.xs,v 2.57 1999/11/30 19:52:20 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -1511,7 +1511,28 @@ handler(pstate, name_sv,...)
         }
 
         /* update */
-        if (items > 2) {
+        if (items == 3 && SvROK(ST(2))) {
+	  SV* sv = SvRV(ST(2));
+	  AV* av;
+	  SV** svp;
+
+	  if (SvTYPE(sv) != SVt_PVAV)
+	    croak("Handler argument reference to something else than an array");
+	  av = (AV*)sv;
+
+	  svp = av_fetch(av, 0, 0);
+	  if (svp && SvOK(*svp)) {
+	    SvREFCNT_dec(h->attrspec);
+	    h->attrspec = attrspec_compile(*svp);
+	  }
+
+	  svp = av_fetch(av, 1, 0);
+	  if (svp) {
+	    SvREFCNT_dec(h->cb);
+	    h->cb = SvREFCNT_inc(*svp);
+	  }
+	}
+        else if (items > 2) {
 	  if (SvOK(ST(2))) {
 	    SvREFCNT_dec(h->attrspec);
 	    h->attrspec = attrspec_compile(ST(2));
