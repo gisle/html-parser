@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.8 1999/12/17 14:11:40 gisle Exp $
+/* $Id: hparser.h,v 2.9 2000/01/21 21:59:07 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -22,13 +22,6 @@ enum marked_section_t {
   MS_CDATA,
   MS_IGNORE,
 };
-
-#define CDATA_MODE(p_state) ((p_state)->literal_mode || \
-	 	             (p_state)->ms == MS_CDATA)
-
-#else /* MARKED_SECTION */
-
-#define CDATA_MODE(p_state) ((p_state)->literal_mode)
 
 #endif /* MARKED_SECTION */
 
@@ -73,6 +66,12 @@ struct p_state {
 
   /* special parsing modes */
   char* literal_mode;
+  bool  is_cdata;
+
+  /* unbroken_text option needs a buffer of pending text */
+  SV*    pend_text;
+  bool   pend_text_is_cdata;
+  STRLEN pend_text_offset;
 
 #ifdef MARKED_SECTION
   /* marked section support */

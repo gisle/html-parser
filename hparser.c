@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.33 2000/01/21 12:08:59 gisle Exp $
+/* $Id: hparser.c,v 2.34 2000/01/21 21:59:07 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -66,6 +66,8 @@ char *argname[] = {
               /* ARG_LITERAL (not compared) */
 };
 
+
+static void flush_pending_text(PSTATE* p_state, SV* self);
 
 /*
  * Parser functions.
@@ -145,6 +147,29 @@ report_event(PSTATE* p_state,
     h = &p_state->handlers[E_DEFAULT];
     if (!h->cb)
       return;
+  }
+
+  if (p_state->unbroken_text && event == E_TEXT) {
+    /* should buffer text */
+    if (!p_state->pend_text)
+      p_state->pend_text = newSV(256);
+    if (SvOK(p_state->pend_text)) {
+      if (p_state->is_cdata != p_state->pend_text_is_cdata) {
+	flush_pending_text(p_state, self);
+	p_state->pend_text_is_cdata = p_state->is_cdata;
+	sv_setpvn(p_state->pend_text, "", 0);
+      }
+    }
+    else {
+      p_state->pend_text_offset = p_state->chunk_offset + offset;
+      p_state->pend_text_is_cdata = p_state->is_cdata;
+      sv_setpvn(p_state->pend_text, "", 0);
+    }
+    sv_catpvn(p_state->pend_text, beg, end - beg);
+    return;
+  }
+  else if (p_state->pend_text && SvOK(p_state->pend_text)) {
+    flush_pending_text(p_state, self);
   }
 
   if (SvTYPE(h->cb) == SVt_PVAV) {
@@ -286,14 +311,14 @@ report_event(PSTATE* p_state,
     case ARG_DTEXT:
       if (event == E_TEXT) {
 	arg = sv_2mortal(newSVpvn(beg, end - beg));
-	if (!CDATA_MODE(p_state))
+	if (!p_state->is_cdata)
 	  decode_entities(arg, entity2char);
       }
       break;
       
     case ARG_IS_CDATA:
       if (event == E_TEXT) {
-	arg = boolSV(CDATA_MODE(p_state));
+	arg = boolSV(p_state->is_cdata);
       }
       break;
 
@@ -436,6 +461,34 @@ argspec_compile(SV* src)
 }
 
 
+static void
+flush_pending_text(PSTATE* p_state, SV* self)
+{
+  bool   old_unbroken_text = p_state->unbroken_text;
+  SV*    old_pend_text     = p_state->pend_text;
+  bool   old_is_cdata      = p_state->is_cdata;
+  STRLEN old_chunk_offset  = p_state->chunk_offset;
+
+  assert(p_state->pend_text && SvOK(p_state->pend_text));
+
+  p_state->unbroken_text = 0;
+  p_state->pend_text     = 0;
+  p_state->is_cdata      = p_state->pend_text_is_cdata;
+  p_state->chunk_offset  = p_state->pend_text_offset;
+
+  report_event(p_state, E_TEXT,
+	       SvPVX(old_pend_text), SvEND(old_pend_text),
+	       0, 0, 0,
+	       self);
+  SvOK_off(old_pend_text);
+
+  p_state->unbroken_text = old_unbroken_text;
+  p_state->pend_text     = old_pend_text;
+  p_state->is_cdata      = old_is_cdata;
+  p_state->chunk_offset  = old_chunk_offset;
+}
+
+
 static char*
 parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
@@ -567,6 +620,7 @@ marked_section_update(PSTATE* p_state)
 	      token = MS_NONE;
 	    if (p_state->ms < token)
 	      p_state->ms = token;
+	    p_state->is_cdata = (p_state->ms == MS_CDATA);
 	  }
 	}
       }
@@ -920,6 +974,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	    if (!--len) {
 	      /* found it */
 	      p_state->literal_mode = literal_mode_elem[i].str;
+	      p_state->is_cdata = 1;
 	      /* printf("Found %s\n", p_state->literal_mode); */
 	      goto END_OF_LITERAL_SEARCH;
 	    }
@@ -1044,6 +1099,8 @@ parse(PSTATE* p_state,
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
+    if (p_state->pend_text && SvOK(p_state->pend_text))
+      flush_pending_text(p_state, self);
     return;
   }
 
@@ -1107,6 +1164,7 @@ parse(PSTATE* p_state,
 	    report_event(p_state, E_END,  end_text, s, &end_token, 1,
 			 end_text - beg, self);
 	    p_state->literal_mode = 0;
+	    p_state->is_cdata = 0;
 	    t = s;
 	  }
 	}

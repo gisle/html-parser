@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.05';  # $Date: 2000/01/21 12:15:19 $
+$VERSION = '3.05';  # $Date: 2000/01/21 21:59:07 $
 
 require HTML::Entities;
 
@@ -382,8 +382,6 @@ I<XML processing instructions> are terminated by "?>" instead of a
 simple ">" as is the case for HTML.
 
 =item $p->unbroken_text( [$bool] )
-
-I<Note: This option is not supported yet!>
 
 By default, blocks of text are given to the text handler as soon as
 possible (but the parser makes sure to always break text at the
