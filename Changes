@@ -3,7 +3,7 @@
     Release 2.99_90 (first beta for 3.00)
 
     Using "realloc" as a parameter name in grow_tokens created
-    problems in some places.  Fix by Paul Schinder <schinder@pobox.com>
+    problems for some people.  Fix by Paul Schinder <schinder@pobox.com>
 
     Patch by Michael that makes array handler destinations really work.
 
@@ -20,7 +20,7 @@
 
     Dropped html_ prefix from internal parser functions.
 
-    Renamed internal function html_handle() to report_event().
+    Renamed internal function html_handle() as report_event().
 
 
 
