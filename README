@@ -29,7 +29,8 @@ The modules present in this collection are:
         an HTML document.
 
   HTML::TokeParser - An alternative interface to the basic parser
-        that does not require subclassing.
+        that does not require subclassing.  Most simple parsing needs
+        are probably best attacked with this module.
 
 
 
@@ -54,7 +55,7 @@ Just follow the usual procedure:
 
 COPYRIGHT
 
-  © 1995-1998 Gisle Aas. All rights reserved.
+  © 1995-1999 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
