@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_90;  # $Date: 1999/12/03 12:58:29 $
+$VERSION = 2.99_90;  # $Date: 1999/12/03 22:30:46 $
 
 require HTML::Entities;
 
@@ -50,7 +50,6 @@ sub new
 		       sub {
 			   my $self = shift;
 			   $self->declaration(substr($_[0], 2, -1));
-			   # MAC: should that be -3 instead of -1?
 		       }, "self,text");
     }
 
@@ -170,27 +169,32 @@ The document to be parsed may be supplied in arbitrary chunks.
 
 The object constructor creates a new C<HTML::Parser> object and
 returns it.  The constructor takes key/value arguments that can set up
-event handlers or configure various options.
+event handlers or set parser options.
+See L</PARSER OPTIONS> and L</HANDLERS>.
 
-If the key ends with the suffix "_h" then it sets up a callback
-handler, otherwise it simply assigns some plain attribute.
-See </$p->handler>.
+Multiple handlers may be assigned with the 'handlers => [handlers]' option.
+If the key ends with the suffix "_h" then it sets up an event
+handler, otherwise it sets a parser option.
 
 If new() is called without any arguments,
 it will create a parser that uses callback methods compatible with Version 2.
 See L</VERSION 2 COMPATIBILITY>.
 
+Special option 'api_version => 2' can be used to initialize Version 2
+callbacks while setting other options and handlers.
+
 Examples:
 
    $p = HTML::Parser->new(text_h => [ sub {...}, "dtext" ]);
 
-This will create a new parser object, set up an text handler that receives
-the original text with general entities decoded.  As an alternative you can
-assign handlers like this:
+This creates a new parser object with a text handler that receives
+the original text with general entities decoded.
 
   $p = HTML::Parser->new(handlers => { text => [sub {...}, "argspecs"],
                                        comment => [sub {...}, "argspecs"],
                                      });
+
+This creates a new parser object with handlers for text and comment events.
 
 =item $p->parse( $string )
 
@@ -205,13 +209,13 @@ The return value is a reference to the parser object.
 
 =item $p->parse_file( $file )
 
-This method can be called to parse text directly from a file.
-The $file argument can be a filename or an open file handle
-(or a reference to such a handle).
+Parse text directly from a file.
+The $file argument can be a filename, an open file handle,
+or a reference to a an open file handle.
 
-If $file is a plain filename and the file can't be opened, then the
-method will return an undefined value and $! will tell you why it
-failed.  Otherwise the return value will be a reference to the parser
+If $file contains a filename and the file can't be opened, then the
+method returns an undefined value and $! tells why it
+failed.  Otherwise the return value is a reference to the parser
 object.
 
 If a file handle is passed as the $file argument, then the file will
@@ -237,7 +241,7 @@ The methods that can be used to get and/or set the options are:
 By default, comments are terminated by the first occurrence of "-->".
 This is the behaviour of most popular browsers (like Netscape and
 MSIE), but it is not correct according to the official HTML
-standard.  Officially you need an even number of "--" tokens before
+standard.  Officially, you need an even number of "--" tokens before
 the closing ">" is recognized and there may not be anything but
 whitespace between an even and an odd "--".
 
@@ -282,7 +286,7 @@ XML processing instructions are terminated by "?>" instead of a simple
 
 =item $p->unbroken_text( [$bool] )
 
-B<Note: This option is not supported yet!>
+I<Note: This option is not supported yet!>
 
 By default, blocks of text are given to the text handler as soon as
 possible.  This might create arbitrary breaks that make it hard to do
@@ -328,22 +332,28 @@ Argspec is a string that describes the information reported by the
 event.  Any requested information that does not apply to an event is
 passed as undef.
 
+The subroutine, method_name, or accum and the argspec may also be grouped
+in an array reference.
+
 Examples:
 
-    $p->handler(start => "start", 'self,attr,attrseq,text');
+    $p->handler(start =>  "start", 'self,attr,attrseq,text' );
+    $p->handler(start => ["start", 'self,attr,attrseq,text']);
 
-This causes the "start" method of object $p to be called for 'start' events.
-The callback signature is $p->start(\%attr, \@attr_seq, $orig_text).
+These cause the "start" method of object $p to be called for 'start' events.
+The callback signature is $p->start(\%attr, \@attr_seq, $text).
 
-    $p->handler(start => \&start, 'attr, attrseq, text');
+    $p->handler(start =>  \&start, 'attr, attrseq, text' );
+    $p->handler(start => [\&start, 'attr, attrseq, text']);
 
-This causes subroutine start() to be called for 'start' events.
-The callback signature is start(\%attr, \@attr_seq, $orig_text).
+These cause subroutine start() to be called for 'start' events.
+The callback signature is start(\%attr, \@attr_seq, $text).
 
-    $p->handler(start => \@accum, '"start",attr,attrseq,text');
+    $p->handler(start =>  \@accum, '"start",attr,attrseq,text' );
+    $p->handler(start => [\@accum, '"start",attr,attrseq,text']);
 
-This causes 'start' event information to be saved in @accum.
-The array elements will be ['start', \%attr, \@attr_seq, $orig_text].
+These cause 'start' event information to be saved in @accum.
+The array elements will be ['start', \%attr, \@attr_seq, $text].
 
 =back
 
@@ -394,20 +404,18 @@ For C<declaration> events, this is the declaration type.
 
 For C<start> and C<end> events, this is the tag name.
 
-This is undef if there is no first token in the event.
+This passes undef if there are no tokens in the event.
 
 =item tagname
 
-=item gi
-
-Tagname and gi are identical to C<token1> except that
+Tagname is identical to C<token1> except that
 if $p->xml_mode is disabled, the tag name is forced to lower case.
 
 =item attr
 
 Attr causes a reference to a hash of attribute name/value pairs to be passed.
 
-This is undef except for C<start> events.
+This passes undef except for C<start> events.
 
 If $p->xml_mode is disabled, the attribute names are forced to lower case.
 
@@ -418,7 +426,7 @@ quotes around the attribute values are removed.
 
 Attrseq causes a reference to an array of attribute names to be passed.
 
-This is undef except for C<start> events.
+This passes undef except for C<start> events.
 
 If $p->xml_mode is disabled, the attribute names are forced to lower case.
 
@@ -430,7 +438,7 @@ Text causes the original event text (including delimiters) to be passed.
 
 Dtext causes the original text (including delimiters) to be passed.
 
-This is undef except for C<text> events.
+This passes undef except for C<text> events.
 
 General entities are decoded unless the event was inside a CDATA section
 or was between literal start and end tags
@@ -474,11 +482,19 @@ of spaces between two text events.
 
 =item start
 
-This event is triggered when a complete start tag is recognized.
+This event is triggered when a start tag is recognized.
+
+Example:
+
+  <A href="http://www.perl.com/">
 
 =item end
 
 This event is triggered when an end tag is recognized.
+
+Example:
+
+  </A>
 
 =item declaration
 
