@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.5 1999/12/04 13:10:52 gisle Exp $
+/* $Id: hparser.c,v 2.6 1999/12/04 23:40:04 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -36,8 +36,8 @@ literal_mode_elem[] =
  *                                   subordinate parse_*() routines after
  *                                   looking at the first char after "<"
  *     parse_decl()                - deals with declarations         <!...>
- *       parse_comment()           - deals <!-- ... -->
- *       parse_marked_section      - deals <![ ... [ ... ]]>
+ *       parse_comment()           - deals with <!-- ... -->
+ *       parse_marked_section      - deals with <![ ... [ ... ]]>
  *     parse_end()                 - deals with end tags             </...>
  *     parse_start()               - deals with start tags           <A...>
  *     parse_process()             - deals with process instructions <?...>
@@ -294,7 +294,7 @@ report_event(PSTATE* p_state,
 }
 
 
-static SV*
+EXTERN SV*
 attrspec_compile(SV* src)
 {
   SV* attrspec = newSVpvn("", 0);
