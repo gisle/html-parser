@@ -1,3 +1,50 @@
+2003-08-14   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.29
+
+     Setting xml_mode now implies strict_names also for end tags.
+
+     Avoid warning from Visual C.  Patch by <gsar@activestate.com>.
+
+     64-bit fix from Doug Larrick <doug@ties.org>
+     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=195500
+
+     Try to parse similar to Mozilla/MSIE in certain edge cases.
+     All these are outside of the official definition of HTML but
+     HTML spam often tries to take advantage of these.
+
+       - New configuration attribute 'strict_end'.  Unless enabled
+         we will allow end tags to contain extra words or stuff
+         that look like attributes before the '>'.  This means that
+         tags like these:
+
+            </foo foo="<ignored>">
+            </foo ignored>
+            </foo ">" ignored>
+
+         are now all parsed as a 'foo' end tag instead of text.
+         Even if the extra stuff looks like attributes they will not
+         be reported if requested via the 'attr' or 'tokens' argspecs
+         for the 'end' handler.
+
+       - Parse '</:comment>' and '</ comment>' as comments unless
+         strict_comment is enabled.  Previous versions of the parser
+         would report these as text.  If these comments contain
+         quoted words prefixed by space or '=' these words can
+         contain '>' without terminating the comment.
+        
+       - Parse '<! "<>" foo>' as comment containing ' "<>" foo'.
+         Previous versions of the parser would terminate the comment
+         at the first '>' and report the rest as text.
+
+       - Legacy comment mode:  Parse with comments terminated with a
+         lone '>' if no '-->' is found before eof.
+
+       - Incomplete tag at eof is reported as a 'comment' instead
+         of 'text' unless strict_comment is enabled.
+
+
+
 2003-04-16   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.28
