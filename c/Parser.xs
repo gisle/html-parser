@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.10 1999/11/03 21:00:23 gisle Exp $
+/* $Id: Parser.xs,v 1.11 1999/11/04 22:07:46 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -296,14 +296,68 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
     if (*s == '-') {
       s++;
-      /* yes, it is really a comment */
-      
-# if 0
+      /* yes, two dashes seen; it is really a comment */
+
       if (p_state->strict_comment) {
-	/* XXX */
+	AV* av = newAV();  /* used to collect comments until we seen them all */
+	char *start_com = s;  /* also used to signal inside/outside */
+
+	while (1) {
+	  /* try to locate "--" */
+	FIND_DASH_DASH:
+	  // printf("find_dash_dash: [%s]\n", s);
+	  while (s < end && *s != '-' && *s != '>')
+	    s++;
+
+	  if (s == end) {
+	    SvREFCNT_dec(av);
+	    return beg;
+	  }
+
+	  if (*s == '>') {
+	    s++;
+	    if (start_com)
+	      goto FIND_DASH_DASH;
+
+	    /* we are done recognizing all comments, make callbacks */
+	    {
+	      int i;
+	      int len = av_len(av);
+	      for (i = 0; i <= len; i++) {
+		SV** svp = av_fetch(av, i, 0);
+		if (svp) {
+		  STRLEN len;
+		  char *s = SvPV(*svp, len);
+		  html_comment(p_state, s, s+len, cbdata);
+		}
+	      }
+	    }
+
+	    SvREFCNT_dec(av);
+	    return s;
+	  }
+
+	  s++;
+	  if (s == end) {
+	    SvREFCNT_dec(av);
+	    return beg;
+	  }
+
+	  if (*s == '-') {
+	    /* two dashes in a row seen */
+	    s++;
+	    /* do something */
+	    if (start_com) {
+	      av_push(av, newSVpvn(start_com, s - start_com - 2));
+	      start_com = 0;
+	    }
+	    else {
+	      start_com = s;
+	    }
+	  }
+	}
       }
-      else
-#endif
+      else /* non-strict comment */
       {
 	char *end_com;
 	/* try to locate /--\s*>/ which signals end-of-comment */
