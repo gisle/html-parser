@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-use Test qw(plan ok skip);
+use Test qw(plan ok);
 use HTML::Parser;
 
 plan tests => 61;
