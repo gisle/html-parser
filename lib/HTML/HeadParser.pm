@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new( [$header] )
 
@@ -182,7 +182,7 @@ sub start
 	for (sort keys %{$attr}) {
 	    $h_val .= qq(; $_="$attr->{$_}");
 	}
-	$self->{'header'}->header(Link => $h_val);
+	$self->{'header'}->push_header(Link => $h_val);
     } elsif ($tag eq 'head' || $tag eq 'html') {
 	# ignore
     } else {
