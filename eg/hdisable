@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+
+use HTML::Parser;
+use HTML::Entities qw(encode_entities);
+
+sub disable_tags_but {
+    my($text, $allowed_tags) = @_;
+
+    my @text;
+    my %allowed_tag = map {$_ => 1} @{$allowed_tags || []};
+
+    my $tag_h = sub {
+	my($tag, $text) = @_;
+	$text = encode_entities($text, "<")
+	    unless $allowed_tag{$tag};
+	push(@text, $text);
+    };
+    
+    HTML::Parser->new(start_h =>   [$tag_h, 'tagname, text'],
+		      end_h   =>   [$tag_h, 'tagname, text'],
+		      default_h => [\@text, '@{text}'],
+		     )
+	->parse($text)->eof;
+    
+    return join("", @text);
+}
+
+#
+# Test it
+#
+print disable_tags_but(<<EOT, [qw(a br)]) unless caller;
+
+Test
+<foo>  <a href="...">...</a>
+</bar>
+
+EOT
