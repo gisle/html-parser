@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.40 2000/03/06 13:30:13 gisle Exp $
+/* $Id: hparser.c,v 2.41 2000/03/20 12:17:38 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -755,13 +755,26 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 
   if (isALPHA(*s)) {
     dTOKENS(8);
+    char *decl_id = s;
+    STRLEN decl_id_len;
 
     s++;
     /* declaration */
     while (s < end && isHNAME_CHAR(*s))
       s++;
+    decl_id_len = s - decl_id;
+
+    /* just hardcode a few names as the recognized declarations */
+    if (!((decl_id_len == 7 && strnEQ(decl_id, "DOCTYPE", 7)) ||
+	  (decl_id_len == 6 && strnEQ(decl_id, "ENTITY",  6))
+         )
+       )
+    {
+      goto FAIL;
+    }
+
     /* first word available */
-    PUSH_TOKEN(beg+2, s);
+    PUSH_TOKEN(decl_id, s);
 
     while (s < end && isHSPACE(*s)) {
       s++;

@@ -20,7 +20,7 @@ $p->handler("declaration" =>
 	    sub {
 		my $t = shift;
 		#print int(@$t), " - @$t\n";
-		print "not " unless @$t == 26 * 6 * 2;
+		print "not " unless @$t == 26 * 6 * 2 + 1;
 		print "ok 2\n";
 	    }, "tokens");
 
@@ -30,7 +30,7 @@ for ("aa" .. "fz") {
 }
 $p->parse(">");
 
-$p->parse("<!");
+$p->parse("<!DOCTYPE ");
 for ("aa" .. "fz") {
     $p->parse("$_ -- $_ -- ");
 }
