@@ -10,6 +10,8 @@ BEFORE 3.00
   - if only a single argument in argspec, then I think the stuff should
     not be wrapped up in a array when event destination is an array.
 
+  - "IGNORE" as handler destination (similar to $SIG{IGNORE})
+
 ISSUES
 
   - no return value from handler()?
