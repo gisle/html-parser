@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.31 1999/12/15 20:56:37 gisle Exp $
+/* $Id: hparser.c,v 2.32 2000/01/15 15:34:17 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -516,7 +516,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	}
       }
       if (s < end) {
-	s = token_pos.end + 2;
+	s = token_pos.end + 1;
 	goto LOCATE_END;
       }
     }
