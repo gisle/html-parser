@@ -7,8 +7,8 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
-  - if only a single argument in argspec, then I think the stuff should
-    not be wrapped up in a array when event destination is an array.
+  - if there is only a single argument in argspec, then I think the stuff
+    should not be wrapped up in a array when event destination is an array.
 
   - "IGNORE" as handler destination (similar to $SIG{IGNORE})
 
@@ -41,7 +41,7 @@ FEATURES THAT CAN WAIT
  - $p->ignore("script", "style");
 
 
-SGML FEATURES WE PROBABLY IGNORE FOREVER
+SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
  - Empty tags: <> </>  (repeat previous start tag)
  - <foo<bar>  (same as <foo><bar>)
  - NET tags <name/.../
@@ -54,6 +54,5 @@ POSSIBLE OPTIMIZATIONS
 
 MINOR "BUGS" (alias FEATURES):
  - no way to clear "boolean_attribute_value".
- - <plaintext> should not end with </plaintext>; can't be
-   escaped.
- - <style> and <script> does not end with the first "</".
+ - <plaintext> ends with </plaintext> and can't be escaped.
+ - <style> and <script> do not end with the first "</".
