@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.30 1999/11/17 21:46:38 gisle Exp $
+/* $Id: Parser.xs,v 2.31 1999/11/17 22:45:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -14,6 +14,9 @@
  *   - unicode support (whatever that means)
  *   - unicode character entities
  *   - count chars, line numbers
+ *
+ * PLAIN BUGS:
+ *   - unbroken_text does not handle cdata sections.
  *
  * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
@@ -74,8 +77,9 @@ enum marked_section_t {
 
 struct p_state {
   U32 magic;
+
   SV* buf;
-  char* literal_mode;
+  SV* pending_text;
 
   /* various boolean configuration attributes */
   bool strict_comment;
@@ -85,6 +89,10 @@ struct p_state {
   bool xml_mode;
   bool v2_compat;
   bool pass_cbdata;
+  bool unbroken_text;
+
+  /* special parsing modes */
+  char* literal_mode;
 
 #ifdef MARKED_SECTION
   /* marked section support */
@@ -272,7 +280,15 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     return;
   }
 
-  text = newSVpv(beg, end - beg);
+  if (p_state->unbroken_text) {
+    if (p_state->pending_text)
+      sv_catpvn(p_state->pending_text, beg, end - beg);
+    else
+      p_state->pending_text = newSVpvn(beg, end - beg);
+    return;
+  }
+
+  text = newSVpvn(beg, end - beg);
   if (!cdata && p_state->decode_text_entities) {
     decode_entities(text, entity2char);
     cdata++;
@@ -308,6 +324,26 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 
 
 static void
+flush_pending_text(PSTATE* p_state, SV* cbdata)
+{
+  char *s;
+  STRLEN len;
+  bool old_unbroken_text;
+
+  if (!p_state->pending_text)
+    return;
+  old_unbroken_text = p_state->unbroken_text;
+  p_state->unbroken_text = 0;
+  s = SvPV(p_state->pending_text, len);
+  html_text(p_state, s, s+len, 0, cbdata);
+  SvREFCNT_dec(p_state->pending_text);
+  p_state->pending_text = 0;
+  p_state->unbroken_text = old_unbroken_text;
+  return;
+}
+
+
+static void
 html_end(PSTATE* p_state,
 	 char *tag_beg, char *tag_end,
 	 char *beg, char *end,
@@ -320,6 +356,8 @@ html_end(PSTATE* p_state,
   if (p_state->ms == MS_IGNORE)
     return;
 #endif
+
+  flush_pending_text(p_state, cbdata);
 
   accum = p_state->accum;
   if (accum) {
@@ -380,6 +418,8 @@ html_start(PSTATE* p_state,
   if (p_state->ms == MS_IGNORE)
     return;
 #endif
+
+  flush_pending_text(p_state, cbdata);
 
   if ((accum || cb) && p_state->v2_compat) {
     /* need to construct an attr hash and an attr_seq array */
@@ -468,6 +508,8 @@ html_process(PSTATE* p_state,
     return;
 #endif
 
+  flush_pending_text(p_state, cbdata);
+
   accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
@@ -512,6 +554,8 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     return;
 #endif
 
+  flush_pending_text(p_state, cbdata);
+
   accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
@@ -550,6 +594,8 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
   if (p_state->ms == MS_IGNORE)
     return;
 #endif
+
+  flush_pending_text(p_state, cbdata);
 
   accum = p_state->accum;
   if (accum) {
@@ -1202,6 +1248,7 @@ html_parse(PSTATE* p_state,
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
       html_text(p_state, s, s+len, 0, cbdata);
+      flush_pending_text(p_state, cbdata);
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -1448,6 +1495,7 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	SvREFCNT_dec(pstate->buf);
+	SvREFCNT_dec(pstate->pending_text);
 #ifdef MARKED_SECTION
         SvREFCNT_dec(pstate->ms_stack);
 #endif
@@ -1484,7 +1532,8 @@ strict_comment(pstate,...)
         HTML::Parser::xml_mode = 5
 	HTML::Parser::v2_compat = 6
         HTML::Parser::pass_cbdata = 7
-        HTML::Parser::marked_sections = 8
+	HTML::Parser::unbroken_text = 8
+        HTML::Parser::marked_sections = 9
     PREINIT:
 	bool *attr;
     CODE:
@@ -1496,8 +1545,12 @@ strict_comment(pstate,...)
 	case 5: attr = &pstate->xml_mode;             break;
 	case 6: attr = &pstate->v2_compat;            break;
 	case 7: attr = &pstate->pass_cbdata;          break;
+	case 8: attr = &pstate->unbroken_text;        break;
+        case 9:
 #ifdef MARKED_SECTION
-        case 8: attr = &pstate->marked_sections;      break;
+		attr = &pstate->marked_sections;      break;
+#else
+	        croak("marked sections not supported"); break;
 #endif
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
