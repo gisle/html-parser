@@ -1,3 +1,12 @@
+2001-05-01   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.23
+
+     If the $p->ignore_elements filter did not work as it should if
+     handlers for start/end events was not registered.
+
+
+
 2001-04-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.22
