@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.31';  # $Date: 2003/10/10 11:07:31 $
+$VERSION = '3.31';  # $Date: 2003/10/10 11:20:00 $
 
 require HTML::Entities;
 
@@ -986,7 +986,7 @@ parsing as soon as the title end tag is seen:
 
 More examples are found in the F<eg/> directory of the C<HTML-Parser>
 distribution; the program C<hrefsub> shows how you can edit all links
-found in a document and C<htextsub> how to edid the text only; the
+found in a document and C<htextsub> how to edit the text only; the
 program C<hstrip> shows how you can strip out certain tags/elements
 and/or attributes; and the program C<htext> show how to obtain the
 plain text, but not any script/style content.
