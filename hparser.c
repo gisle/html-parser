@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.74 2001/05/08 17:39:33 gisle Exp $
+/* $Id: hparser.c,v 2.75 2001/05/09 07:11:22 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -46,6 +46,7 @@ enum argcode {
     ARG_IS_CDATA,
     ARG_SKIPPED_TEXT,
     ARG_OFFSET,
+    ARG_OFFSET_END,
     ARG_LENGTH,
     ARG_LINE,
     ARG_COLUMN,
@@ -73,6 +74,7 @@ char *argname[] = {
     "is_cdata", /* ARG_IS_CDATA */
     "skipped_text", /* ARG_SKIPPED_TEXT */
     "offset",   /* ARG_OFFSET */
+    "offset_end", /* ARG_OFFSET_END */
     "length",   /* ARG_LENGTH */
     "line",     /* ARG_LINE */
     "column",   /* ARG_COLUMN */
@@ -471,6 +473,10 @@ report_event(PSTATE* p_state,
 
 	case ARG_OFFSET:
 	    arg = sv_2mortal(newSViv(offset));
+	    break;
+
+	case ARG_OFFSET_END:
+	    arg = sv_2mortal(newSViv(offset + (end - beg)));
 	    break;
 
 	case ARG_LENGTH:
