@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.4 2001/03/27 19:02:41 gisle Exp $
+# $Id: PullParser.pm,v 2.5 2001/03/27 21:59:12 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -121,8 +121,8 @@ HTML::PullParser - Alternative HTML::Parser interface
  use HTML::PullParser;
 
  $p = HTML::PullParser->new(file => "index.html",
-                            start => "event, tagname",
-                            end   => "event, tagname",
+                            start => 'event, tagname, @attr',
+                            end   => 'event, tagname',
                             ignore_elements => [qw(script style)],
                            ) || die "Can't open: $!";
  while (my $token = $p->get_token) {
@@ -162,17 +162,26 @@ should not be changed before all tokens have been extracted.
 
 Next the information to be returned for the different token types must
 be set up.  This is done by simply assosiating an argspec (as defined
-in L<HTML::Parser>) with the events you have an interrest in.
+in L<HTML::Parser>) with the events you have an interrest in.  For
+instance, if you want C<start> tokens to be reported as the string
+C<'S'> followed by the tagname and the attributes you might pass an
+C<start>-option like this:
 
-At last other C<HTML::Parser> options can be passed in.  Note that you
-should not use the I<event>_h options to set up parser handlers.
+   $p = HTML::Parser-New( doc   => $doc_to_parse,
+                          start => '"S", tagname, @attr',
+                          end   => '"E", tagname',
+                        );
+
+At last other C<HTML::Parser> options, like C<ignore_tags>, and
+C<unbroken_text>, can be passed in.  Note that you should not use the
+I<event>_h options to set up parser handlers.
 
 =item $token = $p->get_token
 
 This method will return the next I<token> found in the HTML document,
-or C<undef> at the end of the document.  The token is returned as an
-array reference.  The content of this array match the argspec set up
-during C<HTML::PullParser> construction.
+or C<undef> at the end of the document.  The token is usually returned
+as an array reference.  The content of this array match the argspec
+set up during C<HTML::PullParser> construction.
 
 =item $p->unget_token($token,...)
 
