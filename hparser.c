@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.114 2004/11/29 10:53:15 gisle Exp $
+/* $Id: hparser.c,v 2.115 2004/11/29 11:09:29 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1776,13 +1776,15 @@ parse(pTHX_
 	    /* Print warnings if we find unexpected Unicode BOM forms */
 #ifdef UNICODE_HTML_PARSER
 	    if (DOWARN &&
-                (!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
-		(utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6)) ||
-                (!utf8 && probably_utf8_chunk(aTHX_ beg, len))
+		p_state->argspec_entity_decode &&
+		!p_state->utf8_mode && (
+                 (!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
+		 (utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6)) ||
+		 (!utf8 && probably_utf8_chunk(aTHX_ beg, len))
+		)
 	       )
 	    {
-		if (p_state->argspec_entity_decode && !p_state->utf8_mode)
-		    warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
+		warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
 	    }
 	    if (DOWARN && utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
 		warn("Parsing string decoded with wrong endianess");
