@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.5 1999/11/03 14:13:31 gisle Exp $
+/* $Id: Parser.xs,v 1.6 1999/11/03 16:13:04 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -294,7 +294,7 @@ html_parse_decl(struct p_state* p_state, char *beg, char *end)
       LOCATE_END:
 	while (s < end && *s != '-')
 	  s++;
-	end_com = s - 1;
+	end_com = s;
 	if (s < end) {
 	  s++;
 	  if (s < end && *s == '-') {
@@ -421,7 +421,7 @@ html_parse(struct p_state* p_state,
   char *s, *t, *end;
   STRLEN len;
 
-#if 1
+#if 0
   {
     STRLEN len;
     char *s;
@@ -607,10 +607,9 @@ get_pstate(SV* sv)
     croak("No a reference to a hash");
   hv = (HV*)sv;
   svp = hv_fetch(hv, "_parser_state", 13, 0);
-  /* printf("svp=%p\n", svp); */
   if (svp)
     return (PSTATE*)SvIV(*svp);
-  croak("Can't find _parser_state element");
+  croak("Can't find '_parser_state' element in HTML::Parser hash");
   return 0;
 }
 
@@ -619,27 +618,19 @@ MODULE = HTML::Parser		PACKAGE = HTML::Parser
 PROTOTYPES: DISABLE
 
 void
-new(xclass)
-	SV* xclass;
+_alloc_pstate(self)
+	SV* self;
     PREINIT:
 	PSTATE* pstate;
-	STRLEN my_na;
-	char *sclass = SvPV(xclass, my_na);
 	SV* sv;
 	HV* hv;
-    PPCODE:
+    CODE:
 	Newz(56, pstate, 1, PSTATE);
 	/* printf("Allocated pstate %p\n", pstate); */
 	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
-
-	hv = newHV();
+	hv = SvRV(self);
 	hv_store(hv, "_parser_state", 13, sv, 0);
-
-	ST(0) = sv_2mortal(newRV_noinc((SV*)hv));
-	sv_bless(ST(0), gv_stashpv(sclass, 1));
-
-	XSRETURN(1);
 
 void
 DESTROY(pstate)
@@ -653,6 +644,7 @@ DESTROY(pstate)
 	SvREFCNT_dec(pstate->decl_cb);
 	SvREFCNT_dec(pstate->com_cb);
 	SvREFCNT_dec(pstate->proc_cb);
+	printf("HTML::Parser::DESTROY\n");
 	Safefree(pstate);
 
 
@@ -660,8 +652,17 @@ void
 parse(pstate, chunk)
 	PSTATE* pstate
 	SV* chunk
-    CODE:
+    PPCODE:
 	html_parse(pstate, chunk);
+	XSRETURN(1); /* self */
+
+int
+strict_comment(pstate,...)
+	PSTATE* pstate
+    CODE:
+	RETVAL = pstate->strict_comment;
+	if (items > 1)
+	     pstate->strict_comment = SvTRUE(ST(1));
 
 void
 callback(pstate, name_sv, cb)
