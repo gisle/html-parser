@@ -1,3 +1,16 @@
+1999-12-14   Gisle Aas <gisle@aas.no>
+
+    Release 3.00
+
+    Documentation update (most of it from Michael)
+
+    Minor patch to eg/hstrip so that it use a "" handler
+    instead of &ignore.
+
+    Test suite patches from Michael
+
+
+
 1999-12-13   Gisle Aas <gisle@aas.no>
 
     Release 2.99_96
