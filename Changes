@@ -2,25 +2,25 @@
 
    Release 2.99_12
 
-   Implemented $p->attr_pos option.  This make attribute positions
-   within $origtext of the start tag be reported instead of the
+   Implemented $p->attr_pos attribute.  This causes attr positions
+   within $origtext of the start tag to be reported instead of the
    attribute values.  The positions are reported as 4 numbers; end of
    previous attr, start of this attr, start of attr value, and end of
    attr.  This should make substr() manipulations of $origtext easy.
 
-   Implemented $p->unbroken_text option.  This make sure that
+   Implemented $p->unbroken_text attribute.  This makes sure that
    text segments are never broken and given back as separate text
    callbacks.  It delays text callbacks until some other markup
    has been recognized.
 
    More English corrections by Michael A. Chase.
 
-   HTML::LinkExtor now recognize even more URI attributes as
+   HTML::LinkExtor now recognizes even more URI attributes as
    suggested by Sean M. Burke <sburke@netadventure.net>
 
    Completed marked sections support.  It is also now a compile
    time decision if you want this supported or not.  The only
-   drawback by enabling it should be a possible parsing speed
+   drawback of enabling it should be a possible parsing speed
    reduction.  I have not measured this yet.
 
    The keys for callbacks initialized in the constructor are now
@@ -42,7 +42,7 @@
 
    Marked sections almost work.  CDATA and RCDATA should work.
 
-   For tags that takes us into literal_mode; <script>, <style>,
+   For tags that take us into literal_mode; <script>, <style>,
    <xmp>, we did not recognize the end tag unless it was written
    in all lower case.
 
