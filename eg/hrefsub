@@ -34,7 +34,6 @@ my $code = 'sub edit { local $_ = shift; my($attr, $tag) = @_; no strict; ' .
 eval $code;
 die $@ if $@;
 
-my $file = shift || die;
 
 my $p = HTML::Parser->new(api_version => 3);
 $p->handler(default => sub { print @_ }, "text");
@@ -62,4 +61,12 @@ $p->handler(start => sub {
 	    },
 	    "tagname, tokenpos, text");
 
+my $file = shift || usage();
 $p->parse_file($file) || die "Can't open file $file: $!\n";
+
+sub usage
+{
+    my $progname = $0;
+    $progname =~ s,^.*/,,;
+    die "Usage: $progname <perlexpr> <filename>\n";
+}
