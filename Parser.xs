@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.35 1999/11/18 08:25:36 gisle Exp $
+/* $Id: Parser.xs,v 2.36 1999/11/18 08:33:22 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -7,21 +7,27 @@
  */
 
 /* TODO:
- *   - direct method calls
- *   - accum flags (filter out what enters @accum)
- *   - option that prevents text broken between callbacks
- *   - return partial text from literal mode
- *   - unicode support (whatever that means)
- *   - unicode character entities
+ *   - write test scritps
+ *   - write documentation
  *   - count chars, line numbers
+ *   - utf8 mode (entities expand to utf8 chars)
+ *   - option that make start tag attrs be returned as a hash
+ *   - return partial text from literal/cdata mode
+ *   - accum flags (filter out what enters @accum)
  *
  * PLAIN BUGS:
  *   - unbroken_text does not handle cdata sections.
  *
- * MINOR "BUGS":
+ * POSSIBLE OPTIMIZATIONS:
+ *   - direct method calls
+ *   - avoid building start tag tokens when start tags are
+ *     ignored.
+ *
+ * MINOR "BUGS" (alias FEATURES):
  *   - no way to clear "bool_attr_val" which gives the name of
  *     the attribute as value.  Perhaps not really a problem.
- *   - <plaintext> should not end with </plaintext>
+ *   - <plaintext> should not end with </plaintext>; can't be
+ *     escaped.
  *   - xml_mode should demand ";" at end of entity references
  */
 
