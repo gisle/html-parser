@@ -1,12 +1,12 @@
 package HTML::Parser;
 
-# $Id: Parser.pm,v 2.13 1998/01/23 09:35:30 aas Exp $
+# $Id: Parser.pm,v 2.14 1998/03/26 21:18:39 aas Exp $
 
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.14 $ =~ /(\d+)\.(\d+)/);
 
 
 sub new
@@ -425,7 +425,7 @@ L<HTML::TreeBuilder>, L<HTML::HeadParser>, L<HTML::Entities>
 
 =head1 COPYRIGHT
 
-Copyright 1996-1997 Gisle Aas. All rights reserved.
+Copyright 1996-1998 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

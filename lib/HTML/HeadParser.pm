@@ -78,7 +78,7 @@ require HTTP::Headers;
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -251,7 +251,7 @@ L<HTML::Parser>, L<HTTP::Headers>
 
 =head1 COPYRIGHT
 
-Copyright 1996-1997 Gisle Aas. All rights reserved.
+Copyright 1996-1998 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

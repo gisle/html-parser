@@ -3,7 +3,7 @@ package HTML::Filter;
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub comment     { $_[0]->output("<!--$_[1]-->") }
@@ -101,7 +101,7 @@ L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1997 Gisle Aas.
+Copyright 1997-1998 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -28,7 +28,7 @@ $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.15 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
 
 use URI::URL qw(url);
 
@@ -176,7 +176,7 @@ L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1996-1997 Gisle Aas.
+Copyright 1996-1998 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
