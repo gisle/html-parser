@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.1 1999/11/08 14:09:26 gisle Exp $
+/* $Id: Parser.xs,v 2.2 1999/11/08 15:06:56 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -50,10 +50,12 @@ struct p_state {
   SV* buf;
   char* literal_mode;
 
+  /* various boolean configuration attributes */
   int strict_comment;
+  int decode_text_entities;
   int keep_case;
-  int pass_cbdata;
   int xml_mode;
+  int pass_cbdata;
 
   SV* bool_attr_val;
   AV* accum;
@@ -80,6 +82,8 @@ literal_mode_elem[] =
   {9, "plaintext"},
   {0, 0}
 };
+
+static HV* entity2char;
 
 
 static SV*
@@ -185,24 +189,33 @@ decode_entities(SV* sv, HV* entity2char)
 static void
 html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 {
-  AV *accum;
-  SV *cb;
+  AV *accum = p_state->accum;
+  SV *cb = p_state->text_cb;
+
+  SV* text;
 
   if (beg == end)
     return;
 
-  accum = p_state->accum;
+  if (!accum && !cb)
+    return;
+
+  text = newSVpv(beg, end - beg);
+  if (!cdata && p_state->decode_text_entities) {
+    decode_entities(text, entity2char);
+    cdata++;
+  }
+
   if (accum) {
     AV* av = newAV();
     av_push(av, newSVpv("T", 1));
-    av_push(av, newSVpv(beg, end - beg));
+    av_push(av, text);
     if (cdata)
       av_push(av, newSVsv(&PL_sv_yes));
     av_push(accum, (SV*)av);
     return;
   }
 
-  cb = p_state->text_cb;
   if (cb) {
     dSP;
     ENTER;
@@ -211,8 +224,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
     XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
-    if (cdata)
-      XPUSHs(&PL_sv_yes);
+    XPUSHs(boolSV(cdata));
     
     PUTBACK;
 
@@ -691,7 +703,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	if (s == end)
 	  goto PREMATURE;
 	s++;
-	av_push(tokens, newSVpvn(str_beg+1, s - str_beg - 2));
+	av_push(tokens, decode_entities(newSVpvn(str_beg+1, s - str_beg - 2),
+					entity2char));
       }
       else {
 	char *word_start = s;
@@ -702,7 +715,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	}
 	if (s == end)
 	  goto PREMATURE;
-	av_push(tokens, newSVpv(word_start, s - word_start));
+	av_push(tokens, decode_entities(newSVpv(word_start, s - word_start),
+					entity2char));
       }
 
       while (s < end && isSPACE(*s))
@@ -1084,43 +1098,30 @@ parse(self, chunk)
 	html_parse(pstate, chunk, self);
 	XSRETURN(1); /* self */
 
-int
-strict_comment(pstate,...)
+SV*
+bool_parser_attr(pstate,...)
 	PSTATE* pstate
+    ALIAS:
+	HTML::Parser::strict_comment = 1
+	HTML::Parser::decode_text_entities = 2
+        HTML::Parser::keep_case = 3
+        HTML::Parser::xml_mode = 4
+        HTML::Parser::pass_cbdata = 5
+    PREINIT:
+	int *attr;
     CODE:
-	RETVAL = pstate->strict_comment;
+        switch (ix) {
+	case 1: attr = &pstate->strict_comment; break;
+	case 2: attr = &pstate->decode_text_entities; break;
+	case 3: attr = &pstate->keep_case; break;
+	case 4: attr = &pstate->xml_mode; break;
+	case 5: attr = &pstate->pass_cbdata; break;
+	default:
+	    croak("Unknown boolean attribute (%d)", ix);
+        }
+	RETVAL = boolSV(*attr);
 	if (items > 1)
-	    pstate->strict_comment = SvTRUE(ST(1));
-    OUTPUT:
-	RETVAL
-
-int
-pass_cbdata(pstate,...)
-	PSTATE* pstate
-    CODE:
-	RETVAL = pstate->pass_cbdata;
-	if (items > 1)
-	    pstate->pass_cbdata = SvTRUE(ST(1));
-    OUTPUT:
-	RETVAL
-
-int
-keep_case(pstate,...)
-	PSTATE* pstate
-    CODE:
-	RETVAL = pstate->keep_case;
-	if (items > 1)
-	    pstate->keep_case = SvTRUE(ST(1));
-    OUTPUT:
-	RETVAL
-
-int
-xml_mode(pstate,...)
-	PSTATE* pstate
-    CODE:
-	RETVAL = pstate->xml_mode;
-	if (items > 1)
-	    pstate->xml_mode = SvTRUE(ST(1));
+	    *attr = SvTRUE(ST(1));
     OUTPUT:
 	RETVAL
 
@@ -1203,7 +1204,6 @@ MODULE = HTML::Parser		PACKAGE = HTML::Entities
 void
 decode_entities(...)
     PREINIT:
-	HV* entity2char = perl_get_hv("HTML::Entities::entity2char", 0);
         int i;
     PPCODE:
 	if (GIMME_V == G_SCALAR && items > 1)
@@ -1220,3 +1220,5 @@ decode_entities(...)
 
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
 
+BOOT:
+    entity2char = perl_get_hv("HTML::Entities::entity2char", TRUE);
