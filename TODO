@@ -1,5 +1,13 @@
 TODO
 
+ - Allow flattened thing in argspc: @attr, @tokenpos
+   This should allow us to set up start tag handlers that
+   are compatible with XML parser.
+ - When collecting to an array we should be able to get
+   things appened directly instead of beeing wrapped in
+   a subarray.
+ - unbroken text should not break text when we have
+   ignored tags in between.
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
  - report 'line'
