@@ -1,4 +1,4 @@
-print "1..6\n";
+print "1..8\n";
 
 use strict;
 use HTML::TokeParser;
@@ -124,3 +124,25 @@ print "Parse time: ", time - $start, "\n";
 print "not " unless $count == 2022;
 print "ok 6\n";
 
+$p = HTML::TokeParser->new(\<<'EOT');
+<H1>This is a heading</H1>
+This is some text.
+<br />
+This is some more text.
+<p>
+This is even some more.
+EOT
+
+$p->get_tag("/h1");
+
+my $t = $p->get_trimmed_text("br", "p");
+print "not " unless $t eq "This is some text.";
+print "ok 7\n";
+
+$p->get_tag;
+
+$t = $p->get_trimmed_text("br", "p");
+print "not " unless $t eq "This is some more text.";
+print "ok 8\n";
+
+undef($p);
