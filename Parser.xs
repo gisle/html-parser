@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.38 1999/11/22 15:32:42 gisle Exp $
+/* $Id: Parser.xs,v 2.39 1999/11/25 09:48:04 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -920,7 +920,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
     while (s < end && isHNAME_CHAR(*s))
       s++;
     /* first word available */
-    av_push(tokens, newSVpv(beg+2, s - beg));
+    av_push(tokens, newSVpv(beg+2, s - beg - 2));
 
     while (s < end && isHSPACE(*s)) {
       s++;
