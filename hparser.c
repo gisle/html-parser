@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.105 2004/11/22 10:44:53 gisle Exp $
+/* $Id: hparser.c,v 2.106 2004/11/22 11:58:56 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1715,6 +1715,9 @@ parse(pTHX_
 	utf8 = SvUTF8(chunk);
 	if (p_state->offset == 0) {
 	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, 0, self);
+
+	    /* Print warnings if we find unexpected Unicode BOM forms */
+#ifdef UNICODE_HTML_PARSER
 	    if ((!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
 		(utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6))
 	       )
@@ -1725,6 +1728,7 @@ parse(pTHX_
 	    if (utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
 		warn("Parsing string decoded with wrong endianess");
 	    }
+#endif
 	    if (!utf8 && len >= 4 &&
 		(strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
 		 strnEQ(beg, "\xFE\xFF\x00\x00", 4))
