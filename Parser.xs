@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.11 1999/11/09 15:53:24 gisle Exp $
+/* $Id: Parser.xs,v 2.12 1999/11/09 19:41:39 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -34,15 +34,20 @@ extern "C" {
 #endif
 
 #include "patchlevel.h"
+
 #if PATCHLEVEL <= 4 /* perl5.004 */
 
 #ifndef PL_sv_undef
    #define PL_sv_undef sv_undef
    #define PL_sv_yes   sv_yes
+#endif
+
+#ifndef PL_hexdigit
    #define PL_hexdigit hexdigit
 #endif
 
-/* The newSVpvn function was introduced in perl5.005 */
+#if (PATCHLEVEL == 4 && SUBVERSION <= 4)
+/* The newSVpvn function was introduced in perl5.004_05 */
 static SV *
 newSVpvn(char *s, STRLEN len)
 {
@@ -50,8 +55,9 @@ newSVpvn(char *s, STRLEN len)
     sv_setpvn(sv,s,len);
     return sv;
 }
-
 #endif
+
+#endif /* perl5.004 */
 
 
 /* This is used to classify "letters" that can make up an HTML identifier
