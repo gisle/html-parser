@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_10';  # $Date: 1999/11/17 08:16:23 $
+$VERSION = '2.99_10';  # $Date: 1999/11/17 08:24:48 $
 
 require HTML::Entities;
 
@@ -133,6 +133,11 @@ HTML::Parser - HTML tokenizer
  $p->parse_file(*F);
 
 =head1 DESCRIPTION
+
+B<Note: > This is the new experimental XS based HTML::Parser.  It
+should be completely backwards compatible with HTML::Parser version
+2.2x, but have many new features (not documented yet).  The rest of
+this manual page describe HTML::Parser v2.25.
 
 The C<HTML::Parser> will tokenize an HTML document when the parse() or
 parse_file() methods are called.  Tokens are reported by invoking
