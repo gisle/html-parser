@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.11 2001/02/23 06:53:11 gisle Exp $
+/* $Id: util.c,v 2.12 2001/02/23 06:54:20 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -14,11 +14,11 @@
 EXTERN SV*
 sv_lower(pTHX_ SV* sv)
 {
-   STRLEN len;
-   char *s = SvPV_force(sv, len);
-   for (; len--; s++)
+    STRLEN len;
+    char *s = SvPV_force(sv, len);
+    for (; len--; s++)
 	*s = toLOWER(*s);
-   return sv;
+    return sv;
 }
 
 EXTERN int
@@ -65,157 +65,157 @@ grow_gap(SV* sv, STRLEN grow, char** t, char** s, char** e)
 EXTERN SV*
 decode_entities(pTHX_ SV* sv, HV* entity2char)
 {
-  STRLEN len;
-  char *s = SvPV_force(sv, len);
-  char *t = s;
-  char *end = s + len;
-  char *ent_start;
+    STRLEN len;
+    char *s = SvPV_force(sv, len);
+    char *t = s;
+    char *end = s + len;
+    char *ent_start;
 
-  char *repl;
-  STRLEN repl_len;
+    char *repl;
+    STRLEN repl_len;
 #ifdef UNICODE_ENTITIES
-  char buf[UTF8_MAXLEN];
-  int repl_utf8;
+    char buf[UTF8_MAXLEN];
+    int repl_utf8;
 #else
-  char buf[1];
+    char buf[1];
 #endif
 
-  while (s < end) {
-    assert(t <= s);
+    while (s < end) {
+	assert(t <= s);
 
-    if ((*t++ = *s++) != '&')
-      continue;
+	if ((*t++ = *s++) != '&')
+	    continue;
 
-    ent_start = s;
-    repl = 0;
+	ent_start = s;
+	repl = 0;
 
-    if (*s == '#') {
-      UV num = 0;
-      UV prev = 0;
-      int ok = 0;
-      s++;
-      if (*s == 'x' || *s == 'X') {
-	char *tmp;
-	s++;
-	while (*s) {
-	  char *tmp = strchr(PL_hexdigit, *s);
-	  if (!tmp)
-	    break;
-	  num = num << 4 | ((tmp - PL_hexdigit) & 15);
-	  if (prev && num <= prev) {
-	      /* overflow */
-	      ok = 0;
-	      break;
-	  }
-	  prev = num;
-	  s++;
-	  ok = 1;
-	}
-      }
-      else {
-	while (isDIGIT(*s)) {
-	  num = num * 10 + (*s - '0');
-	  if (prev && num < prev) {
-	      /* overflow */
-	      ok = 0;
-	      break;
-	  }
-	  prev = num;
-	  s++;
-	  ok = 1;
-	}
-      }
-      if (ok) {
+	if (*s == '#') {
+	    UV num = 0;
+	    UV prev = 0;
+	    int ok = 0;
+	    s++;
+	    if (*s == 'x' || *s == 'X') {
+		char *tmp;
+		s++;
+		while (*s) {
+		    char *tmp = strchr(PL_hexdigit, *s);
+		    if (!tmp)
+			break;
+		    num = num << 4 | ((tmp - PL_hexdigit) & 15);
+		    if (prev && num <= prev) {
+			/* overflow */
+			ok = 0;
+			break;
+		    }
+		    prev = num;
+		    s++;
+		    ok = 1;
+		}
+	    }
+	    else {
+		while (isDIGIT(*s)) {
+		    num = num * 10 + (*s - '0');
+		    if (prev && num < prev) {
+			/* overflow */
+			ok = 0;
+			break;
+		    }
+		    prev = num;
+		    s++;
+		    ok = 1;
+		}
+	    }
+	    if (ok) {
 #ifdef UNICODE_ENTITIES
-	if (!SvUTF8(sv) && num <= 255) {
-	  buf[0] = num;
-	  repl = buf;
-	  repl_len = 1;
-	  repl_utf8 = 0;
+		if (!SvUTF8(sv) && num <= 255) {
+		    buf[0] = num;
+		    repl = buf;
+		    repl_len = 1;
+		    repl_utf8 = 0;
+		}
+		else {
+		    char *tmp = uv_to_utf8(buf, num);
+		    repl = buf;
+		    repl_len = tmp - buf;
+		    repl_utf8 = 1;
+		}
+#else
+		if (num <= 255) {
+		    buf[0] = num & 0xFF;
+		    repl = buf;
+		    repl_len = 1;
+		}
+#endif
+	    }
 	}
 	else {
-	  char *tmp = uv_to_utf8(buf, num);
-	  repl = buf;
-	  repl_len = tmp - buf;
-	  repl_utf8 = 1;
-	}
-#else
-	if (num <= 255) {
-	  buf[0] = num & 0xFF;
-	  repl = buf;
-	  repl_len = 1;
-	}
-#endif
-      }
-    }
-    else {
-      char *ent_name = s;
-      while (isALNUM(*s))
-	s++;
-      if (ent_name != s && entity2char) {
-	SV** svp = hv_fetch(entity2char, ent_name, s - ent_name, 0);
-	if (svp) {
-	  repl = SvPV(*svp, repl_len);
+	    char *ent_name = s;
+	    while (isALNUM(*s))
+		s++;
+	    if (ent_name != s && entity2char) {
+		SV** svp = hv_fetch(entity2char, ent_name, s - ent_name, 0);
+		if (svp) {
+		    repl = SvPV(*svp, repl_len);
 #ifdef UNICODE_ENTITIES
-	  repl_utf8 = SvUTF8(*svp);
+		    repl_utf8 = SvUTF8(*svp);
 #endif
+		}
+	    }
 	}
-      }
-    }
 
-    if (repl) {
-      char *repl_allocated = 0;
-      if (*s == ';')
-	s++;
-      t--;  /* '&' already copied, undo it */
+	if (repl) {
+	    char *repl_allocated = 0;
+	    if (*s == ';')
+		s++;
+	    t--;  /* '&' already copied, undo it */
 
 #ifdef UNICODE_ENTITIES
-      if (!SvUTF8(sv) && repl_utf8) {
-	  int len = t - SvPVX(sv);
-	  if (len) {
-	      /* need to upgrade the part that we have looked though */
-	      int old_len = len;
-	      char *ustr = bytes_to_utf8(SvPVX(sv), &len);
-	      int grow = len - old_len;
-	      if (grow) {
-		  /* XXX It might already be enough gap, so we don't need this,
-		     but it should not hurt either.
-		   */
-		  grow_gap(sv, grow, &t, &s, &end);
-		  Copy(ustr, SvPVX(sv), len, char);
-		  t = SvPVX(sv) + len;
-	      }
-	      Safefree(ustr);
-	  }
-	  SvUTF8_on(sv);
-      }
-      else if (SvUTF8(sv) && !repl_utf8) {
-	  repl = bytes_to_utf8(repl, &repl_len);
-	  repl_allocated = repl;
-      }
+	    if (!SvUTF8(sv) && repl_utf8) {
+		int len = t - SvPVX(sv);
+		if (len) {
+		    /* need to upgrade the part that we have looked though */
+		    int old_len = len;
+		    char *ustr = bytes_to_utf8(SvPVX(sv), &len);
+		    int grow = len - old_len;
+		    if (grow) {
+			/* XXX It might already be enough gap, so we don't need this,
+			   but it should not hurt either.
+			*/
+			grow_gap(sv, grow, &t, &s, &end);
+			Copy(ustr, SvPVX(sv), len, char);
+			t = SvPVX(sv) + len;
+		    }
+		    Safefree(ustr);
+		}
+		SvUTF8_on(sv);
+	    }
+	    else if (SvUTF8(sv) && !repl_utf8) {
+		repl = bytes_to_utf8(repl, &repl_len);
+		repl_allocated = repl;
+	    }
 #endif
 
-      if (t + repl_len > s) {
-	/* need to grow the string */
-	grow_gap(sv, repl_len - (s - t), &t, &s, &end);
-      }
+	    if (t + repl_len > s) {
+		/* need to grow the string */
+		grow_gap(sv, repl_len - (s - t), &t, &s, &end);
+	    }
 
-      /* copy replacement string into string */
-      while (repl_len--)
-	*t++ = *repl++;
+	    /* copy replacement string into string */
+	    while (repl_len--)
+		*t++ = *repl++;
 
-      if (repl_allocated)
-	  Safefree(repl_allocated);
+	    if (repl_allocated)
+		Safefree(repl_allocated);
+	}
+	else {
+	    while (ent_start < s)
+		*t++ = *ent_start++;
+	}
     }
-    else {
-      while (ent_start < s)
-	*t++ = *ent_start++;
-    }
-  }
 
-  *t = '\0';
-  SvCUR_set(sv, t - SvPVX(sv));
+    *t = '\0';
+    SvCUR_set(sv, t - SvPVX(sv));
 
-  //sv_dump(sv);
-  return sv;
+    //sv_dump(sv);
+    return sv;
 }
