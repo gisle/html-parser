@@ -37,3 +37,5 @@ MyParser->new->parse_file($io);
 $io->seek(0, 0) || die;
 MyParser->new->parse_file(*$io);
 undef($io);
+
+unlink($filename);
