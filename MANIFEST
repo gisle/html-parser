@@ -6,6 +6,7 @@ Parser.pm
 Parser.xs
 TODO
 eg/hrefsub
+eg/htext
 hints/solaris.pl
 hparser.h
 hparser.c
