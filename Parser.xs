@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.37 1999/11/18 08:59:44 gisle Exp $
+/* $Id: Parser.xs,v 2.38 1999/11/22 15:32:42 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1674,7 +1674,7 @@ callback(pstate, name_sv, cb)
 
 	if (svp) {
 	    SvREFCNT_dec(*svp);
-	    *svp = SvREFCNT_inc(cb);
+	    *svp = SvOK(cb) ? SvREFCNT_inc(cb) : 0;
 	}
 	else
 	    croak("Can't access %s callback", name);
