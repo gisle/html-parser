@@ -3,7 +3,7 @@ package HTML::Filter;
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.8 $ =~ /(\d+)\.(\d+)/);
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub process     { $_[0]->output($_[2])          }
@@ -22,6 +22,12 @@ __END__
 
 HTML::Filter - Filter HTML text through the parser
 
+=head1 NOTE
+
+This module is depreciated. C<HTML::Parser> now provide the
+functionally of C<HTML::Filter> much more efficiently with the the
+C<default> handler.
+
 =head1 SYNOPSIS
 
  require HTML::Filter;
@@ -29,13 +35,13 @@ HTML::Filter - Filter HTML text through the parser
 
 =head1 DESCRIPTION
 
-The I<HTML::Filter> is an HTML parser that by default prints the
+The C<HTML::Filter> is an HTML parser that by default prints the
 original text parsed (a slow version of cat(1) basically).  You can
 override the callback methods to modify the filtering for some of the
 HTML elements and you can override output() method which is called to
 print the HTML text.
 
-The I<HTML::Filter> is a subclass of I<HTML::Parser>. This means that
+The C<HTML::Filter> is a subclass of C<HTML::Parser>. This means that
 the document should be given to the parser by calling the $p->parse()
 or $p->parse_file() methods.
 
@@ -63,7 +69,7 @@ table.
      my $self = shift;
      $self->{table_seen}++ if $_[0] eq "table";
      $self->SUPER::start(@_);
-  }  
+  }
 
   sub end
   {
@@ -88,11 +94,6 @@ something like this:
   @ISA=qw(HTML::Filter);
   sub output { push(@{$_[0]->{fhtml}}, $_[1]) }
   sub filtered_html { join("", @{$_[0]->{fhtml}}) }
-
-=head1 BUGS
-
-If you turn on strict_comment(), then comments with embedded "--" are
-split into multiple comments.
 
 =head1 SEE ALSO
 
