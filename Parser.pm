@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_92;  # $Date: 1999/12/05 21:09:00 $
+$VERSION = 2.99_92;  # $Date: 1999/12/05 22:04:18 $
 
 require HTML::Entities;
 
@@ -182,8 +182,10 @@ If new() is called without any arguments,
 it will create a parser that uses callback methods compatible with Version 2.
 See L</VERSION 2 COMPATIBILITY>.
 
-Special option 'api_version => 2' can be used to initialize Version 2
-callbacks while setting other options and handlers.
+Special constructor option 'api_version => 2' can be used to
+initialize Version 2 callbacks while still setting other options and
+handlers.  'api_version => 3' can be used if you don't want to set up
+any options and don't want to fall back to v2 compatible mode.
 
 Examples:
 
@@ -401,12 +403,10 @@ For C<start> events, this contains the original tag name followed by
 the attribute name/value pairs.
 
 For C<end> events, this contains the original tag name.
-This will be an empty string for artifical C<end> events
-triggered by empty start tags.
 
 For C<process> events, this contains the process instructions.
 
-This passes undef if there are no tokens in the event (e.g., C<text>).
+This passes C<undef> if there are no tokens in the event (e.g., C<text>).
 
 =item tokenpos
 
@@ -415,7 +415,8 @@ For each string that appears in C<tokens>, this array contains two numbers.
 The first number is the offset of the start of the token in the original text
 C<text> and the second number is the length of the token.
 
-This passes undef if there are no tokens in the event (e.g., C<text>).
+This passes undef if there are no tokens in the event (e.g., C<text>)
+and for artifical C<end> events -triggered by empty start tags
 
 =item token0
 
@@ -429,23 +430,27 @@ This passes undef if there are no tokens in the event.
 
 =item tagname
 
-Tagname is identical to C<token0> except that
-if $p->xml_mode is disabled, the tag name is forced to lower case.
+Tagname is identical to C<token0> except that if $p->xml_mode is
+disabled, the tag name is forced to lower case.
 
 =item attr
 
-Attr causes a reference to a hash of attribute name/value pairs to be passed.
+Attr causes a reference to a hash of attribute name/value pairs to be
+passed.
 
 This passes undef except for C<start> events.
 
-If $p->xml_mode is disabled, the attribute names are forced to lower case.
+If $p->xml_mode is disabled, the attribute names are forced to lower
+case.
 
 General entities are decoded in the attribute values and
 quotes around the attribute values are removed.
 
 =item attrseq
 
-Attrseq causes a reference to an array of attribute names to be passed.
+Attrseq causes a reference to an array of attribute names to be
+passed.  This can be useful if you want to walk the C<attr>-hash in
+the original sequnce.
 
 This passes undef except for C<start> events.
 
@@ -457,13 +462,13 @@ Text causes the original event text (including delimiters) to be passed.
 
 =item dtext
 
-Dtext causes the original text to be passed.
+Dtext causes the decoded text to be passed.  General entities are
+decoded unless the event was inside a CDATA section or was between
+literal start and end tags (C<script>, C<style>, C<xmp>, and
+C<plaintext>).
 
 This passes undef except for C<text> events.
 
-General entities are decoded unless the event was inside a CDATA section
-or was between literal start and end tags
-(C<script>, C<style>, C<xmp>, and C<plaintext>).
 
 =item cdata_flag
 
@@ -472,13 +477,14 @@ if the event inside a CDATA section
 or was between literal start and end tags
 (C<script>, C<style>, C<xmp>, and C<plaintext>).
 
-When the flag is FALSE for a text event, the you should either use
-C<dtext> or decode the entities yourself before the text is
+When the flag is FALSE for a text event, the you should normally
+either use C<dtext> or decode the entities yourself before the text is
 processed further.
 
 =item offset
 
-The byte position of the C<text> in the HTML document.
+Offset causes the byte position of the start of the event to be passed.
+The first byte in the document is 0.
 
 =item event
 
@@ -487,16 +493,13 @@ Event causes the event name to be provided.
 The event name is one of C<text>, C<start>, C<end>, C<declaration>,
 C<comment>, C<process> or C<default>.
 
-=item bytepos
+=item line
 
-Bytepos causes the byte position of the start of the event to be passed.
-The first byte in the document is 0.
+I<Note: This is not supported yet!>
 
-=item linepos
-
-Linepos causes the line number of the start of the event to be passed.
-The first line in the document is 1.
-Line counting doesn't start until at least one handler requests this value.
+Line causes the line number of the start of the event to be passed.
+The first line in the document is 1.  Line counting doesn't start
+until at least one handler requests this value.
 
 =back
 
