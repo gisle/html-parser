@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.47 2000/12/15 18:24:43 gisle Exp $
+/* $Id: hparser.c,v 2.48 2000/12/26 08:36:27 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -98,6 +98,7 @@ report_event(PSTATE* p_state,
 	    )
 {
   struct p_handler *h;
+  dTHX;
   dSP;
   AV *array;
   STRLEN my_na;
@@ -393,6 +394,7 @@ report_event(PSTATE* p_state,
 EXTERN SV*
 argspec_compile(SV* src)
 {
+  dTHX;
   SV* argspec = newSVpvn("", 0);
   STRLEN len;
   char *s = SvPV(src, len);
@@ -469,6 +471,7 @@ argspec_compile(SV* src)
 static void
 flush_pending_text(PSTATE* p_state, SV* self)
 {
+  dTHX;
   bool   old_unbroken_text = p_state->unbroken_text;
   SV*    old_pend_text     = p_state->pend_text;
   bool   old_is_cdata      = p_state->is_cdata;
@@ -592,6 +595,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 static void
 marked_section_update(PSTATE* p_state)
 {
+  dTHX;
   /* we look at p_state->ms_stack to determine p_state->ms */
   AV* ms_stack = p_state->ms_stack;
   p_state->ms = MS_NONE;
@@ -639,6 +643,7 @@ marked_section_update(PSTATE* p_state)
 static char*
 parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 {
+  dTHX;
   char *s = beg;
   AV* tokens = 0;
 
@@ -866,6 +871,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 static char*
 parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
+  dTHX;
   char *s = beg;
   SV* attr;
   int empty_tag = 0;  /* XML feature */
@@ -1102,6 +1108,7 @@ parse(PSTATE* p_state,
 	   SV* chunk,
 	   SV* self)
 {
+  dTHX;
   char *s, *t, *beg, *end, *new_pos;
   STRLEN len;
 
