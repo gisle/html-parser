@@ -7,6 +7,7 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
+
 ISSUES
 
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
@@ -23,6 +24,7 @@ ISSUES
     be part of that tag and not part of the text flow. According to
     '../html4.0.1/appendix/notes.html#h-B.3.1'
 
+
 FEATURES THAT CAN WAIT
 
  - report 'linenumber'
@@ -34,9 +36,17 @@ FEATURES THAT CAN WAIT
  - <![%app1;[...]]> (parameter entities)
  - $p->ignore("script", "style");
 
+
+SGML FEATURES WE PROBABLY IGNORE
+ - Empty tags: <> </>  (repeat previous start tag)
+ - <foo<bar>  (same as <foo><bar>)
+ - NET tags <name/.../
+ 
+
 POSSIBLE OPTIMIZATIONS
  - none that I can think of right now
  - run the profiler
+
 
 MINOR "BUGS" (alias FEATURES):
  - no way to clear "bool_attr_val" which gives the name of
@@ -44,5 +54,3 @@ MINOR "BUGS" (alias FEATURES):
  - <plaintext> should not end with </plaintext>; can't be
    escaped.
  - <style> and <script> does not end with the first "</".
-
-
