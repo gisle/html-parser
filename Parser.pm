@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_08';  # $Date: 1999/11/09 22:14:16 $
+$VERSION = '2.99_08';  # $Date: 1999/11/09 22:46:49 $
 
 require HTML::Entities;
 
@@ -33,8 +33,8 @@ sub new
 
 	# In the end we try to assume plain attribute or callback
 	for (keys %cfg) {
-	    eval {$self->$_($cfg{$_})};
-	    eval { $self->callback($_ => $cfg{$_}) } if $@;
+	    eval { $self->callback($_ => $cfg{$_}) };
+	    eval { $self->$_($cfg{$_})} if $@;
 	    warn "Unknown configuration key $_" if $@ && $^W;
 	}
     }
@@ -49,7 +49,6 @@ sub new
 	$self->callback(declaration => sub { shift->declaration(@_)});
 	$self->callback(process     => sub { shift->process(@_)});
 	$self->callback(start       => sub { shift->start(@_)});
-	_set_up_method_callbacks($self);
     }
     $self;
 }
@@ -94,8 +93,10 @@ sub netscape_buggy_comment  # legacy
 }
 
 
+# set up method stubs
 sub text { }
 *declaration = \&text;
+*process     = \&text;
 *comment     = \&text;
 *start       = \&text;
 *end         = \&text;
