@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_01';  # $Date: 1999/11/03 20:46:41 $
+$VERSION = '2.99_01';  # $Date: 1999/11/03 20:49:17 $
 
 require DynaLoader;
 @ISA=qw(DynaLoader);
@@ -79,41 +79,23 @@ sub parse_file
     $self->eof;
 }
 
+
 sub netscape_buggy_comment  # legacy
 {
     my $self = shift;
     if ($^W) {
-	warn "netscape_buggy_comment is depreciated.  Please use the strict_comment() method instead";
+	warn "netscape_buggy_comment() is depreciated.  Please use the strict_comment() method instead";
     }
     my $old = !$self->strict_comment;
     $self->strict_comment(!shift) if @_;
     return $old;
 }
 
-sub text
-{
-    # my($self, $text) = @_;
-}
 
-sub declaration
-{
-    # my($self, $decl) = @_;
-}
-
-sub comment
-{
-    # my($self, $comment) = @_;
-}
-
-sub start
-{
-    # my($self, $tag, $attr, $attrseq, $origtext) = @_;
-    # $attr is reference to a HASH, $attrseq is reference to an ARRAY
-}
-
-sub end
-{
-    # my($self, $tag, $origtext) = @_;
-}
+sub text { }
+*declaration = \&text;
+*comment     = \&text;
+*start       = \&text;
+*end         = \&text;
 
 1;
