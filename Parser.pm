@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.24';  # $Date: 2001/05/09 07:12:06 $
+$VERSION = '3.24';  # $Date: 2001/05/09 07:50:20 $
 
 require HTML::Entities;
 
@@ -950,9 +950,6 @@ and/or attributes; and the program C<htext> show how to obtain the
 plain text, but not any script/style content.
 
 =head1 BUGS
-
-C<HTML::Parser> will leave <plaintext> mode when it sees </plaintext>.
-Plaintext mode should not really be escapeable.
 
 The <style> and <script> sections do not end with the first "</", but
 need the complete corresponding end tag.
