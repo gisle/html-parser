@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 3.00;  # $Date: 1999/12/14 09:39:53 $
+$VERSION = 3.00;  # $Date: 1999/12/14 10:54:19 $
 
 require HTML::Entities;
 
@@ -66,6 +66,10 @@ sub new
 	if ($option =~ /^(\w+)_h$/) {
 	    $self->handler($1 => @$val);
 	}
+        elsif ($option =~ /^(text|start|end|process|declaration|comment)$/) {
+	    require Carp;
+	    Carp::croak("Bad constructor option '$option'");
+        }
 	else {
 	    $self->$option($val);
 	}
