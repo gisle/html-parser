@@ -6,7 +6,7 @@ Makefile.PL		Will create 'Makefile' to build this extention
 Parser.pm		Bootstrap & documentation
 Parser.xs		XS glue
 TODO			Ideas and things still left to do
-eg/hanchor		Extract all links from a document
+eg/hanchors		Extract all links from a document
 eg/hrefsub		Do substitutions on link attributes
 eg/hstrip		Stip away certains tags/elements and attributes
 eg/htext		Leave only the text
