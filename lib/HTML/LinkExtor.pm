@@ -25,42 +25,14 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.28 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
-use vars qw(%LINK_ELEMENT);
+use HTML::Tagset ();
 
-# Tags that might contain links and the link attribute name(s)
-%LINK_ELEMENT =
-(
- a       => 'href',
- applet  => [qw(archive codebase code)],
- area    => 'href',
- base    => 'href',
- bgsound => 'src',
- blockquote => 'cite',
- body    => 'background',
- del     => 'cite',
- embed   => [qw(pluginspage src)],
- form    => 'action',
- frame   => [qw(src longdesc)],
- iframe  => [qw(src longdesc)],
- ilayer  => 'background',
- img     => [qw(src lowsrc longdesc usemap)],
- input   => [qw(src usemap)],
- ins     => 'cite',
- isindex => 'action',
- head    => 'profile',
- layer   => [qw(background src)],
-'link'   => 'href',
- object  => [qw(classid codebase data archive usemap)],
-'q'      => 'cite',
- script  => [qw(src for)],
- table   => 'background',
- td      => 'background',
- th      => 'background',
- xmp     => 'href',
-);
+# legacy (some applications grabs this hash directly)
+use vars qw(%LINK_ELEMENT);
+*LINK_ELEMENT = \%HTML::Tagset::linkElements;
 
 =over 4
 
@@ -96,10 +68,10 @@ sub new
 sub _start_tag
 {
     my($self, $tag, $attr) = @_;
-    return unless exists $LINK_ELEMENT{$tag};
+    return unless exists $HTML::Tagset::linkElements{$tag};
 
     my $base = $self->{extractlink_base};
-    my $links = $LINK_ELEMENT{$tag};
+    my $links = $HTML::Tagset::linkElements{$tag};
     $links = [$links] unless ref $links;
 
     my @links;
@@ -194,11 +166,11 @@ received using LWP:
 
 =head1 SEE ALSO
 
-L<HTML::Parser>, L<LWP>, L<URI::URL>
+L<HTML::Parser>, L<HTML::Tagset>, L<LWP>, L<URI::URL>
 
 =head1 COPYRIGHT
 
-Copyright 1996-1999 Gisle Aas.
+Copyright 1996-2000 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
