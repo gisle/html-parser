@@ -1,4 +1,5 @@
 MANIFEST
+README
 Makefile.PL
 Parser.pm
 Parser.xs
