@@ -1,5 +1,44 @@
-
 print "1..2\n";
+
+{ package H;
+  sub new { bless {}, shift; }
+
+  sub header {
+     my $self = shift;
+     my $key  = uc(shift);
+     my $old = $self->{$key};
+     if (@_) { $self->{$key} = shift; }
+     $old;     
+  }
+
+  sub push_header {
+     my($self, $k, $v) = @_;
+     $k = uc($k);
+     if (exists $self->{$k}) {
+        $self->{$k} = [ $self->{$k} ] unless ref $self->{$k};
+	push(@{$self->{$k}}, $v);
+     } else {
+	$self->{$k} = $v;
+     }
+  }
+
+  sub as_string {
+     my $self = shift;
+     my $str = "";
+     for (sort keys %$self) {
+         if (ref($self->{$_})) {
+            my $v;
+            for $v (@{$self->{$_}}) {
+	        $str .= "$_: $v\n";
+            }
+         } else {
+            $str .= "$_: $self->{$_}\n";
+         }
+     }
+     $str;
+  }
+}
+
 
 $HTML = <<'EOT';
 
@@ -15,8 +54,11 @@ $HTML = <<'EOT';
 </script>
 
 <base href="http://www.sn.no">
+<meta name="Keywords" content="test, test, test,...">
+<meta name="Keywords" content="more">
 
-Dette er også vanlig tekst
+Dette er vanlig tekst.  Denne teksten definerer også slutten på
+&lt;head> delen av dokumentet.
 
 <style>
 
@@ -26,8 +68,7 @@ Dette er også vanlig tekst
 
 <isindex>
 
-Dette er vanlig tekst.
-
+Dette er også vanlig tekst som ikke skal blir parset i det hele tatt.
 
 EOT
 
@@ -35,7 +76,7 @@ $| = 1;
 
 #$HTML::HeadParser::DEBUG = 1;
 require HTML::HeadParser;
-$p = new HTML::HeadParser;
+$p = HTML::HeadParser->new( H->new );
 
 $bad = 0;
 
@@ -62,7 +103,7 @@ print "ok 1\n";
 # Try feeding one char at a time
 print "\n\n#### Parsing once char at a time...\n";
 $expected = $p->as_string;
-$p = new HTML::HeadParser;
+$p = HTML::HeadParser->new(H->new);
 while ($HTML =~ /(.)/sg) {
     print $1;
     $p->parse($1) or last;
