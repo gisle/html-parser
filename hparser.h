@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.14 2001/03/13 05:38:02 gisle Exp $
+/* $Id: hparser.h,v 2.15 2001/03/13 19:22:14 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -91,7 +91,7 @@ struct p_state {
     struct p_handler handlers[EVENT_COUNT];
 
     /* filters */
-    HV* report_tags;
+    HV* report_only_tags;
     HV* ignore_tags;
     HV* ignore_elements;
 

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.56 2001/03/13 05:38:02 gisle Exp $
+/* $Id: hparser.c,v 2.57 2001/03/13 19:22:14 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -165,7 +165,7 @@ report_event(PSTATE* p_state,
     }
 
     /* tag filters */
-    if (p_state->ignore_tags || p_state->report_tags || p_state->ignore_elements) {
+    if (p_state->ignore_tags || p_state->report_only_tags || p_state->ignore_elements) {
 
 	if (event == E_START || event == E_END) {
 	    SV* tagname;
@@ -205,8 +205,8 @@ report_event(PSTATE* p_state,
 		SvREFCNT_dec(tagname);
 		return;
 	    }
-	    if (p_state->report_tags &&
-		!hv_fetch_ent(p_state->report_tags, tagname, 0, hash))
+	    if (p_state->report_only_tags &&
+		!hv_fetch_ent(p_state->report_only_tags, tagname, 0, hash))
 	    {
 		SvREFCNT_dec(tagname);
 		return;
