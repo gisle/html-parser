@@ -4,7 +4,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.25";  # $Date: 1999/11/05 09:09:21 $
+$VERSION = "2.25";  # $Date: 1999/11/05 09:34:53 $
 
 
 sub new
@@ -236,6 +236,7 @@ sub parse_file
     my $chunk = '';
     while(read($file, $chunk, 512)) {
 	$self->parse($chunk);
+	last if delete $self->{parse_file_stop};
     }
     close($file) if $opened;
     $self->eof;
@@ -254,6 +255,9 @@ sub strict_comment
 sub netscape_buggy_comment  # legacy
 {
     my $self = shift;
+    if ($^W) {
+	warn "netscape_buggy_comment() is depreciated.  Please use the strict_comment() method instead";
+    }
     my $old = !$self->strict_comment;
     $self->strict_comment(!shift) if @_;
     return $old;
