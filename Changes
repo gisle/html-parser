@@ -1,3 +1,12 @@
+2001-02-24   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.18
+
+     There was a C++ style comment left in util.c.  Strict C
+     compilers do not like that kind of stuff.
+
+
+
 2001-02-23   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.17
