@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.5 1999/11/09 14:18:40 gisle Exp $
+/* $Id: Parser.xs,v 2.6 1999/11/09 14:33:35 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -19,7 +19,6 @@
  *   - no way to clear "bool_attr_val" which gives the name of
  *     the attribute as value.  Perhaps not really a problem.
  *   - <plaintext> should not end with </plaintext>
- *   - xml_mode should imply keep_case
  *   - xml_mode should demand ";" at end of entity references
  */
 
@@ -32,6 +31,27 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#include "patchlevel.h"
+#if PATCHLEVEL <= 4 /* perl5.004 */
+
+#ifndef PL_sv_undef
+   #define PL_sv_undef sv_undef
+   #define PL_sv_yes   sv_yes
+   #define PL_hexdigit hexdigit
+#endif
+
+/* The newSVpvn function was introduced in perl5.005 */
+static SV *
+newSVpvn(char *s, STRLEN len)
+{
+    register SV *sv = newSV(0);
+    sv_setpvn(sv,s,len);
+    return sv;
+}
+
+#endif
+
 
 /* This is used to classify "letters" that can make up an HTML identifier
  * (tagname or attribute name) after the first strict ALFA char.  In addition
@@ -252,7 +272,7 @@ html_end(PSTATE* p_state,
   if (accum) {
     AV* av = newAV();
     SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
-    if (!p_state->keep_case)
+    if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(tag);
     
     av_push(av, newSVpv("E", 1));
@@ -272,7 +292,7 @@ html_end(PSTATE* p_state,
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
     sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
-    if (!p_state->keep_case)
+    if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
     XPUSHs(sv);
     XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
@@ -301,7 +321,7 @@ html_start(PSTATE* p_state,
   if (accum) {
     AV* av = newAV();
     SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
-    if (!p_state->keep_case)
+    if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(tag);
     
     av_push(av, newSVpv("S", 1));
@@ -325,7 +345,7 @@ html_start(PSTATE* p_state,
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
     sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
-    if (!p_state->keep_case)
+    if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
     XPUSHs(sv);
     XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
@@ -677,7 +697,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       goto PREMATURE;
 
     attr = newSVpv(attr_beg, s - attr_beg);
-    if (!p_state->keep_case)
+    if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(attr);
     av_push(tokens, attr);
 
