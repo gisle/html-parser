@@ -5,6 +5,9 @@
      Avoid core dump if somebody clobbers the aliased $self argument of
      a handler.
 
+     HTML::TokeParser documentation update suggested by
+     Paul Makepeace <Paul.Makepeace@realprogrammers.com>.
+
 
 
 2000-05-23   Gisle Aas <gisle@ActiveState.com>
