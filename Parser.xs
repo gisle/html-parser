@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.58 1999/11/30 19:53:58 gisle Exp $
+/* $Id: Parser.xs,v 2.59 1999/11/30 20:19:46 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -1145,10 +1145,8 @@ html_parse(PSTATE* p_state,
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
+      assert(len);
       html_handle(p_state, E_TEXT, s, s+len, 0, 0, self);
-#if 0
-      flush_pending_text(p_state, self);
-#endif
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -1209,7 +1207,8 @@ html_parse(PSTATE* p_state,
 	    s++;
 	  if (*s == '>') {
 	    s++;
-	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
+	    if (t != end_text)
+	      html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
 	    html_handle(p_state, E_END,  end_text, s, &end_token, 1, self);
 	    p_state->literal_mode = 0;
 	    t = s;
@@ -1232,7 +1231,8 @@ html_parse(PSTATE* p_state,
 	    if (*s == '\n')
 	      s++;
 	    /* marked section end */
-	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
+	    if (t != end_text)
+	      html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
 	    t = s;
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);
@@ -1290,7 +1290,8 @@ html_parse(PSTATE* p_state,
 	    s--;
 	}
 	s++;
-	html_handle(p_state, E_TEXT, t, s, 0, 0, self);
+	if (s != t)
+	  html_handle(p_state, E_TEXT, t, s, 0, 0, self);
 	break;
       }
     }
