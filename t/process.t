@@ -1,12 +1,14 @@
 use strict;
 
-print "1..7\n";
+print "1..6\n";
 
 my $pi;
 my $orig;
 
 use HTML::Parser ();
-my $p = HTML::Parser->new(process_cb => sub { $pi = shift; $orig = shift; });
+my $p = HTML::Parser->new(process_h => ["token1,origtext",
+	                                sub { $pi = shift; $orig = shift; }]
+	                 );
 
 $p->parse("<a><?foo><a>");
 
@@ -39,15 +41,3 @@ print "ok 5\n";
 $p->parse("<a><??></a>");
 print "not " unless $pi eq "" && $orig eq "<??>";
 print "ok 6\n";
-
-
-$p = HTML::Parser->new(accum => []);
-$p->parse("<a><?foo><b>");
-#use Data::Dump; Data::Dump::dump($p->accum);
-my $a = $p->accum;
-print "not " unless $a->[0][0] eq "S" &&
-                    $a->[1][0] eq "PI" &&
-                    $a->[1][1] eq "foo" &&
-                    $a->[1][2] eq "<?foo>" &&
-                    $a->[2][0] eq "S";
-print "ok 7\n";
