@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.6 1999/11/09 14:33:35 gisle Exp $
+/* $Id: Parser.xs,v 2.7 1999/11/09 14:43:37 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -326,8 +326,7 @@ html_start(PSTATE* p_state,
     
     av_push(av, newSVpv("S", 1));
     av_push(av, tag);
-    av_push(av, (SV*)tokens);
-    SvREFCNT_inc(tokens);
+    av_push(av, SvREFCNT_inc((SV*)tokens));
     if (p_state->xml_mode)
       av_push(av, newSVsv(boolSV(empty_tag)));
     av_push(av, newSVpv(beg, end - beg));
@@ -440,8 +439,7 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
   if (accum) {
     AV* av = newAV();
     av_push(av, newSVpv("D", 1));
-    av_push(av, (SV*)tokens);
-    SvREFCNT_inc(tokens);
+    av_push(av, SvREFCNT_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, (SV*)av);
     return;
@@ -1174,7 +1172,7 @@ accum(pstate,...)
 		croak("accum argument is not an array reference");
 	    SvREFCNT_dec(pstate->accum);
 	    pstate->accum = av;
-	    SvREFCNT_inc(pstate->accum);
+	    (void)SvREFCNT_inc(pstate->accum);
         }
     OUTPUT:
 	RETVAL
