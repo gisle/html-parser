@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 my @extra;
 my $ans = prompt("Do you want to compile with support for marked sections?", "no");
-if ($ans =~ /^y(es)?$/) {
+if ($ans =~ /^y(es)?$/i) {
     push(@extra, "DEFINE" => "-DMARKED_SECTION");
 }
 
