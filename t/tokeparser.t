@@ -1,4 +1,4 @@
-print "1..5\n";
+print "1..6\n";
 
 use strict;
 use HTML::TokeParser;
@@ -88,6 +88,7 @@ undef($p);
 print "not " unless $atext eq "Perl\240Institute";
 print "ok 4\n";
 
+# test parsing of embeded document
 $p = HTML::TokeParser->new(\<<HTML);
 <title>Title</title>
 <H1>
@@ -98,4 +99,21 @@ HTML
 print "not " unless $p->get_tag("h1") && $p->get_trimmed_text eq "Heading";
 print "ok 5\n";
 undef($p);
+
+# test parsing of large embedded documents
+my $doc = "<a href='foo'>foo is bar</a>\n\n\n" x 2022;
+
+#use Time::HiRes qw(time);
+my $start = time;
+$p = HTML::TokeParser->new(\$doc);
+print "Contruction time: ", time - $start, "\n";
+
+my $count;
+while (my $t = $p->get_token) {
+    $count++ if $t->[0] eq "S";
+}
+print "Parse time: ", time - $start, "\n";
+
+print "not " unless $count == 2022;
+print "ok 6\n";
 
