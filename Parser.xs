@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.131 2005/01/06 09:02:28 gisle Exp $
+/* $Id: Parser.xs,v 2.132 2005/02/28 19:45:40 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -524,6 +524,7 @@ _probably_utf8_chunk(string)
 	s = SvPV(string, len);
         RETVAL = probably_utf8_chunk(aTHX_ s, len);
 #else
+        RETVAL = 0; /* avoid never initialized complains from compiler */
 	croak("_probably_utf8_chunk() only works for Unicode enabled perls");
 #endif
     OUTPUT:
