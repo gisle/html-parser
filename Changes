@@ -1,3 +1,11 @@
+1998-12-18   Gisle Aas <aas@sn.no>
+
+   Release 2.22
+
+   Protect HTML::HeadParser from evil $SIG{__DIE__} hooks.
+
+
+
 1998-11-13   Gisle Aas <aas@sn.no>
 
    Release 2.21
