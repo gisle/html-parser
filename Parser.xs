@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.15 1999/11/09 22:12:24 gisle Exp $
+/* $Id: Parser.xs,v 2.16 1999/11/10 12:36:46 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -506,11 +506,127 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 
 
 static char*
+html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+{
+  char *s = beg;
+
+  if (p_state->strict_comment) {
+    AV* av = newAV();  /* used to collect comments until we seen them all */
+    char *start_com = s;  /* also used to signal inside/outside */
+
+    while (1) {
+      /* try to locate "--" */
+    FIND_DASH_DASH:
+      /* printf("find_dash_dash: [%s]\n", s); */
+      while (s < end && *s != '-' && *s != '>')
+	s++;
+
+      if (s == end) {
+	SvREFCNT_dec(av);
+	return beg;
+      }
+
+      if (*s == '>') {
+	s++;
+	if (start_com)
+	  goto FIND_DASH_DASH;
+	
+	/* we are done recognizing all comments, make callbacks */
+	{
+	  int i;
+	  int len = av_len(av);
+	  for (i = 0; i <= len; i++) {
+	    SV** svp = av_fetch(av, i, 0);
+	    if (svp) {
+	      STRLEN len;
+	      char *s = SvPV(*svp, len);
+	      html_comment(p_state, s, s+len, cbdata);
+	    }
+	  }
+	}
+
+	SvREFCNT_dec(av);
+	return s;
+      }
+
+      s++;
+      if (s == end) {
+	SvREFCNT_dec(av);
+	return beg;
+      }
+
+      if (*s == '-') {
+	/* two dashes in a row seen */
+	s++;
+	/* do something */
+	if (start_com) {
+	  av_push(av, newSVpvn(start_com, s - start_com - 2));
+	  start_com = 0;
+	}
+	else {
+	  start_com = s;
+	}
+      }
+    }
+  }
+
+  else { /* non-strict comment */
+    char *end_com;
+    /* try to locate /--\s*>/ which signals end-of-comment */
+  LOCATE_END:
+    while (s < end && *s != '-')
+      s++;
+    end_com = s;
+    if (s < end) {
+      s++;
+      if (s < end && *s == '-') {
+	s++;
+	while (s < end && isSPACE(*s))
+	  s++;
+	if (s < end && *s == '>') {
+	  s++;
+	  /* yup */
+	  html_comment(p_state, beg, end_com, cbdata);
+	  return s;
+	}
+      }
+      if (s < end) {
+	s = end_com + 2;
+	goto LOCATE_END;
+      }
+    }
+    
+    if (s == end)
+      return beg;
+  }
+
+  return 0;
+}
+
+
+
+static char*
 html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg;
 
-  assert(end - beg >= 1);
+  if (*s == '-') {
+    /* comment? */
+
+    char *tmp;
+    s++;
+    if (s == end)
+      return beg;
+
+    if (*s != '-')
+      return 0;  /* nope, illegal */
+
+    /* yes, two dashes seen */
+    s++;
+
+    tmp = html_parse_comment(p_state, s, end, cbdata);
+    return (tmp == s) ? beg : tmp;
+  }
 
   if (isALPHA(*s)) {
     AV* tokens = newAV();
@@ -596,106 +712,6 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     SvREFCNT_dec(tokens);
     return beg;
 
-  } else if (*s == '-') {
-    s++;
-    /* comment? */
-    if (s == end)
-      return beg;
-
-    if (*s == '-') {
-      s++;
-      /* yes, two dashes seen; it is really a comment */
-
-      if (p_state->strict_comment) {
-	AV* av = newAV();  /* used to collect comments until we seen them all */
-	char *start_com = s;  /* also used to signal inside/outside */
-
-	while (1) {
-	  /* try to locate "--" */
-	FIND_DASH_DASH:
-	  /* printf("find_dash_dash: [%s]\n", s); */
-	  while (s < end && *s != '-' && *s != '>')
-	    s++;
-
-	  if (s == end) {
-	    SvREFCNT_dec(av);
-	    return beg;
-	  }
-
-	  if (*s == '>') {
-	    s++;
-	    if (start_com)
-	      goto FIND_DASH_DASH;
-
-	    /* we are done recognizing all comments, make callbacks */
-	    {
-	      int i;
-	      int len = av_len(av);
-	      for (i = 0; i <= len; i++) {
-		SV** svp = av_fetch(av, i, 0);
-		if (svp) {
-		  STRLEN len;
-		  char *s = SvPV(*svp, len);
-		  html_comment(p_state, s, s+len, cbdata);
-		}
-	      }
-	    }
-
-	    SvREFCNT_dec(av);
-	    return s;
-	  }
-
-	  s++;
-	  if (s == end) {
-	    SvREFCNT_dec(av);
-	    return beg;
-	  }
-
-	  if (*s == '-') {
-	    /* two dashes in a row seen */
-	    s++;
-	    /* do something */
-	    if (start_com) {
-	      av_push(av, newSVpvn(start_com, s - start_com - 2));
-	      start_com = 0;
-	    }
-	    else {
-	      start_com = s;
-	    }
-	  }
-	}
-      }
-      else /* non-strict comment */
-      {
-	char *end_com;
-	/* try to locate /--\s*>/ which signals end-of-comment */
-      LOCATE_END:
-	while (s < end && *s != '-')
-	  s++;
-	end_com = s;
-	if (s < end) {
-	  s++;
-	  if (s < end && *s == '-') {
-	    s++;
-	    while (s < end && isSPACE(*s))
-	      s++;
-	    if (s < end && *s == '>') {
-	      s++;
-	      /* yup */
-	      html_comment(p_state, beg+2, end_com, cbdata);
-	      return s;
-	    }
-	  }
-	  if (s < end) {
-	    s = end_com + 2;
-	    goto LOCATE_END;
-	  }
-	}
-	
-	if (s == end)
-	  return beg;
-      }
-    }
   }
   return 0;
 }
