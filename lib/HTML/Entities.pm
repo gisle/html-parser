@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.13 1998/03/26 21:19:05 aas Exp $
+# $Id: Entities.pm,v 1.14 1999/11/08 13:27:15 gisle Exp $
 
 =head1 NAME
 
@@ -73,8 +73,10 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.13 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.14 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
+
+require HTML::Parser;  # for fast XS implemented decode_entities
 
 
 %entity2char = (
@@ -201,7 +203,7 @@ for (0 .. 255) {
 my %subst;  # compiled encoding regexps
 
 
-sub decode_entities
+sub decode_entities_old
 {
     my $array;
     if (defined wantarray) {
