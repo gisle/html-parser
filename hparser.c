@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.83 2003/04/17 03:44:58 gisle Exp $
+/* $Id: hparser.c,v 2.84 2003/05/12 20:44:57 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1330,6 +1330,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 }
 
 
+#ifdef USE_PFUNC
 static char*
 parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 {
@@ -1339,6 +1340,7 @@ parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 #include "pfunc.h"                   /* declares the parsefunc[] */
+#endif /* USE_PFUNC */
 
 EXTERN void
 parse(pTHX_
@@ -1537,7 +1539,22 @@ parse(pTHX_
 	/* next char is known to be '<' and pointed to by 't' as well as 's' */
 	s++;
 
-	if ( (new_pos = parsefunc[(unsigned char)*s](p_state, t, end, self))) {
+#ifdef USE_PFUNC
+	new_pos = parsefunc[(unsigned char)*s](p_state, t, end, self);
+#else
+	if (isHNAME_FIRST(*s))
+	    new_pos = parse_start(p_state, t, end, self);
+	else if (*s == '/')
+	    new_pos = parse_end(p_state, t, end, self);
+	else if (*s == '!')
+	    new_pos = parse_decl(p_state, t, end, self);
+	else if (*s == '?')
+	    new_pos = parse_process(p_state, t, end, self);
+	else
+	    new_pos = 0;
+#endif /* USE_PFUNC */
+
+	if (new_pos) {
 	    if (new_pos == t) {
 		/* no progress, need more data to know what it is */
 		s = t;
