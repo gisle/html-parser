@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.112 2004/11/23 20:38:27 gisle Exp $
+/* $Id: hparser.c,v 2.113 2004/11/23 22:08:54 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -445,12 +445,13 @@ report_event(PSTATE* p_state,
 			attrval = newSVpvn(beg, len);
 			if (utf8)
 			    SvUTF8_on(attrval);
-			if (p_state->utf8_mode) {
-			    assert(!utf8);
-			    sv_utf8_decode(attrval);
-			}
-			if (!p_state->attr_encoded)
+			if (!p_state->attr_encoded) {
+			    if (p_state->utf8_mode)
+				sv_utf8_decode(attrval);
 			    decode_entities(aTHX_ attrval, p_state->entity2char, 0);
+			    if (p_state->utf8_mode)
+				SvUTF8_off(attrval);
+			}
 		    }
 		    else { /* boolean */
 			if (p_state->bool_attr_val)
@@ -514,12 +515,13 @@ report_event(PSTATE* p_state,
 		arg = sv_2mortal(newSVpvn(beg, end - beg));
 		if (utf8)
 		    SvUTF8_on(arg);
-		if (p_state->utf8_mode) {
-		    assert(!utf8);
-		    sv_utf8_decode(arg);
-		}
-		if (!p_state->is_cdata)
+		if (!p_state->is_cdata) {
+		    if (p_state->utf8_mode)
+			sv_utf8_decode(arg);
 		    decode_entities(aTHX_ arg, p_state->entity2char, 1);
+		    if (p_state->utf8_mode)
+			SvUTF8_off(arg);
+		}
 	    }
 	    break;
       

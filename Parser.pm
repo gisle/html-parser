@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3991';  # $Date: 2004/11/23 20:56:57 $
+$VERSION = '3.3991';  # $Date: 2004/11/23 22:08:49 $
 
 require HTML::Entities;
 
@@ -436,9 +436,24 @@ used to directly index in the original document file.
 
 =item $p->utf8_mode( $bool )
 
-Enable this option when parsing raw undecoded UTF-8.  This will make
-the strings reported for C<attr>, C<@attr> and C<dtext> be properly
-decoded.
+Enable this option when parsing raw undecoded UTF-8.  This tells the
+parser that the entities expanded for strings reported by C<attr>,
+C<@attr> and C<dtext> should be expanded as decoded UTF-8 so they end
+up compatible with the surrounding text.
+
+If C<utf8_mode> is enabled then it is an error to pass strings
+containing characters with code above 255 to the parse() method, and
+the parse() method will croak if you try.
+
+Example: The Unicode character "\x{2665}" is "\xE2\x99\xA5" when UTF-8
+encoded.  The character can also be represented by the entity
+"&hearts;" or "&#x2665".  If we feed the parser:
+
+  $p->parse("\xE2\x99\xA5&hearts;");
+
+then C<dtext> will be reported as "\xE2\x99\xA5\x{2665}" without
+C<utf8_mode> enabled, but as "\xE2\x99\xA5\xE2\x99\xA5" when enabled.
+The later string is what you want.
 
 =item $p->xml_mode
 
@@ -911,11 +926,11 @@ perl-5.8 or better.  If Unicode is passed to $p->parse() then chunks
 of Unicode will be reported to the handlers.  The offset and length
 argspecs will also report their position in terms of characters.
 
-It is safe to parse raw undecoded UTF-8 if you avoid decoding entities
-and make sure to not use I<argspecs> that do; C<attr>, C<@attr> and
-C<dtext>.  Parsing of undecoded UTF-8 might be useful when parsing
-from a file where you need the reported offsets and lengths to match
-the byte offsets in the file.
+It is safe to parse raw undecoded UTF-8 if you either avoid decoding
+entities and make sure to not use I<argspecs> that do, or enable the
+C<utf8_mode> for the parser.  Parsing of undecoded UTF-8 might be
+useful when parsing from a file where you need the reported offsets
+and lengths to match the byte offsets in the file.
 
 If a filename is passed to $p->parse_file() then the file will be read
 in binary mode.  This will be fine if the file contains only ASCII or
@@ -1149,8 +1164,8 @@ The solution is to use the Encode::encode_utf8() on the data before
 feeding it to the $p->parse().  For $p->parse_file() pass a file that
 has been opened in ":utf8" mode.
 
-The parser can process raw undecoded UTF-8 sanely if you avoid using
-the "attr", "@attr" or "dtext" argspecs.
+The parser can process raw undecoded UTF-8 sanely if enable the
+C<utf8_mode> or avoid using the "attr", "@attr" or "dtext" argspecs.
 
 =item Parsing string decoded with wrong endianess
 

@@ -155,10 +155,10 @@ $p->utf8_mode(1);
 $p->parse_file($fh);
 ok(@parsed, "11");
 ok($parsed[6][0], "start");
-ok($parsed[6][8]{id}, "\x{2665}\x{2665}");
+ok($parsed[6][8]{id}, "\xE2\x99\xA5\xE2\x99\xA5");
 ok($parsed[7][0], "text");
 ok($parsed[7][1], "&hearts Love \xE2\x99\xA5");
-ok($parsed[7][2], "\x{2665} Love \x{2665}");
+ok($parsed[7][2], "\xE2\x99\xA5 Love \xE2\x99\xA5");
 ok($parsed[10][3], -s $file);
 ok(@warn, 0);
 
