@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.28 1999/11/17 19:55:39 gisle Exp $
+/* $Id: Parser.xs,v 2.29 1999/11/17 21:39:20 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -24,7 +24,7 @@
  *   - xml_mode should demand ";" at end of entity references
  */
 
-#define MARKED_SECTION /**/
+/* #define MARKED_SECTION /**/
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,6 +90,7 @@ struct p_state {
   /* marked section support */
   enum marked_section_t ms;
   AV* ms_stack;
+  bool marked_sections;
 #endif
 
   /* various */
@@ -261,6 +262,11 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
   if (beg == end)
     return;
 
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
+
   if (!accum && !cb) {
     html_default(p_state, beg, end, cbdata);
     return;
@@ -309,6 +315,11 @@ html_end(PSTATE* p_state,
 {
   AV *accum;
   SV *cb;
+
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
 
   accum = p_state->accum;
   if (accum) {
@@ -364,6 +375,11 @@ html_start(PSTATE* p_state,
 
   HV *attr;
   AV *attr_seq;
+
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
 
   if ((accum || cb) && p_state->v2_compat) {
     /* need to construct an attr hash and an attr_seq array */
@@ -447,6 +463,11 @@ html_process(PSTATE* p_state,
   AV *accum;
   SV *cb;
 
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
+
   accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
@@ -486,6 +507,11 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   AV *accum;
   SV *cb;
 
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
+
   accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
@@ -519,6 +545,11 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 {
   AV *accum;
   SV *cb;
+
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
 
   accum = p_state->accum;
   if (accum) {
@@ -712,6 +743,9 @@ html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg;
   AV* tokens = 0;
+
+  if (!p_state->marked_sections)
+    return 0;
 
  FIND_NAMES:
   while (isHSPACE(*s))
@@ -1245,6 +1279,9 @@ html_parse(PSTATE* p_state,
 	if (*s == ']') {
 	  s++;
 	  if (*s == '>') {
+	    s++;
+	    if (*s == '\n')
+	      s++;
 	    /* marked section end */
 	    html_text(p_state, t, end_text, (p_state->ms == MS_CDATA), cbdata);
 	    t = s;
@@ -1271,6 +1308,13 @@ html_parse(PSTATE* p_state,
 	  s++;
 	  if (*s == '>') {
 	    s++;
+	    if (*s == '\n')
+	      s++;
+	    html_text(p_state, t, end_text, 0, cbdata);
+	    SvREFCNT_dec(av_pop(p_state->ms_stack));
+	    marked_section_update(p_state);    
+	    t = s;
+	    continue;
 	  }
 	}
       }
@@ -1431,6 +1475,7 @@ strict_comment(pstate,...)
         HTML::Parser::xml_mode = 5
 	HTML::Parser::v2_compat = 6
         HTML::Parser::pass_cbdata = 7
+        HTML::Parser::marked_sections = 8
     PREINIT:
 	bool *attr;
     CODE:
@@ -1442,6 +1487,9 @@ strict_comment(pstate,...)
 	case 5: attr = &pstate->xml_mode;             break;
 	case 6: attr = &pstate->v2_compat;            break;
 	case 7: attr = &pstate->pass_cbdata;          break;
+#ifdef MARKED_SECTION
+        case 8: attr = &pstate->marked_sections;      break;
+#endif
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }
