@@ -1,3 +1,19 @@
+2001-03-25   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_92
+
+     HTML::HeadParser made more efficient by using 'ignore_elements'.
+
+     HTML::LinkExtor made more efficient by using 'report_only_tags'.
+
+     HTML::TokeParser generalized into HTML::PullParser.  HTML::PullParser
+     only support the get_token/unget_token interface of HTML::TokeParser,
+     but is more flexible because the information that make up an token
+     is customisable.  HTML::TokeParser is made into an HTML::PullParser
+     subclass.
+
+
+
 2001-03-19   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.19_91
