@@ -1,7 +1,7 @@
-/* $Id: Parser.xs,v 2.85 2000/01/21 21:59:07 gisle Exp $
+/* $Id: Parser.xs,v 2.86 2000/03/06 13:30:13 gisle Exp $
  *
- * Copyright 1999, Gisle Aas.
- * Copyright 1999, Michael A. Chase.
+ * Copyright 1999-2000, Gisle Aas.
+ * Copyright 1999-2000, Michael A. Chase.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
@@ -272,13 +272,13 @@ handler(pstate, eventname,...)
         int event = -1;
         int i;
         struct p_handler *h;
-    PPCODE:
+    CODE:
 	/* map event name string to event_id */
 	for (i = 0; i < EVENT_COUNT; i++) {
-	  if (strEQ(name, event_id_str[i])) {
-	    event = i;
-	    break;
-	  }
+	    if (strEQ(name, event_id_str[i])) {
+	        event = i;
+	        break;
+	    }
 	}
         if (event < 0)
 	    croak("No handler for %s events", name);
@@ -287,12 +287,12 @@ handler(pstate, eventname,...)
 
 	/* set up return value */
 	if (h->cb) {
-	  ST(0) = (SvTYPE(h->cb) == SVt_PVAV)
-	             ? sv_2mortal(newRV_inc(h->cb))
-	             : sv_2mortal(newSVsv(h->cb));
+	    RETVAL = (SvTYPE(h->cb) == SVt_PVAV)
+	                 ? newRV_inc(h->cb)
+	                 : newSVsv(h->cb);
 	}
         else {
-	  ST(0) = &PL_sv_undef;
+	    RETVAL = &PL_sv_undef;
         }
 
         /* update */
@@ -306,8 +306,8 @@ handler(pstate, eventname,...)
             h->cb = 0;
 	    h->cb = check_handler(ST(2));
 	}
-
-        XSRETURN(1);
+    OUTPUT:
+	RETVAL
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
@@ -326,7 +326,7 @@ decode_entities(...)
 		croak("Can't inline decode readonly string");
 	    decode_entities(ST(i), entity2char);
 	}
-        XSRETURN(items);
+	SP += items;
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Parser

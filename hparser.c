@@ -1,7 +1,7 @@
-/* $Id: hparser.c,v 2.39 2000/02/05 10:50:59 gisle Exp $
+/* $Id: hparser.c,v 2.40 2000/03/06 13:30:13 gisle Exp $
  *
- * Copyright 1999, Gisle Aas
- * Copyright 1999 Michael A. Chase
+ * Copyright 1999-2000, Gisle Aas
+ * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
@@ -1040,33 +1040,30 @@ static char*
 parse_process(PSTATE* p_state, char *beg, char *end,
 	      STRLEN offset, SV* self)
 {
-  char *s = beg + 2;
+  char *s = beg + 2;  /* skip '<?' */
   /* processing instruction */
   token_pos_t token_pos;
   token_pos.beg = s;
 
- FIND_PI_END:
-  while (s < end && *s != '>')
-    s++;
-  if (*s == '>') {
-    token_pos.end = s;
-    s++;
+  while (s < end) {
+    if (*s == '>') {
+      token_pos.end = s;
+      s++;
 
-    if (p_state->xml_mode) {
-      /* XML processing instructions are ended by "?>" */
-      if (s - beg < 4 || s[-2] != '?')
-	goto FIND_PI_END;
-      token_pos.end = s - 2;
+      if (p_state->xml_mode) {
+	/* XML processing instructions are ended by "?>" */
+	if (s - beg < 4 || s[-2] != '?')
+	  continue;
+	token_pos.end = s - 2;
+      }
+      
+      /* a complete processing instruction seen */
+      report_event(p_state, E_PROCESS, beg, s, &token_pos, 1, offset, self);
+      return s;
     }
-
-    /* a complete processing instruction seen */
-    report_event(p_state, E_PROCESS, beg, s, &token_pos, 1, offset, self);
-    return s;
+    s++;
   }
-  else {
-    return beg;
-  }
-  return 0;
+  return beg;  /* could not fix end */
 }
 
 
