@@ -6,6 +6,7 @@ Parser.pm		Bootstrap & documentation
 Parser.xs		XS glue
 TODO			Ideas and things still left to do
 eg/hanchors		Extract all links from a document
+eg/hform		Parse <forms> using HTML::PullParser
 eg/hrefsub		Do substitutions on link attributes
 eg/hstrip		Stip away certains tags/elements and attributes
 eg/htext		Leave only the text

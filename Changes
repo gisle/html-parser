@@ -1,3 +1,14 @@
+2001-03-30   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_94
+
+     Implemented 'tag', 'line', 'column' argspecs.
+
+     HTML::PullParser doc update.
+     eg/hform is an example of HTML::PullParser usage.
+
+
+
 2001-03-27   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.19_93
