@@ -1,3 +1,15 @@
+1998-06-22   Gisle Aas <aas@sn.no>
+
+   Release 2.18
+
+   HTML::HeadParser->parse_file will now stop parsing when the
+   <body> starts as it should.
+
+   HTML::LinkExtor more easily subclassable by introducing the
+   $self->_found_link method.
+
+
+
 1998-04-28   Gisle Aas <aas@sn.no>
 
    Release 2.17
