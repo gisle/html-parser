@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.63 1999/12/02 11:31:21 gisle Exp $
+/* $Id: Parser.xs,v 2.64 1999/12/02 12:05:04 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -1269,8 +1269,6 @@ html_parse(PSTATE* p_state,
 	  s++;
 	  if (*s == '>') {
 	    s++;
-	    if (*s == '\n')
-	      s++;
 	    /* marked section end */
 	    if (t != end_text)
 	      html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
@@ -1298,8 +1296,6 @@ html_parse(PSTATE* p_state,
 	  s++;
 	  if (*s == '>') {
 	    s++;
-	    if (*s == '\n')
-	      s++;
 	    html_handle(p_state, E_TEXT, t, end_text, 0, 0, self);
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);    
