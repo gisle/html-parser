@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.15 1999/11/05 09:02:44 gisle Exp $
+/* $Id: Parser.xs,v 1.16 1999/11/05 11:15:55 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -22,7 +22,7 @@ extern "C" {
  * and ":".   The underscore is known to be used in Netscape bookmarks.html
  * files.  MicroSoft Excel use ":" in their HTML exports:
  *
- *  <A HREF="http://www.britannica.com/" ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">Welcome to Britannica.com</A>
+ *  <A HREF="..." ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">
  *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
  */
 
@@ -32,6 +32,7 @@ extern "C" {
 struct p_state {
   SV* buf;
 
+  int xmp;
   int strict_comment;
   int keep_case;
   int pass_cbdata;
@@ -60,7 +61,7 @@ sv_lower(SV* sv)
 
 
 static void
-html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
+html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 {
   AV *accum;
   SV *cb;
@@ -73,6 +74,8 @@ html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
     AV* av = newAV();
     av_push(av, newSVpv("T", 1));
     av_push(av, newSVpv(beg, end - beg));
+    if (cdata)
+      av_push(av, &PL_sv_yes);
     av_push(accum, (SV*)av);
     return;
   }
@@ -86,6 +89,9 @@ html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
     XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+    if (cdata)
+      XPUSHs(&PL_sv_yes);
+    
     PUTBACK;
 
     perl_call_sv(cb, G_DISCARD);
@@ -585,6 +591,13 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     html_start(p_state, beg+1, tag_end, tokens, beg, s, cbdata);
     if (tokens)
       SvREFCNT_dec(tokens);
+
+    if (tag_end - beg == 4 &&
+	toLOWER(beg[1]) == 'x' &&
+	toLOWER(beg[2]) == 'm' &&
+	toLOWER(beg[3]) == 'p')
+      p_state->xmp++;
+
     return s;
   }
   if (tokens)
@@ -630,7 +643,7 @@ html_parse(PSTATE* p_state,
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
-      html_text(p_state, s, s+len, cbdata);
+      html_text(p_state, s, s+len, 0, cbdata);
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -653,13 +666,55 @@ html_parse(PSTATE* p_state,
   end = s + len;
 
   while (1) {
+    /*
+     * At the start of this loop we will always be ready for eating text
+     * or a new tag.  We will never be inside some tag.  The 't' point
+     * to where we started and the 's' is advanced as we go.
+     */
+
+    while (p_state->xmp) {
+      char *end_text;
+
+      while (s < end && *s != '<')
+	s++;
+      if (s == end)
+	goto DONE;
+
+      end_text = s;
+      s++;
+      
+      /* here we rely on '\0' termination of perl svpv buffers */
+      if (*s == '/') {
+	s++;
+	if (toLOWER(*s) == 'x') {
+	  s++;
+	  if (toLOWER(*s) == 'm') {
+	    s++;
+	    if (toLOWER(*s) == 'p') {
+	      s++;
+	      while (isSPACE(*s))
+		s++;
+	      if (*s == '>') {
+		/* end */
+		s++;
+		html_text(p_state, t, end_text, 1, cbdata);
+		html_end(p_state, end_text+2, end_text+5,
+			          end_text, s, cbdata);
+		p_state->xmp = 0;
+		t = s;
+	      }
+	    }
+	  }
+	}
+      }
+    }
 
     /* first we try to match as much text as possible */
     while (s < end && *s != '<')
       s++;
     if (s != t) {
       if (*s == '<') {
-	html_text(p_state, t, s, cbdata);
+	html_text(p_state, t, s, 0, cbdata);
 	t = s;
       }
       else {
@@ -677,7 +732,7 @@ html_parse(PSTATE* p_state,
 	    s--;
 	}
 	s++;
-	html_text(p_state, t, s, cbdata);
+	html_text(p_state, t, s, 0, cbdata);
 	break;
       }
     }
@@ -760,6 +815,8 @@ html_parse(PSTATE* p_state,
      * treat it is plain text.
      */
   }
+
+ DONE:
 
   if (s == end) {
     if (p_state->buf) {
