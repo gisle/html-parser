@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.67 2001/04/06 20:03:24 gisle Exp $
+/* $Id: hparser.c,v 2.68 2001/04/10 18:33:27 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -243,6 +243,7 @@ report_event(PSTATE* p_state,
 		SvREFCNT_dec(tagname);
 		return;
 	    }
+	    SvREFCNT_dec(tagname);
 	}
 	else if (p_state->ignoring_element) {
 	    return;

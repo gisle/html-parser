@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.106 2001/03/30 07:11:00 gisle Exp $
+/* $Id: Parser.xs,v 2.107 2001/04/10 18:33:27 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -342,7 +342,7 @@ ignore_tags(pstate,...)
 	}
 	else if (*attr) {
 	    SvREFCNT_dec(*attr);
-            *attr = 0;	    
+            *attr = 0;
 	}
 
 SV*
