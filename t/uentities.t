@@ -25,16 +25,21 @@ print "ok 2\n";
 print "not " unless decode_entities("&#500000") eq chr(500000);
 print "ok 3\n";
 
-print "not " unless decode_entities("&#xFFFF") eq "\x{FFFD}";
+print "not " unless decode_entities("&#x10FFFD") eq "\x{10FFFD}";
 print "ok 4\n";
 
-{
-    no warnings 'utf8';  # workaround for perl bug
-    print "not " unless decode_entities("&#x10FFFF") eq chr(0x10FFFF);
-    print "ok 5\n";
-}
+print "not " unless decode_entities("&#xFFFC") eq "\x{FFFC}";
+print "ok 5\n";
 
-print "not " unless decode_entities("&#XFFFFFFFF") eq chr(0xFFFD);
+
+print "not " unless decode_entities("&#xFDD0") eq "\x{FFFD}" &&
+                    decode_entities("&#xFDD1") eq "\x{FFFD}" &&
+                    decode_entities("&#xFDE0") eq "\x{FFFD}" &&
+                    decode_entities("&#xFDEF") eq "\x{FFFD}" &&
+                    decode_entities("&#xFFFF") eq "\x{FFFD}" &&
+                    decode_entities("&#x10FFFF") eq "\x{FFFD}" &&
+                    decode_entities("&#x110000") eq chr(0xFFFD) &&
+                    decode_entities("&#XFFFFFFFF") eq chr(0xFFFD);
 print "ok 6\n";
 
 print "not " unless decode_entities("&#0") eq "\0" &&

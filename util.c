@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.19 2004/11/08 12:54:57 gisle Exp $
+/* $Id: util.c,v 2.20 2004/11/08 14:14:35 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -157,9 +157,12 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		    else {
 			high_surrogate = 0;
 			/* otherwise invalid? */
-			if (num == 0xFFFE || num == 0xFFFF || num > 0x1F0000) {
+			if ((num >= 0xFDD0 && num <= 0xFDEF) ||
+			    ((num & 0xFFFE) == 0xFFFE) ||
+			    num > 0x10FFFF)
+			{
 			    num = 0xFFFD;
-                        }
+			}
 		    }
 
 		    tmp = uvuni_to_utf8(buf, num);
