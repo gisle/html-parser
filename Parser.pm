@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3991';  # $Date: 2004/11/23 20:38:21 $
+$VERSION = '3.3991';  # $Date: 2004/11/23 20:56:57 $
 
 require HTML::Entities;
 
@@ -323,6 +323,49 @@ Methods that can be used to get and/or set parser options are:
 
 =over
 
+=item $p->attr_encoded
+
+=item $p->attr_encoded( $bool )
+
+By default, the C<attr> and C<@attr> argspecs will have general
+entities for attribute values decoded.  Enabling this attribute leaves
+entities alone.
+
+=item $p->boolean_attribute_value( $val )
+
+This method sets the value reported for boolean attributes inside HTML
+start tags.  By default, the name of the attribute is also used as its
+value.  This affects the values reported for C<tokens> and C<attr>
+argspecs.
+
+=item $p->case_sensitive
+
+=item $p->case_sensitive( $bool )
+
+By default, tagnames and attribute names are down-cased.  Enabling this
+attribute leaves them as found in the HTML source document.
+
+=item $p->closing_plaintext
+
+=item $p->closing_plaintext( $bool )
+
+By default, "plaintext" element can never be closed. Everything up to
+the end of the document is parsed in CDATA mode.  This historical
+behaviour is what at least MSIE does.  Enabling this attribute makes
+closing "</plaintext>" tag effective and the parsing process will resume
+after seeing this tag.  This emulates gecko-based browsers.
+
+=item $p->marked_sections
+
+=item $p->marked_sections( $bool )
+
+By default, section markings like <![CDATA[...]]> are treated like
+ordinary text.  When this attribute is enabled section markings are
+honoured.
+
+There are currently no events associated with the marked section
+markup, but the text can be returned as C<skipped_text>.
+
 =item $p->strict_comment
 
 =item $p->strict_comment( $bool )
@@ -343,6 +386,16 @@ comments:
   <! comment>
 
 
+=item $p->strict_end
+
+=item $p->strict_end( $bool )
+
+By default, attributes and other junk are allowed to be present on end tags in a
+manner that emulates MSIE's behaviour.
+
+The official behaviour is enabled with this attribute.  If enabled,
+only whitespace is allowed between the tagname and the final ">".
+
 =item $p->strict_names
 
 =item $p->strict_names( $bool )
@@ -361,22 +414,31 @@ The official behaviour is enabled by enabling this attribute.  If
 enabled, it will cause the tag above to be reported as text
 since "LIST]" is not a legal attribute name.
 
-=item $p->strict_end
+=item $p->unbroken_text
 
-=item $p->strict_end( $bool )
+=item $p->unbroken_text( $bool )
 
-By default, attributes and other junk are allowed to be present on end tags in a
-manner that emulates MSIE's behaviour.
+By default, blocks of text are given to the text handler as soon as
+possible (but the parser takes care always to break text at a
+boundary between whitespace and non-whitespace so single words and
+entities can always be decoded safely).  This might create breaks that
+make it hard to do transformations on the text. When this attribute is
+enabled, blocks of text are always reported in one piece.  This will
+delay the text event until the following (non-text) event has been
+recognized by the parser.
 
-The official behaviour is enabled with this attribute.  If enabled,
-only whitespace is allowed between the tagname and the final ">".
+Note that the C<offset> argspec will give you the offset of the first
+segment of text and C<length> is the combined length of the segments.
+Since there might be ignored tags in between, these numbers can't be
+used to directly index in the original document file.
 
-=item $p->boolean_attribute_value( $val )
+=item $p->utf8_mode
 
-This method sets the value reported for boolean attributes inside HTML
-start tags.  By default, the name of the attribute is also used as its
-value.  This affects the values reported for C<tokens> and C<attr>
-argspecs.
+=item $p->utf8_mode( $bool )
+
+Enable this option when parsing raw undecoded UTF-8.  This will make
+the strings reported for C<attr>, C<@attr> and C<dtext> be properly
+decoded.
 
 =item $p->xml_mode
 
@@ -398,68 +460,6 @@ the correct tag name.
 
 I<XML processing instructions> are terminated by "?>" instead of a
 simple ">" as is the case for HTML.
-
-=item $p->utf8_mode
-
-=item $p->utf8_mode( $bool )
-
-Enable this option when parsing raw undecoded UTF-8.  This will make
-the strings reported for C<attr>, C<@attr> and C<dtext> be properly
-decoded.
-
-=item $p->unbroken_text
-
-=item $p->unbroken_text( $bool )
-
-By default, blocks of text are given to the text handler as soon as
-possible (but the parser takes care always to break text at a
-boundary between whitespace and non-whitespace so single words and
-entities can always be decoded safely).  This might create breaks that
-make it hard to do transformations on the text. When this attribute is
-enabled, blocks of text are always reported in one piece.  This will
-delay the text event until the following (non-text) event has been
-recognized by the parser.
-
-Note that the C<offset> argspec will give you the offset of the first
-segment of text and C<length> is the combined length of the segments.
-Since there might be ignored tags in between, these numbers can't be
-used to directly index in the original document file.
-
-=item $p->marked_sections
-
-=item $p->marked_sections( $bool )
-
-By default, section markings like <![CDATA[...]]> are treated like
-ordinary text.  When this attribute is enabled section markings are
-honoured.
-
-There are currently no events associated with the marked section
-markup, but the text can be returned as C<skipped_text>.
-
-=item $p->attr_encoded
-
-=item $p->attr_encoded( $bool )
-
-By default, the C<attr> and C<@attr> argspecs will have general
-entities for attribute values decoded.  Enabling this attribute leaves
-entities alone.
-
-=item $p->case_sensitive
-
-=item $p->case_sensitive( $bool )
-
-By default, tagnames and attribute names are down-cased.  Enabling this
-attribute leaves them as found in the HTML source document.
-
-=item $p->closing_plaintext
-
-=item $p->closing_plaintext( $bool )
-
-By default, "plaintext" element can never be closed. Everything up to
-the end of the document is parsed in CDATA mode.  This historical
-behaviour is what at least MSIE does.  Enabling this attribute makes
-closing "</plaintext>" tag effective and the parsing process will resume
-after seeing this tag.  This emulates gecko-based browsers.
 
 =back
 
@@ -552,16 +552,6 @@ The following methods control filters:
 
 =over
 
-=item $p->ignore_tags( @tags )
-
-Any C<start> and C<end> events involving any of the tags given are
-suppressed.
-
-=item $p->report_tags( @tags )
-
-Any C<start> and C<end> events involving any of the tags I<not> given
-are suppressed.
-
 =item $p->ignore_elements( @tags )
 
 Both the C<start> event and the C<end> event as well as any events that
@@ -575,6 +565,16 @@ content is parsed in CDATA mode.  For most other tags
 C<ignore_elements> must be used with caution since HTML is often not
 I<well formed>.
 
+=item $p->ignore_tags( @tags )
+
+Any C<start> and C<end> events involving any of the tags given are
+suppressed.
+
+=item $p->report_tags( @tags )
+
+Any C<start> and C<end> events involving any of the tags I<not> given
+are suppressed.
+
 =back
 
 =head2 Argspec
@@ -584,6 +584,108 @@ the information reported by the event.  The following argspec
 identifier names can be used:
 
 =over
+
+=item C<attr>
+
+Attr causes a reference to a hash of attribute name/value pairs to be
+passed.
+
+Boolean attributes' values are either the value set by
+$p->boolean_attribute_value, or the attribute name if no value has been
+set by $p->boolean_attribute_value.
+
+This passes undef except for C<start> events.
+
+Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
+names are forced to lower case.
+
+General entities are decoded in the attribute values and
+one layer of matching quotes enclosing the attribute values is removed.
+
+The Unicode character set is assumed for entity decoding.  With Perl
+version 5.6 or earlier only the Latin-1 range is supported, and
+entities for characters outside the range 0..255 are left unchanged.
+
+=item C<@attr>
+
+Basically the same as C<attr>, but keys and values are passed as
+individual arguments and the original sequence of the attributes is
+kept.  The parameters passed will be the same as the @attr calculated
+here:
+
+   @attr = map { $_ => $attr->{$_} } @$attrseq;
+
+assuming $attr and $attrseq here are the hash and array passed as the
+result of C<attr> and C<attrseq> argspecs.
+
+This passes no values for events besides C<start>.
+
+=item C<attrseq>
+
+Attrseq causes a reference to an array of attribute names to be
+passed.  This can be useful if you want to walk the C<attr> hash in
+the original sequence.
+
+This passes undef except for C<start> events.
+
+Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
+names are forced to lower case.
+
+=item C<column>
+
+Column causes the column number of the start of the event to be passed.
+The first column on a line is 0.
+
+=item C<dtext>
+
+Dtext causes the decoded text to be passed.  General entities are
+automatically decoded unless the event was inside a CDATA section or
+was between literal start and end tags (C<script>, C<style>,
+C<xmp>, and C<plaintext>).
+
+The Unicode character set is assumed for entity decoding.  With Perl
+version 5.6 or earlier only the Latin-1 range is supported, and
+entities for characters outside the range 0..255 are left unchanged.
+
+This passes undef except for C<text> events.
+
+=item C<event>
+
+Event causes the event name to be passed.
+
+The event name is one of C<text>, C<start>, C<end>, C<declaration>,
+C<comment>, C<process>, C<start_document> or C<end_document>.
+
+=item C<is_cdata>
+
+Is_cdata causes a TRUE value to be passed if the event is inside a CDATA
+section or between literal start and end tags (C<script>,
+C<style>, C<xmp>, and C<plaintext>).
+
+if the flag is FALSE for a text event, then you should normally
+either use C<dtext> or decode the entities yourself before the text is
+processed further.
+
+=item C<length>
+
+Length causes the number of bytes of the source text of the event to
+be passed.
+
+=item C<line>
+
+Line causes the line number of the start of the event to be passed.
+The first line in the document is 1.  Line counting doesn't start
+until at least one handler requests this value to be reported.
+
+=item C<offset>
+
+Offset causes the byte position in the HTML document of the start of
+the event to be passed.  The first byte in the document has offset 0.
+
+=item C<offset_end>
+
+Offset_end causes the byte position in the HTML document of the end of
+the event to be passed.  This is the same as C<offset> + C<length>.
 
 =item C<self>
 
@@ -595,6 +697,72 @@ that capture $self by themselves as handlers.  Unfortunately this
 creates circular references which prevent the HTML::Parser object
 from being garbage collected.  Using the C<self> argspec avoids this
 problem.
+
+=item C<skipped_text>
+
+Skipped_text returns the concatenated text of all the events that have
+been skipped since the last time an event was reported.  Events might
+be skipped because no handler is registered for them or because some
+filter applies.  Skipped text also includes marked section markup,
+since there are no events that can catch it.
+
+If an C<"">-handler is registered for an event, then the text for this
+event is not included in C<skipped_text>.  Skipped text both before
+and after the C<"">-event is included in the next reported
+C<skipped_text>.
+
+=item C<tag>
+
+Same as C<tagname>, but prefixed with "/" if it belongs to an C<end>
+event and "!" for a declaration.  The C<tag> does not have any prefix
+for C<start> events, and is in this case identical to C<tagname>.
+
+=item C<tagname>
+
+This is the element name (or I<generic identifier> in SGML jargon) for
+start and end tags.  Since HTML is case insensitive, this name is
+forced to lower case to ease string matching.
+
+Since XML is case sensitive, the tagname case is not changed when
+C<xml_mode> is enabled.  The same happens if the C<case_sensitive> attribute
+is set.
+
+The declaration type of declaration elements is also passed as a tagname,
+even if that is a bit strange.
+In fact, in the current implementation tagname is
+identical to C<token0> except that the name may be forced to lower case.
+
+=item C<token0>
+
+Token0 causes the original text of the first token string to be
+passed.  This should always be the same as $tokens->[0].
+
+For C<declaration> events, this is the declaration type.
+
+For C<start> and C<end> events, this is the tag name.
+
+For C<process> and non-strict C<comment> events, this is everything
+inside the tag.
+
+This passes undef if there are no tokens in the event.
+
+=item C<tokenpos>
+
+Tokenpos causes a reference to an array of token positions to be
+passed.  For each string that appears in C<tokens>, this array
+contains two numbers.  The first number is the offset of the start of
+the token in the original C<text> and the second number is the length
+of the token.
+
+Boolean attributes in a C<start> event will have (0,0) for the
+attribute value offset and length.
+
+This passes undef if there are no tokens in the event (e.g., C<text>)
+and for artificial C<end> events triggered by empty element tags.
+
+If you are using these offsets and lengths to modify C<text>, you
+should either work from right to left, or be very careful to calculate
+the changes to the offsets.
 
 =item C<tokens>
 
@@ -621,188 +789,20 @@ token).
 
 This passes C<undef> for C<text> events.
 
-=item C<tokenpos>
-
-Tokenpos causes a reference to an array of token positions to be
-passed.  For each string that appears in C<tokens>, this array
-contains two numbers.  The first number is the offset of the start of
-the token in the original C<text> and the second number is the length
-of the token.
-
-Boolean attributes in a C<start> event will have (0,0) for the
-attribute value offset and length.
-
-This passes undef if there are no tokens in the event (e.g., C<text>)
-and for artificial C<end> events triggered by empty element tags.
-
-If you are using these offsets and lengths to modify C<text>, you
-should either work from right to left, or be very careful to calculate
-the changes to the offsets.
-
-=item C<token0>
-
-Token0 causes the original text of the first token string to be
-passed.  This should always be the same as $tokens->[0].
-
-For C<declaration> events, this is the declaration type.
-
-For C<start> and C<end> events, this is the tag name.
-
-For C<process> and non-strict C<comment> events, this is everything
-inside the tag.
-
-This passes undef if there are no tokens in the event.
-
-=item C<tagname>
-
-This is the element name (or I<generic identifier> in SGML jargon) for
-start and end tags.  Since HTML is case insensitive, this name is
-forced to lower case to ease string matching.
-
-Since XML is case sensitive, the tagname case is not changed when
-C<xml_mode> is enabled.  The same happens if the C<case_sensitive> attribute
-is set.
-
-The declaration type of declaration elements is also passed as a tagname,
-even if that is a bit strange.
-In fact, in the current implementation tagname is
-identical to C<token0> except that the name may be forced to lower case.
-
-=item C<tag>
-
-Same as C<tagname>, but prefixed with "/" if it belongs to an C<end>
-event and "!" for a declaration.  The C<tag> does not have any prefix
-for C<start> events, and is in this case identical to C<tagname>.
-
-=item C<attr>
-
-Attr causes a reference to a hash of attribute name/value pairs to be
-passed.
-
-Boolean attributes' values are either the value set by
-$p->boolean_attribute_value, or the attribute name if no value has been
-set by $p->boolean_attribute_value.
-
-This passes undef except for C<start> events.
-
-Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
-names are forced to lower case.
-
-General entities are decoded in the attribute values and
-one layer of matching quotes enclosing the attribute values is removed.
-
-The Unicode character set is assumed for entity decoding.  With Perl
-version 5.6 or earlier only the Latin-1 range is supported, and
-entities for characters outside the range 0..255 are left unchanged.
-
-=item C<attrseq>
-
-Attrseq causes a reference to an array of attribute names to be
-passed.  This can be useful if you want to walk the C<attr> hash in
-the original sequence.
-
-This passes undef except for C<start> events.
-
-Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
-names are forced to lower case.
-
-=item C<@attr>
-
-Basically the same as C<attr>, but keys and values are passed as
-individual arguments and the original sequence of the attributes is
-kept.  The parameters passed will be the same as the @attr calculated
-here:
-
-   @attr = map { $_ => $attr->{$_} } @$attrseq;
-
-assuming $attr and $attrseq here are the hash and array passed as the
-result of C<attr> and C<attrseq> argspecs.
-
-This passes no values for events besides C<start>.
-
 =item C<text>
 
 Text causes the source text (including markup element delimiters) to be
 passed.
 
-=item C<dtext>
+=item C<undef>
 
-Dtext causes the decoded text to be passed.  General entities are
-automatically decoded unless the event was inside a CDATA section or
-was between literal start and end tags (C<script>, C<style>,
-C<xmp>, and C<plaintext>).
-
-The Unicode character set is assumed for entity decoding.  With Perl
-version 5.6 or earlier only the Latin-1 range is supported, and
-entities for characters outside the range 0..255 are left unchanged.
-
-This passes undef except for C<text> events.
-
-=item C<is_cdata>
-
-Is_cdata causes a TRUE value to be passed if the event is inside a CDATA
-section or between literal start and end tags (C<script>,
-C<style>, C<xmp>, and C<plaintext>).
-
-if the flag is FALSE for a text event, then you should normally
-either use C<dtext> or decode the entities yourself before the text is
-processed further.
-
-=item C<skipped_text>
-
-Skipped_text returns the concatenated text of all the events that have
-been skipped since the last time an event was reported.  Events might
-be skipped because no handler is registered for them or because some
-filter applies.  Skipped text also includes marked section markup,
-since there are no events that can catch it.
-
-If an C<"">-handler is registered for an event, then the text for this
-event is not included in C<skipped_text>.  Skipped text both before
-and after the C<"">-event is included in the next reported
-C<skipped_text>.
-
-=item C<offset>
-
-Offset causes the byte position in the HTML document of the start of
-the event to be passed.  The first byte in the document has offset 0.
-
-=item C<length>
-
-Length causes the number of bytes of the source text of the event to
-be passed.
-
-=item C<offset_end>
-
-Offset_end causes the byte position in the HTML document of the end of
-the event to be passed.  This is the same as C<offset> + C<length>.
-
-=item C<event>
-
-Event causes the event name to be passed.
-
-The event name is one of C<text>, C<start>, C<end>, C<declaration>,
-C<comment>, C<process>, C<start_document> or C<end_document>.
-
-=item C<line>
-
-Line causes the line number of the start of the event to be passed.
-The first line in the document is 1.  Line counting doesn't start
-until at least one handler requests this value to be reported.
-
-=item C<column>
-
-Column causes the column number of the start of the event to be passed.
-The first column on a line is 0.
+Pass an undefined value.  Useful as padding where the same handler
+routine is registered for multiple events.
 
 =item C<'...'>
 
 A literal string of 0 to 255 characters enclosed
 in single (') or double (") quotes is passed as entered.
-
-=item C<undef>
-
-Pass an undefined value.  Useful as padding where the same handler
-routine is registered for multiple events.
 
 =back
 
@@ -825,30 +825,13 @@ Handlers for the following events can be registered:
 
 =over
 
-=item C<text>
+=item C<comment>
 
-This event is triggered when plain text (characters) is recognized.
-The text may contain multiple lines.  A sequence of text may be broken
-between several text events unless $p->unbroken_text is enabled.
-
-The parser will make sure that it does not break a word or a sequence
-of whitespace between two text events.
-
-=item C<start>
-
-This event is triggered when a start tag is recognized.
+This event is triggered when a markup comment is recognized.
 
 Example:
 
-  <A HREF="http://www.perl.com/">
-
-=item C<end>
-
-This event is triggered when an end tag is recognized.
-
-Example:
-
-  </A>
+  <!-- This is a comment -- -- So is this -->
 
 =item C<declaration>
 
@@ -864,13 +847,24 @@ Example:
 
 DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
-=item C<comment>
+=item C<default>
 
-This event is triggered when a markup comment is recognized.
+This event is triggered for events that do not have a specific
+handler.  You can set up a handler for this event to catch stuff you
+did not want to catch explicitly.
+
+=item C<end>
+
+This event is triggered when an end tag is recognized.
 
 Example:
 
-  <!-- This is a comment -- -- So is this -->
+  </A>
+
+=item C<end_document>
+
+This event is triggered when $p->eof is called and after any remaining
+text is flushed.  There is no document text associated with this event.
 
 =item C<process>
 
@@ -885,22 +879,28 @@ Examples:
   <? HTML processing instructions >
   <? XML processing instructions ?>
 
+=item C<start>
+
+This event is triggered when a start tag is recognized.
+
+Example:
+
+  <A HREF="http://www.perl.com/">
+
 =item C<start_document>
 
 This event is triggered before any other events for a new document.  A
 handler for it can be used to initialize stuff.  There is no document
 text associated with this event.
 
-=item C<end_document>
+=item C<text>
 
-This event is triggered when $p->eof is called and after any remaining
-text is flushed.  There is no document text associated with this event.
+This event is triggered when plain text (characters) is recognized.
+The text may contain multiple lines.  A sequence of text may be broken
+between several text events unless $p->unbroken_text is enabled.
 
-=item C<default>
-
-This event is triggered for events that do not have a specific
-handler.  You can set up a handler for this event to catch stuff you
-did not want to catch explicitly.
+The parser will make sure that it does not break a word or a sequence
+of whitespace between two text events.
 
 =back
 
