@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.36';  # $Date: 2004/04/01 12:05:52 $
+$VERSION = '3.36';  # $Date: 2004/11/08 11:06:24 $
 
 require HTML::Entities;
 
@@ -158,31 +158,6 @@ HTML::Parser - HTML parser class
  # or
  open(F, "foo.html") || die;
  $p->parse_file(*F);
-
-HTML::Parser version 2 style subclassing and method callbacks:
-
- {
-    package MyParser;
-    use base 'HTML::Parser';
-
-    sub start {
-       my($self, $tagname, $attr, $attrseq, $origtext) = @_;
-       #...
-    }
-
-    sub end {
-	my($self, $tagname, $origtext) = @_;
-	#...
-    }
-
-    sub text {
-	my($self, $origtext, $is_cdata) = @_;
-	#...
-    }
- }
-
- my $p = MyParser->new;
- $p->parse_file("foo.html");
 
 =head1 DESCRIPTION
 
