@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.31';  # $Date: 2003/10/10 11:20:00 $
+$VERSION = '3.31';  # $Date: 2003/10/10 11:34:39 $
 
 require HTML::Entities;
 
@@ -995,6 +995,10 @@ You can browse the F<eg/> directory online from the I<[Browse]> link on
 the http://search.cpan.org/~gaas/HTML-Parser/ page.
 
 =head1 BUGS
+
+Unicode strings are not parsed correctly.  A workaround is to encode
+them as UTF-8 before passing them to the HTML::Parser.  The C<Encode>
+module can do that.
 
 The <style> and <script> sections do not end with the first "</", but
 need the complete corresponding end tag.  MSIE avoids terminating a
