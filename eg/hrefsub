@@ -54,6 +54,7 @@ $p->handler(start => sub {
 			$v =~ s/^([\'\"])(.*)\1$/$2/;
 			my $new_v = edit($v, $attrname, $tagname);
 			next if $new_v eq $v;
+			$new_v =~ s/\"/&quot;/g;  # since we quote with ""
 			substr($text, $v_offset, $v_len) = qq("$new_v");
 		    }
 		}
