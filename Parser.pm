@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.28';  # $Date: 2003/04/17 03:45:34 $
+$VERSION = '3.28';  # $Date: 2003/08/14 20:28:10 $
 
 require HTML::Entities;
 
@@ -702,8 +702,8 @@ passed.
 
 Dtext causes the decoded text to be passed.  General entities are
 automatically decoded unless the event was inside a CDATA section or
-was between literal start and end tags (C<script>, C<style>, C<xmp>,
-and C<plaintext>).
+was between literal start and end tags (C<script>, C<style>, C<textarea>,
+C<xmp>, and C<plaintext>).
 
 The Unicode character set is assumed for entity decoding.  With perl
 version < 5.7.1 only the Latin1 range is supported, and entities for
@@ -715,7 +715,7 @@ This passes undef except for C<text> events.
 
 Is_cdata causes a TRUE value to be passed if the event is inside a CDATA
 section or is between literal start and end tags (C<script>,
-C<style>, C<xmp>, and C<plaintext>).
+C<style>, C<textarea>, C<xmp>, and C<plaintext>).
 
 When the flag is FALSE for a text event, then you should normally
 either use C<dtext> or decode the entities yourself before the text is
