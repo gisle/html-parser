@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.23 2001/11/05 21:23:21 gisle Exp $
+# $Id: Entities.pm,v 1.24 2003/01/18 12:32:04 gisle Exp $
 
 =head1 NAME
 
@@ -14,6 +14,15 @@ HTML::Entities - Encode or decode strings with HTML entities
  decode_entities($a);
  encode_entities($a, "\200-\377");
 
+For example, this:
+
+ $input = "vis-à-vis Beyoncé's naïve papier-mâché résumé";
+ print encode_entities($in), "\n"
+
+Prints this out:
+
+ vis-&agrave;-vis Beyonc&eacute;'s na&iuml;ve papier-m&acirc;ch&eacute; r&eacute;sum&eacute;
+
 =head1 DESCRIPTION
 
 This module deals with encoding and decoding of strings with HTML
@@ -24,38 +33,58 @@ character entities.  The module provides the following functions:
 =item decode_entities($string)
 
 This routine replaces HTML entities found in the $string with the
-corresponding ISO-8859/1 (or with perl-5.7 or better Unicode)
-character.  Unrecognized entities are left alone.
+corresponding ISO-8859-1 character, and if possible (under perl 5.7
+or later) will replace to Unicode characters.  Unrecognized
+entities are left alone.
+
+This routine is exported by default.
 
 =item encode_entities($string, [$unsafe_chars])
 
 This routine replaces unsafe characters in $string with their entity
-representation.  A second argument can be given to specify which
-characters to concider as unsafe.  The default set of characters to
-expand are control chars, high-bit chars and the '<', '&', '>' and '"'
-characters.
+representation. A second argument can be given to specify which
+characters to consider unsafe (i.e., which to escape). The default set
+of characters to encode are control chars, high-bit chars, and the
+C<< < >>, C<< & >>, C<< > >>, and C<< " >>
+characters.  But this, for example, would encode I<just> the
+C<< < >>, C<< & >>, C<< > >>, and C<< " >> characters:
+
+  $escaped = encode_entities($input, '<>&"');
+
+This routine is exported by default.
+
+=item encode_entities_numeric($string, [$unsafe_chars])
+
+This routine works just like encode_entities, except that the replacement
+entities are always C<&#xI<hexnum>;> and never C<&I<entname>;>.  For
+example, C<escape_entities("r\Xf4le")> returns "r&ocirc;le", but
+C<escape_entities_numeric("r\Xf4le")> returns "r&#xF4;le".
+
+This routine is I<not> exported by default.  But you can always
+export it with C<use HTML::Entities qw(encode_entities_numeric);>
+or even C<use HTML::Entities qw(:DEFAULT encode_entities_numeric);>
 
 =back
 
-Both routines modify the string passed as the first argument if
-called in a void context.  In scalar and array contexts the encoded or
-decoded string is returned (and the argument string is left
-unchanged).
+All these routines modify the string passed as the first argument, if
+called in a void context.  In scalar and array contexts, the encoded or
+decoded string is returned (without changing the input string).
 
-If you prefer not to import these routines into your namespace you can
+If you prefer not to import these routines into your namespace, you can
 call them as:
 
   use HTML::Entities ();
-  $encoded = HTML::Entities::encode($a);
   $decoded = HTML::Entities::decode($a);
+  $encoded = HTML::Entities::encode($a);
+  $encoded = HTML::Entities::encode_numeric($a);
 
 The module can also export the %char2entity and the %entity2char
-hashes which contain the mapping from all characters to the
-corresponding entities.
+hashes, which contain the mapping from all characters to the
+corresponding entities (and vice versa, respectively).
 
 =head1 COPYRIGHT
 
-Copyright 1995-2001 Gisle Aas. All rights reserved.
+Copyright 1995-2003 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -71,9 +100,9 @@ require Exporter;
 @ISA = qw(Exporter);
 
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
-@EXPORT_OK = qw(%entity2char %char2entity);
+@EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.23 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.24 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -346,13 +375,13 @@ require HTML::Parser;  # for fast XS implemented decode_entities
 );
 
 
-# Make the oposite mapping
+# Make the opposite mapping
 while (my($entity, $char) = each(%entity2char)) {
     $char2entity{$char} = "&$entity;";
 }
 delete $char2entity{"'"};  # only one-way decoding
 
-# Fill inn missing entities
+# Fill in missing entities
 for (0 .. 255) {
     next if exists $char2entity{chr($_)};
     $char2entity{chr($_)} = "&#$_;";
@@ -386,12 +415,14 @@ sub encode_entities
     } else {
 	$ref = \$_[0];  # modify in-place
     }
-    if (defined $_[1]) {
+    if (defined $_[1] and length $_[1]) {
 	unless (exists $subst{$_[1]}) {
 	    # Because we can't compile regex we fake it with a cached sub
-	    $subst{$_[1]} =
-	      eval "sub {\$_[0] =~ s/([$_[1]])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
-	    die $@ if $@;
+	    my $code = "sub {\$_[0] =~ s/([$_[1]])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
+	    $subst{$_[1]} = eval $code;
+	    die( $@ . " while trying to turn range: \"$_[1]\"\n "
+	      . "into code: $code\n "
+	    ) if $@;
 	}
 	&{$subst{$_[1]}}($$ref);
     } else {
@@ -401,12 +432,20 @@ sub encode_entities
     $$ref;
 }
 
+sub encode_entities_numeric {
+    local %char2entity;
+    return &encode_entities;   # a goto &encode_entities wouldn't work
+}
+
+
 sub num_entity {
     sprintf "&#x%X;", ord($_[0]);
 }
 
 # Set up aliases
 *encode = \&encode_entities;
+*encode_numeric = \&encode_entities_numeric;
+*encode_numerically = \&encode_entities_numeric;
 *decode = \&decode_entities;
 
 1;
