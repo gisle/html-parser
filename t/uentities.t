@@ -27,14 +27,17 @@ print "ok 2\n";
 print "not " unless decode_entities("&#500000") eq chr(500000);
 print "ok 3\n";
 
-print "not " unless decode_entities("&#xFFFF") eq "\x{FFFF}";
-print "ok 4\n";
+{
+   no warnings 'utf8';  # These are illegal unicode chars
+   print "not " unless decode_entities("&#xFFFF") eq "\x{FFFF}";
+   print "ok 4\n";
 
-print "not " unless decode_entities("&#x10FFFF") eq chr(0x10FFFF);
-print "ok 5\n";
+   print "not " unless decode_entities("&#x10FFFF") eq chr(0x10FFFF);
+   print "ok 5\n";
 
-print "not " unless decode_entities("&#XFFFFFFFF") eq chr(0xFFFF_FFFF);
-print "ok 6\n";
+   print "not " unless decode_entities("&#XFFFFFFFF") eq chr(0xFFFF_FFFF);
+   print "ok 6\n";
+}
 
 print "not " unless decode_entities("&#0") eq "\0" &&
                     decode_entities("&#0;") eq "\0" &&
