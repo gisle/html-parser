@@ -1,5 +1,14 @@
 1999-11-05   Gisle Aas <gisle@aas.no>
 
+   Release 2.99_05
+
+   The previous release did not even compile.  I forgot to try 'make test'
+   before uploading.
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
+
    Release 2.99_04
 
    Generalized <XMP>-support to cover all literal parsing.  Currently
