@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.23 1999/11/05 22:04:56 gisle Exp $
+/* $Id: Parser.xs,v 1.24 1999/11/05 22:16:14 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -691,7 +691,7 @@ html_parse(PSTATE* p_state,
 
   if (!chunk || !SvOK(chunk)) {
     /* EOF */
-    if (p_state->buf && SvOK(p_state_buf)) {
+    if (p_state->buf && SvOK(p_state->buf)) {
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
