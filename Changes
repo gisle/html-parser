@@ -1,3 +1,19 @@
+1999-12-17   Gisle Aas <gisle@aas.no>
+
+    Release 3.01
+
+    Rely on ~-magic instead of a DESTROY method to deallocate
+    the internal 'struct p_state'.  This make it safer for people
+    that simply wipe of the content of the object hash.
+
+    One of the assertion in hparser.c had oposite logic.  This was
+    visible when compiling with a -DDEBUGGING perl.
+
+    We can't rely on the order of hash keys in the t/cases.t test.
+    This test failed with some newer development releases of perl.
+
+
+
 1999-12-14   Gisle Aas <gisle@aas.no>
 
     Release 3.00
