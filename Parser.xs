@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.116 2003/08/15 15:06:17 gisle Exp $
+/* $Id: Parser.xs,v 2.117 2003/08/15 16:37:45 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -230,7 +230,7 @@ parse(self, chunk)
 	SV* chunk
     PREINIT:
 	PSTATE* p_state = get_pstate_hv(aTHX_ self);
-    CODE:
+    PPCODE:
 	if (p_state->parsing)
     	    croak("Parse loop not allowed");
         p_state->parsing = 1;
@@ -267,15 +267,18 @@ parse(self, chunk)
         p_state->parsing = 0;
 	if (p_state->eof) {
 	    p_state->eof = 0;
-            ST(0) = sv_newmortal();
+            PUSHs(sv_newmortal());
         }
+	else {
+	    PUSHs(self);
+	}
 
-void
+SV *
 eof(self)
 	SV* self;
     PREINIT:
 	PSTATE* p_state = get_pstate_hv(aTHX_ self);
-    CODE:
+    PPCODE:
         if (p_state->parsing)
             p_state->eof = 1;
         else {
@@ -283,7 +286,7 @@ eof(self)
 	    parse(aTHX_ p_state, 0, self); /* flush */
 	    p_state->parsing = 0;
 	}
-	/* ST(0) = yes, xsubpp we want to return a value */
+	PUSHs(self);
 
 SV*
 strict_comment(pstate,...)
