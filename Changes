@@ -1,3 +1,26 @@
+2002-03-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.26
+
+     Avoid core dump in some cases where the callback croaks.
+     The perl_call_method and perl_call_sv needs G_EVAL flag
+     to be safe.
+
+     New parser attributes; 'attr_encoded' and 'case_sensitive'.
+     Contributed by Guy Albertelli II <guy@albertelli.com>.
+
+     HTML::Entities
+         - don't encode \r by default as suggested by Sean M. Burke.
+
+     HTML::HeadParser
+         - ignore empty http-equiv
+         - allow multiple <link> elements.  Patch by
+           Timur I. Bakeyev <timur@gnu.org>
+
+     Avoid warnings from bleadperl on the uentities test.
+
+
+
 2001-05-11   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.25

@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.25';  # $Date: 2002/03/08 04:02:21 $
+$VERSION = '3.26';  # $Date: 2002/03/17 20:07:57 $
 
 require HTML::Entities;
 
@@ -1093,7 +1093,7 @@ be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
- Copyright 1996-2001 Gisle Aas. All rights reserved.
+ Copyright 1996-2002 Gisle Aas. All rights reserved.
  Copyright 1999-2000 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
