@@ -25,6 +25,7 @@ tokenpos.h		Dynamically sized token_pos arrays
 typemap			Convert between HTML::Parser and 'struct p_state'
 t/api_version.t         Test api_version constructor option
 t/argspec.t		Test argspec
+t/argspec2.t		Test new argspecs @attr, @{...}
 t/argspec-bad.t         Test various bad argspec arguments
 t/cases.t		Test various interesting cases
 t/comment.t             Test comment parsing
