@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.55 1999/11/30 19:00:18 gisle Exp $
+/* $Id: Parser.xs,v 2.56 1999/11/30 19:36:40 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -346,11 +346,14 @@ html_handle(PSTATE* p_state,
 	}
 	break;
 
+      case '1':
+	/* token1 */
+	/* fall through */
       case 'n':
 	/* tagname */
 	if (num_tokens >= 1) {
 	  arg = sv_2mortal(newSVpvn(tokens[0].beg, tokens[0].end - tokens[0].beg));
-	  if (!p_state->xml_mode)
+	  if (!p_state->xml_mode && *s == 'n')
 	    sv_lower(arg);
 	}
 	break;
@@ -443,7 +446,7 @@ html_handle(PSTATE* p_state,
 
     PUTBACK;
 
-    if (*attrspec == 's' && SvTYPE(h->cb) <= SVt_PVLV) {
+    if (*attrspec == 's' && !SvROK(h->cb)) {
       char *method = SvPV(h->cb, my_na);
       perl_call_method(method, G_DISCARD | G_VOID);
     }
@@ -471,6 +474,7 @@ attrspec_compile(SV* src)
     names = newHV();
     hv_store(names, "self", 4,          newSVpvn("s", 1), 0);
     hv_store(names, "tokens", 6,        newSVpvn("t", 1), 0);
+    hv_store(names, "token1", 6,        newSVpvn("1", 1), 0);
     hv_store(names, "tokenpos", 8,      newSVpvn("#", 1), 0);
     hv_store(names, "tagname", 7,       newSVpvn("n", 1), 0);
     hv_store(names, "gi", 2,            newSVpvn("n", 1), 0);
