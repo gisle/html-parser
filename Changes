@@ -1,3 +1,17 @@
+2003-08-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.30
+
+     The previous release failed to compile on a -DDEBUGGING perl
+     like the one provided by Redhat 9.
+
+     Got rid of references to perl-5.7.
+
+     Further fixes to avoid warnings from Visual C.
+     Patch by Steve Hay <steve.hay@uk.radan.com>.
+
+
+
 2003-08-14   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.29
