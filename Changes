@@ -1,3 +1,21 @@
+1999-11-30   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_15
+
+   Major restructuring/simplification of callback interface based on
+   initial work by Michael.  The main news is that you now need to
+   tell what arguments you want to be provided to your callbacks.
+
+   The following parser options has been eliminated:
+
+       $p->decode_text_entities
+       $p->keep_case
+       $p->v2_compat
+       $p->pass_self
+       $p->attr_pos
+
+
+
 1999-11-26   Gisle Aas <gisle@aas.no>
 
    Release 2.99_14
