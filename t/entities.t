@@ -1,6 +1,6 @@
-use HTML::Entities qw(decode_entities encode_entities);
+use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
 
-print "1..9\n";
+print "1..11\n";
 
 $a = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -12,11 +12,17 @@ encode_entities($a);
 
 print "ok 2\n" if $a eq "V&aring;re norske tegn b&oslash;r &aelig;res";
 
+decode_entities($a);
+encode_entities_numeric($a);
+
+print "ok 3\n" if $a eq "V&#xE5;re norske tegn b&#xF8;r &#xE6;res";
+
 $a = "<&>";
-print "ok 3\n" if encode_entities($a) eq "&lt;&amp;&gt;";
+print "ok 4\n" if encode_entities($a) eq "&lt;&amp;&gt;";
+print "ok 5\n" if encode_entities_numeric($a) eq "&#x3C;&#x26;&#x3E;";
 
 $a = "abcdef";
-print "ok 4\n" if encode_entities($a, 'a-c') eq "&#97;&#98;&#99;def";
+print "ok 6\n" if encode_entities($a, 'a-c') eq "&#97;&#98;&#99;def";
 
 
 # See how well it does against rfc1866...
@@ -32,7 +38,7 @@ $a = $ent;
 decode_entities($a);
 print "DDD>$a\n";
 print "not " if $a ne $plain;
-print "ok 5\n";
+print "ok 7\n";
 
 # Try decoding when the ";" are left out
 $a = $ent,
@@ -40,14 +46,14 @@ $a =~ s/;//g;
 decode_entities($a);
 print ";;;>$a\n";
 print "not " if $a ne $plain;
-print "ok 6\n";
+print "ok 8\n";
 
 
 $a = $plain;
 encode_entities($a);
 print "EEE>$a\n";
 print "not " if $a ne $ent;
-print "ok 7\n";
+print "ok 9\n";
 
 
 # From: Bill Simpson-Young <bill.simpson-young@cmis.csiro.au>
@@ -63,12 +69,12 @@ print "ok 7\n";
 
 print "not " unless decode_entities("abc&def&ghi&abc;&def;") eq
                                     "abc&def&ghi&abc;&def;";
-print "ok 8\n";
+print "ok 10\n";
 
 # Decoding of &apos;
 print "not " unless decode_entities("&apos;") eq "'" &&
                     encode_entities("'", "'") eq "&#39;";
-print "ok 9\n";
+print "ok 11\n";
 
 
 __END__
