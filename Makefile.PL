@@ -12,9 +12,11 @@ WriteMakefile(
     NAME	 => 'HTML::Parser',
     DISTNAME     => 'HTML-Parser-XS',
     VERSION_FROM => 'Parser.pm',
-    H            => [ "hctype.h", "pfunc.h", "tokenpos.h" ],
-    @extra,
+    H            => [ "hparser.h", "hctype.h", "tokenpos.h", "pfunc.h",
+		      "hparser.c", "util.c",
+		    ],
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    @extra,
 );
 
 
