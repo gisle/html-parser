@@ -16,13 +16,17 @@ HTML::HeadParser - Parse <HEAD> section of a HTML document
 
 =head1 DESCRIPTION
 
-The I<HTML::HeadParser> is a specialized (and lightweight)
-I<HTML::Parser> that will only parse the E<lt>HEAD>...E<lt>/HEAD>
+The C<HTML::HeadParser> is a specialized (and lightweight)
+C<HTML::Parser> that will only parse the E<lt>HEAD>...E<lt>/HEAD>
 section of an HTML document.  The parse() method
 will return a FALSE value as soon as some E<lt>BODY> element or body
 text are found, and should not be called again after this.
 
-The I<HTML::HeadParser> keeps a reference to a header object, and the
+Note that the C<HTML::HeadParser> might get confused if raw undecoded
+UTF-8 is passed to the parse() method.  Make sure the strings are
+properly decoded before passing them on.
+
+The C<HTML::HeadParser> keeps a reference to a header object, and the
 parser will update this header object as the various elements of the
 E<lt>HEAD> section of the HTML document are recognized.  The following
 header fields are affected:
@@ -72,7 +76,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.19 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.20 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new
 
@@ -80,11 +84,11 @@ $VERSION = sprintf("%d.%02d", q$Revision: 2.19 $ =~ /(\d+)\.(\d+)/);
 
 The object constructor.  The optional $header argument should be a
 reference to an object that implement the header() and push_header()
-methods as defined by the I<HTTP::Headers> class.  Normally it will be
-of some class that isa or delegates to the I<HTTP::Headers> class.
+methods as defined by the C<HTTP::Headers> class.  Normally it will be
+of some class that isa or delegates to the C<HTTP::Headers> class.
 
-If no $header is given I<HTML::HeadParser> will create an
-I<HTTP::Header> object by itself (initially empty).
+If no $header is given C<HTML::HeadParser> will create an
+C<HTTP::Header> object by itself (initially empty).
 
 =cut
 
@@ -236,7 +240,7 @@ __END__
 
 L<HTML::Parser>, L<HTTP::Headers>
 
-The I<HTTP::Headers> class is distributed as part of the
+The C<HTTP::Headers> class is distributed as part of the
 I<libwww-perl> package.  If you don't have that distribution installed
 you need to provide the $header argument to the C<HTML::HeadParser>
 constructor with your own object that implements the documented

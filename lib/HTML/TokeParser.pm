@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.29 2004/11/15 09:50:55 gisle Exp $
+# $Id: TokeParser.pm,v 2.30 2004/11/23 11:40:56 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.29 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.30 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -187,8 +187,8 @@ object, or the complete document to be parsed.
 
 If the argument is a plain scalar, then it is taken as the name of a
 file to be opened and parsed.  If the file can't be opened for
-reading, then the constructor will return an undefined value and $!
-will tell you why it failed.
+reading, then the constructor will return C<undef> and $! will tell
+you why it failed.
 
 If the argument is a reference to a plain scalar, then this scalar is
 taken to be the literal document to parse.  The value of this
@@ -198,6 +198,24 @@ Otherwise the argument is taken to be some object that the
 C<HTML::TokeParser> can read() from when it needs more data.  Typically
 it will be a filehandle of some kind.  The stream will be read() until
 EOF, but not closed.
+
+Note that the parsing result will likely not be valid if raw undecoded
+UTF-8 is used as a source.  When parsing UTF-8 encoded files turn
+on UTF-8 decoding:
+
+   open(my $fh, "<:utf8", "index.html") || die "Can't open 'index.html': $!";
+   my $p = HTML::TokeParser->new( $fh );
+   # ...
+
+If a $filename is passed to the constructor the file will be opened in
+raw mode and the parsing result will only be valid if its content is
+Latin-1 or pure ASCII.
+
+If parsing from an UTF-8 encoded string buffer decode it first:
+
+   utf8::decode($document);
+   my $p = HTML::TokeParser->new( \$document );
+   # ...
 
 =item $p->get_token
 
