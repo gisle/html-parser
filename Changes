@@ -1,3 +1,15 @@
+2000-12-03   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.14
+
+     If a handler triggered by flushing text at eof called the
+     eof method then infinite recursion occurred.  Fixed.
+     Bug discovered by Jonathan Stowe <gellyfish@gellyfish.com>.
+
+     Allow <!doctype ...> to be parsed as declaration.
+
+
+
 2000-09-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.13
