@@ -7,16 +7,19 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
+  - if only a single argument in argspec, then I think the stuff should
+    not be wrapped up in a array when event destination is an array.
 
 ISSUES
 
+  - no return value from handler()?
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
   - Should we rename 'cdata_flag'?  (candidates: 'is_cdata',...)
-  - Should token0 go away?
+  - Should token0 go away? No!
   - Should we report tokens for 'text'?  If all you want is to know
     the length of a text segment, then 'tokenpos' could be used instead
     of asking for 'text' and then applying length($text).
-  - Something better than '' as the default argspec?
+  - Something better than '' as the default argspec? No!
   - Should some '\n' be part of markup instead of text.  The SGML standard
     has a few things to say about this.  A '\n' following a start tag should
     be considered part of that tag.  A '\n' preceeding an end tag should
@@ -48,8 +51,7 @@ POSSIBLE OPTIMIZATIONS
 
 
 MINOR "BUGS" (alias FEATURES):
- - no way to clear "bool_attr_val" which gives the name of
-   the attribute as value.  Perhaps not really a problem.
+ - no way to clear "boolean_attribute_value".
  - <plaintext> should not end with </plaintext>; can't be
    escaped.
  - <style> and <script> does not end with the first "</".
