@@ -38,6 +38,7 @@ my $xml = <<'EOT';
 <para>This is the first paragraph in this document</para>
 <para html="p">This is the second paragraph</para>
 <para/>
+<xmp><foo></foo></xmp>
 </DOC>
 EOT
 
@@ -52,6 +53,7 @@ S[author html=address]Geir Ove Gronmo, grove@infotek.noE[author]
 S[para]This is the first paragraph in this documentE[para]
 S[para html=p]This is the second paragraphE[para]
 S[para]E[para]
+S[xmp]S[foo]E[foo]E[xmp]
 E[DOC]
 EOT
 
@@ -68,6 +70,7 @@ S[author html=address]Geir Ove Gronmo, grove@infotek.noE[author]
 S[para]This is the first paragraph in this documentE[para]
 S[para html=p]This is the second paragraphE[para]
 S[para/]
+S[xmp]<foo></foo>E[xmp]
 E[doc]
 EOT
 
