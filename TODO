@@ -1,6 +1,5 @@
 TODO
 
- - offsets/line/column wrong after marked sections
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
  - <![%app1;[...]]> (parameter entities)

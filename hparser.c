@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.65 2001/03/30 07:33:50 gisle Exp $
+/* $Id: hparser.c,v 2.66 2001/03/30 08:10:36 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -892,6 +892,7 @@ FIND_NAMES:
 	    p_state->ms_stack = newAV();
 	av_push(p_state->ms_stack, newRV_noinc((SV*)tokens));
 	marked_section_update(p_state);
+	report_event(p_state, E_NONE, beg, s, 0, 0, self);
 	return s;
     }
 
@@ -1399,6 +1400,7 @@ parse(pTHX_
 			if (t != end_text)
 			    report_event(p_state, E_TEXT, t, end_text,
 					 0, 0, self);
+			report_event(p_state, E_NONE, end_text, s, 0, 0, self);
 			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
 			marked_section_update(p_state);
@@ -1425,9 +1427,11 @@ parse(pTHX_
 			s++;
 			report_event(p_state, E_TEXT, t, end_text,
 				     0, 0, self);
+			report_event(p_state, E_NONE, end_text, s,
+				     0, 0, self);
+			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
 			marked_section_update(p_state);    
-			t = s;
 			continue;
 		    }
 		}

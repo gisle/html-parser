@@ -18,7 +18,7 @@ if ($@) {
     exit;
 }
 
-print "1..10\n";
+print "1..11\n";
 
 $p->parse("<![[foo]]>");
 print "not " unless $text eq "foo";
@@ -68,3 +68,43 @@ $p->parse("<![[foo&aring;<a>]]><br>");
 print "not " unless $text eq "fooå";
 print "ok 10\n";
 
+# offsets/line/column numbers
+$p = HTML::Parser->new(default_h => [\&x, "line,column,offset,text"],
+		       marked_sections => 1,
+		      );
+$p->parse(<<'EOT')->eof;
+<title>Test</title>
+<![CDATA
+  [foo&aring;<a>
+]]>
+<![[
+INCLUDE
+STUFF
+]]>
+  <h1>Test</h1>
+EOT
+
+my @x;
+sub x {
+    my($line, $col, $offset, $text) = @_;
+    $text =~ s/\n/\\n/g;
+    $text =~ s/ /./g;
+    push(@x, "$line.$col:$offset $text\n");
+}
+
+#print @x;
+print "not " unless join("", @x) eq <<'EOT';
+1.0:0 <title>
+1.7:7 Test
+1.11:11 </title>
+1.19:19 \n
+3.3:29 foo&aring;<a>\n
+4.3:46 \n
+5.1:48 \nINCLUDE\nSTUFF\n
+8.3:66 \n..
+9.2:69 <h1>
+9.6:73 Test
+9.10:77 </h1>
+9.15:82 \n
+EOT
+print "ok 11\n";
