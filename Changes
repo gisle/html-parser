@@ -1,3 +1,14 @@
+2003-04-16   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.28
+
+     When 'strict_comment' is off (which it is by default)
+     treat anything that matches <!...> a comment.
+
+     Should now be more efficient on threaded perls.
+
+
+
 2003-01-18   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.27
