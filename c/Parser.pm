@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_02';  # $Date: 1999/11/03 23:01:49 $
+$VERSION = '2.99_03';  # $Date: 1999/11/04 23:33:51 $
 
 require DynaLoader;
 @ISA=qw(DynaLoader);
