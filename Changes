@@ -1,3 +1,13 @@
+1999-11-16   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_10
+
+   The mkhctype and mkpfunc scripts did use \z inside RE.  This
+   did not work for perl5.004.  Replaced them with plain old
+   dollar signs.
+
+
+
 1999-11-15   Gisle Aas <gisle@aas.no>
 
    Release 2.99_09
