@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1994';  # $Date: 2001/03/30 08:15:18 $
+$VERSION = '3.20';  # $Date: 2001/04/02 23:28:02 $
 
 require HTML::Entities;
 
@@ -934,7 +934,7 @@ This is not permitted.
 =item marked sections not supported
 
 (F) The $p->marked_sections() method was invoked in a HTML::Parser
-module that was compiled without support for marked sections. 
+module that was compiled without support for marked sections.
 
 =item Unknown boolean attribute (%d)
 
