@@ -1,5 +1,31 @@
 2004-11-23   Gisle Aas <gisle@ActiveState.com>
 
+     Release 3.39_92
+
+     More documentation of the Unicode issues.  Moved around HTML::Parser
+     documentation a bit.
+
+     New boolean option; $p->utf8_mode to allow parsing of raw  UTF-8.
+
+     Documented that HTML::Entities::decode_entities() can take multiple
+     arguments.
+
+     Unterminated entities are now decoded in text (compatibility
+     with MSIE misfeature).
+
+     Document HTML::Entities::_decode_entities(); this variation of the
+     decode_entities() function has been available for a long time, but
+     have not been documented until now.
+
+     HTML::Entities::_decode_entities() can now be told to try to
+     expand unterminated entities.
+
+     Simplified Makefile.PL
+
+
+
+2004-11-23   Gisle Aas <gisle@ActiveState.com>
+
      Release 3.39_91
 
      The HTML::HeadParser will skip Unicode BOM.  Previously it
