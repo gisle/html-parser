@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.20';  # $Date: 2001/04/02 23:28:02 $
+$VERSION = '3.20';  # $Date: 2001/04/06 19:53:16 $
 
 require HTML::Entities;
 
@@ -652,12 +652,9 @@ automatically decoded unless the event was inside a CDATA section or
 was between literal start and end tags (C<script>, C<style>, C<xmp>,
 and C<plaintext>).
 
-The ISO 8859-1 character set (aka Latin1) is assumed for entity
-decoding.
-
-It is planned that C<HTML::Parser> will get an C<utf8> option
-at some point that will affect the byte sequence that characters with
-codes greater than 127 will decode into.
+The Unicode character set is assumed for entity decoding.  With perl
+version < 5.7 only the Latin1 range is supported, and entities for
+characters outside the 0..255 range is left unchanged.
 
 This passes undef except for C<text> events.
 
