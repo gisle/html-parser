@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_93;  # $Date: 1999/12/07 01:05:08 $
+$VERSION = 2.99_93;  # $Date: 1999/12/07 01:26:46 $
 
 require HTML::Entities;
 
@@ -486,6 +486,10 @@ processed further.
 
 Offset causes the byte position of the start of the event to be passed.
 The first byte in the document is 0.
+
+=item length
+
+This returns the number of bytes in C<text>.
 
 =item event
 

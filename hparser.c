@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.17 1999/12/06 11:07:51 gisle Exp $
+/* $Id: hparser.c,v 2.18 1999/12/07 01:26:46 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -40,6 +40,7 @@ enum argcode {
   ARG_DTEXT,
   ARG_CDATA_FLAG,
   ARG_OFFSET,
+  ARG_LENGTH,
   ARG_EVENT,
   ARG_LITERAL,
 };
@@ -276,6 +277,10 @@ report_event(PSTATE* p_state,
       arg = sv_2mortal(newSViv(p_state->chunk_offset + offset));
       break;
 
+    case ARG_LENGTH:
+      arg = sv_2mortal(newSViv(end - beg));
+      break;
+
     case ARG_EVENT:
       assert(event >= 0 && event < EVENT_COUNT);
       arg = sv_2mortal(newSVpv(event_id_str[event], 0));
@@ -350,6 +355,7 @@ argspec_compile(SV* src)
     hv_store(names, "dtext", 5,       newSViv(ARG_DTEXT),      0);
     hv_store(names, "cdata_flag", 10, newSViv(ARG_CDATA_FLAG), 0);
     hv_store(names, "offset", 6,      newSViv(ARG_OFFSET),     0);
+    hv_store(names, "length", 6,      newSViv(ARG_LENGTH),     0);
     hv_store(names, "event", 5,       newSViv(ARG_EVENT),      0);
   }
 
