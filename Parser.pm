@@ -1,12 +1,10 @@
 package HTML::Parser;
 
-# $Id: Parser.pm,v 2.29 1999/10/29 13:39:52 gisle Exp $
-
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.24";  # $Date: 1999/10/29 13:39:52 $
+$VERSION = "2.24";  # $Date: 1999/10/29 13:43:13 $
 
 
 sub new
