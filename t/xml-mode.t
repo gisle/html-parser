@@ -27,7 +27,7 @@ $p->handler(process =>
 $p->handler(text =>
 	     sub {
 		 $text .= shift;
-	     }, "origtext");
+	     }, "text");
 
 my $xml = <<'EOT';
 <?xml version="1.0"?>
@@ -77,8 +77,8 @@ $p = HTML::Parser->new(api_version => 3,
 
 $p->handler("end" =>
 	    sub {
-		my($tagname, $origtext) = @_;
-		print "not " unless $tagname eq "Xyzzy" && !length($origtext);
+		my($tagname, $text) = @_;
+		print "not " unless $tagname eq "Xyzzy" && !length($text);
 		print "ok 3\n";
-	    }, "tagname,origtext");
+	    }, "tagname,text");
 $p->parse("<Xyzzy foo=bar/>and some more")->eof;

@@ -3,7 +3,7 @@ print "1..3\n";
 
 my $text = "";
 use HTML::Parser ();
-my $p = HTML::Parser->new(default_h => [sub { $text .= shift }, "origtext"],
+my $p = HTML::Parser->new(default_h => [sub { $text .= shift }, "text"],
                          );
 
 my $html = <<'EOT';

@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.14 1999/12/03 09:02:54 gisle Exp $
+# $Id: TokeParser.pm,v 2.15 1999/12/03 12:58:29 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.14 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -24,16 +24,16 @@ sub new
     }
     my $self = $class->SUPER::new(api_version => 3);
     my $accum = $self->{accum} = [];
-    $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,origtext");
-    $self->handler(end =>     $accum, "'E',tagname,origtext");
-    $self->handler(text =>    $accum, "'T',origtext,cdata_flag");
-    $self->handler(process => $accum, "'PI',token1,origtext");
+    $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,text");
+    $self->handler(end =>     $accum, "'E',tagname,text");
+    $self->handler(text =>    $accum, "'T',text,cdata_flag");
+    $self->handler(process => $accum, "'PI',token1,text");
 
     # XXX The following two are not strictly V2 compatible.  We used
     # to return something that did not contain the "<!(--)?" and
     # "(--)?>" markers.
-    $self->handler(comment => $accum, "'C',origtext");
-    $self->handler(declaration => $accum, "'D',origtext");
+    $self->handler(comment => $accum, "'C',text");
+    $self->handler(declaration => $accum, "'D',text");
 
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
@@ -226,8 +226,8 @@ declaration, and "PI" for process instructions.  The rest of the array
 is the same as the arguments passed to the corresponding HTML::Parser
 callbacks (see L<HTML::Parser>).  Returned tokens look like this:
 
-  ["S",  $tag, %$attr, @$attrseq, $origtext]
-  ["E",  $tag, $origtext]
+  ["S",  $tag, %$attr, @$attrseq, $text]
+  ["E",  $tag, $text]
   ["T",  $text]
   ["C",  $text]
   ["D",  $text]
@@ -248,8 +248,8 @@ for $p->get_token above, but the type code (first element) is missing
 and the name of end tags are prefixed with "/".  This means that the
 tags returned look like this:
 
-  [$tag, %$attr, @$attrseq, $origtext]
-  ["/$tag", $origtext]
+  [$tag, %$attr, @$attrseq, $text]
+  ["/$tag", $text]
 
 =item $p->get_text( [$endtag] )
 

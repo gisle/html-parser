@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.1 1999/12/03 12:43:00 gisle Exp $
+/* $Id: hparser.c,v 2.2 1999/12/03 12:58:29 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -291,11 +291,10 @@ attrspec_compile(SV* src)
     hv_store(names, "token1", 6,        newSVpvn("1", 1), 0);
     hv_store(names, "tokenpos", 8,      newSVpvn("#", 1), 0);
     hv_store(names, "tagname", 7,       newSVpvn("n", 1), 0);
-    hv_store(names, "gi", 2,            newSVpvn("n", 1), 0);
     hv_store(names, "attr", 4,          newSVpvn("a", 1), 0);
     hv_store(names, "attrseq", 7,       newSVpvn("A", 1), 0);
-    hv_store(names, "origtext", 8,      newSVpvn("d", 1), 0);
-    hv_store(names, "decoded_text", 12, newSVpvn("D", 1), 0);
+    hv_store(names, "text", 4,          newSVpvn("d", 1), 0);
+    hv_store(names, "dtext", 5,         newSVpvn("D", 1), 0);
     hv_store(names, "cdata_flag", 10,   newSVpvn("c", 1), 0);
     hv_store(names, "event", 5,         newSVpvn("E", 1), 0);
   }

@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_90;  # $Date: 1999/12/03 12:45:58 $
+$VERSION = 2.99_90;  # $Date: 1999/12/03 12:58:29 $
 
 require HTML::Entities;
 
@@ -32,11 +32,11 @@ sub new
 
     if ($api_version < 3) {
 	# Set up method callbacks compatible with HTML-Parser-2.xx
-	$self->handler(text    => "text",    "self,origtext,cdata_flag");
-	$self->handler(end     => "end",     "self,tagname,origtext");
-	$self->handler(process => "process", "self,token1,origtext");
+	$self->handler(text    => "text",    "self,text,cdata_flag");
+	$self->handler(end     => "end",     "self,tagname,text");
+	$self->handler(process => "process", "self,token1,text");
 	$self->handler(start   => "start",
-		                  "self,tagname,attr,attrseq,origtext");
+		                  "self,tagname,attr,attrseq,text");
 
 	$self->handler(comment =>
 		       sub {
@@ -51,7 +51,7 @@ sub new
 			   my $self = shift;
 			   $self->declaration(substr($_[0], 2, -1));
 			   # MAC: should that be -3 instead of -1?
-		       }, "self,origtext");
+		       }, "self,text");
     }
 
     if (my $h = delete $arg{handlers}) {
@@ -149,10 +149,10 @@ HTML::Parser - HTML tokenizer
 
 =head1 NOTE
 
-This is the new and still experimental XS based HTML::Parser.  It
-should be completely backwards compatible with HTML::Parser version
-2.2x, but has many new features.  This is currently an alpha release.
-The interface to the new features might still change.
+This is the new XS based HTML::Parser.  It should be completely
+backwards compatible with HTML::Parser version 2.2x, but has many new
+features.  This is currently an beta release.  The interface to the
+new features should now be fairly stable.
 
 =head1 DESCRIPTION
 
@@ -182,7 +182,7 @@ See L</VERSION 2 COMPATIBILITY>.
 
 Examples:
 
-   $p = HTML::Parser->new(text_h => [ sub {...}, "decoded_text" ]);
+   $p = HTML::Parser->new(text_h => [ sub {...}, "dtext" ]);
 
 This will create a new parser object, set up an text handler that receives
 the original text with general entities decoded.  As an alternative you can
@@ -275,7 +275,7 @@ are reported by the C<tagname> and C<attr> argspecs.
 Empty element tags look like start tags, but end with the character
 sequence "/>".  When recognized by HTML::Parser they cause an
 artificial end event in addition to the start event.  The
-C<origtext> for this generated end event will be empty.
+C<text> for this generated end event will be empty.
 
 XML processing instructions are terminated by "?>" instead of a simple
 ">" as is the case for HTML.
@@ -330,17 +330,17 @@ passed as undef.
 
 Examples:
 
-    $p->handler(start => "start", 'self,attr,attrseq,origtext');
+    $p->handler(start => "start", 'self,attr,attrseq,text');
 
 This causes the "start" method of object $p to be called for 'start' events.
 The callback signature is $p->start(\%attr, \@attr_seq, $orig_text).
 
-    $p->handler(start => \&start, 'attr, attrseq, origtext');
+    $p->handler(start => \&start, 'attr, attrseq, text');
 
 This causes subroutine start() to be called for 'start' events.
 The callback signature is start(\%attr, \@attr_seq, $orig_text).
 
-    $p->handler(start => \@accum, '"start",attr,attrseq,origtext');
+    $p->handler(start => \@accum, '"start",attr,attrseq,text');
 
 This causes 'start' event information to be saved in @accum.
 The array elements will be ['start', \%attr, \@attr_seq, $orig_text].
@@ -384,7 +384,7 @@ For C<process> events, this contains the process instructions.
 Tokenpos causes a reference to an array of token positions to be passed.
 For each string that appears in C<tokens>, this array contains two numbers.
 The first number is the offset of the start of the token in the original text
-C<origtext> and the second number is the length of the token.
+C<text> and the second number is the length of the token.
 
 =item token1
 
@@ -422,13 +422,13 @@ This is undef except for C<start> events.
 
 If $p->xml_mode is disabled, the attribute names are forced to lower case.
 
-=item origtext
+=item text
 
-Origtext causes the original event text (including delimiters) to be passed.
+Text causes the original event text (including delimiters) to be passed.
 
-=item decoded_text
+=item dtext
 
-Decoded_text causes the original text (including delimiters) to be passed.
+Dtext causes the original text (including delimiters) to be passed.
 
 This is undef except for C<text> events.
 
@@ -444,7 +444,7 @@ or was between literal start and end tags
 (C<script>, C<style>, C<xmp>, and C<plaintext>).
 
 When the flag is FALSE for a text event, the you should either use
-decoded_text or decode the entities yourself before the text is
+C<dtext> or decode the entities yourself before the text is
 processed further.
 
 =item event
@@ -521,10 +521,10 @@ Version 2 callback methods.
 
 This is equivilent to the following method calls:
 
-   $p->handler(text    => "text",    "self,origtext,cdata_flag");
-   $p->handler(end     => "end",     "self,tagname,origtext");
-   $p->handler(process => "process", "self,token1,origtext");
-   $p->handler(start   => "start",   "self,tagname,attr,attrseq,origtext");
+   $p->handler(text    => "text",    "self,text,cdata_flag");
+   $p->handler(end     => "end",     "self,tagname,text");
+   $p->handler(process => "process", "self,token1,text");
+   $p->handler(start   => "start",   "self,tagname,attr,attrseq,text");
    $p->handler(comment =>
              sub {
 		 my($self, $tokens) = @_;
@@ -534,22 +534,22 @@ This is equivilent to the following method calls:
              sub {
 		 my $self = shift;
 		 $self->declaration(substr($_[0], 2, -1));},
-             "self,origtext");
+             "self,text");
 
 =head1 EXAMPLES
 
 Strip out <font> tags:
 
   sub ignore_font { print pop unless shift eq "font" }
-  HTML::Parser->new(default_h => [sub { print shift }, 'origtext'],
-                    start_h => [\&ignore_font, 'tagname,origtext'],
-                    end_h => [\&ignore_font, 'tagname,origtext'],
+  HTML::Parser->new(default_h => [sub { print shift }, 'text'],
+                    start_h => [\&ignore_font, 'tagname,text'],
+                    end_h => [\&ignore_font, 'tagname,text'],
 		    marked_sections => 0,
 		    )->parse_file(shift);
 
 Strip out comments:
 
-  HTML::Parser->new(default_h => [sub { print shift }, 'origtext'],
+  HTML::Parser->new(default_h => [sub { print shift }, 'text'],
                     comment_h => [sub { }, ''],
                    )->parse_file(shift);
 
