@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.16 1999/11/10 12:36:46 gisle Exp $
+/* $Id: Parser.xs,v 2.17 1999/11/10 13:17:03 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -96,6 +96,7 @@ struct p_state {
   SV* decl_cb;
   SV* com_cb;
   SV* pi_cb;
+  SV* default_cb;
 };
 typedef struct p_state PSTATE;
 
@@ -217,6 +218,32 @@ decode_entities(SV* sv, HV* entity2char)
 }
 
 static void
+html_default(PSTATE* p_state, char* beg, char *end, SV* cbdata)
+{	
+  SV *cb = p_state->default_cb;
+  if (beg == end)
+    return;
+
+  if (cb) {
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
+      XPUSHs(cbdata);
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+    
+    PUTBACK;
+
+    perl_call_sv(cb, G_DISCARD);
+
+    FREETMPS;
+    LEAVE;
+    
+  }
+}
+
+static void
 html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
 {
   AV *accum = p_state->accum;
@@ -227,8 +254,10 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
   if (beg == end)
     return;
 
-  if (!accum && !cb)
+  if (!accum && !cb) {
+    html_default(p_state, beg, end, cbdata);
     return;
+  }
 
   text = newSVpv(beg, end - beg);
   if (!cdata && p_state->decode_text_entities) {
@@ -255,7 +284,6 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
       XPUSHs(cbdata);
     XPUSHs(sv_2mortal(text));
     XPUSHs(boolSV(cdata));
-    
     PUTBACK;
 
     perl_call_sv(cb, G_DISCARD);
@@ -309,7 +337,10 @@ html_end(PSTATE* p_state,
 
     FREETMPS;
     LEAVE;
+    return;
   }
+
+  html_default(p_state, beg, end, cbdata);
 }
 
 
@@ -390,8 +421,10 @@ html_start(PSTATE* p_state,
     FREETMPS;
     LEAVE;
   }
-  else
+  else {
+    html_default(p_state, beg, end, cbdata);
     return;
+  }
 
   if (empty_tag)
     html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, cbdata);
@@ -399,7 +432,10 @@ html_start(PSTATE* p_state,
 
 
 static void
-html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
+html_process(PSTATE* p_state,
+	     char *pi_beg, char *pi_end,
+	     char *beg, char *end,
+	     SV* cbdata)
 {
   AV *accum;
   SV *cb;
@@ -421,6 +457,7 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
     PUSHMARK(SP);
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
+    XPUSHs(sv_2mortal(newSVpvn(pi_beg, pi_end - pi_beg)));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -428,7 +465,10 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 
     FREETMPS;
     LEAVE;
+    return;
   }
+
+  html_default(p_state, beg, end, cbdata);
 }
 
 
@@ -500,7 +540,10 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 
     FREETMPS;
     LEAVE;
+    return;
   }
+
+  html_default(p_state, beg-2, end+1, cbdata);
 }
 
 
@@ -532,7 +575,9 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	  goto FIND_DASH_DASH;
 	
 	/* we are done recognizing all comments, make callbacks */
-	{
+	if (!p_state->accum && !p_state->com_cb)
+	    html_default(p_state, beg-4, s, cbdata);
+	else {
 	  int i;
 	  int len = av_len(av);
 	  for (i = 0; i <= len; i++) {
@@ -586,7 +631,10 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	if (s < end && *s == '>') {
 	  s++;
 	  /* yup */
-	  html_comment(p_state, beg, end_com, cbdata);
+	  if (!p_state->accum && !p_state->com_cb)
+	    html_default(p_state, beg-4, s, cbdata);
+	  else
+	    html_comment(p_state, beg, end_com, cbdata);
 	  return s;
 	}
       }
@@ -1066,7 +1114,7 @@ html_parse(PSTATE* p_state,
 	}
 
 	/* a complete processing instruction seen */
-	html_process(p_state, t+2, pi_end, cbdata);
+	html_process(p_state, t+2, pi_end, t, s, cbdata);
 	t = s;
       }
       else {
@@ -1161,6 +1209,7 @@ DESTROY(pstate)
 	SvREFCNT_dec(pstate->decl_cb);
 	SvREFCNT_dec(pstate->com_cb);
 	SvREFCNT_dec(pstate->pi_cb);
+	SvREFCNT_dec(pstate->default_cb);
 	Safefree(pstate);
 
 
@@ -1262,6 +1311,8 @@ callback(pstate, name_sv, cb)
 		svp = &pstate->com_cb;
 	    if (strEQ(name, "process"))
 		svp = &pstate->pi_cb;
+	    if (strEQ(name, "default"))
+		svp = &pstate->default_cb;
 	    break;
 	case 11:
 	    if (strEQ(name, "declaration"))
