@@ -1,3 +1,11 @@
+2003-08-19   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.31
+
+     The -DDEBUGGING fix in 3.30 was not really there :-(
+
+
+
 2003-08-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.30
