@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.86 2003/08/15 00:02:33 gisle Exp $
+/* $Id: hparser.c,v 2.87 2003/08/15 00:15:20 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1001,11 +1001,11 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 
     if (*s == '>') {
 	/* make <!> into empty comment <SGML Handbook 36:32> */
-	token_pos_t empty;
-	empty.beg = s;
-	empty.end = s;
+	token_pos_t token;
+	token.beg = s;
+	token.end = s;
 	s++;
-	report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+	report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
 	return s;
     }
 
@@ -1120,11 +1120,11 @@ DECL_FAIL:
 	s++;
 
     if (*s == '>') {
-	token_pos_t empty;
-	empty.beg = beg + 2;
-	empty.end = s;
+	token_pos_t token;
+	token.beg = beg + 2;
+	token.end = s;
 	s++;
-	report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+	report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
 	return s;
     }
     return 0;
@@ -1326,11 +1326,11 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
     else if (!p_state->strict_comment) {
 	s = skip_until_gt(s, end);
 	if (s < end) {
-	    token_pos_t empty;
-	    empty.beg = beg + 2;
-	    empty.end = s;
+	    token_pos_t token;
+	    token.beg = beg + 2;
+	    token.end = s;
 	    s++;
-	    report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+	    report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
 	    return s;
 	}
 	else {
