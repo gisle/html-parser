@@ -1,5 +1,5 @@
 use strict;
-print "1..2\n";
+print "1..3\n";
 
 use HTML::Parser ();
 my $p = HTML::Parser->new(xml_mode => 1,
@@ -71,3 +71,14 @@ S[para/]
 E[doc]
 EOT
 
+# Test that we get an empty tag back
+$p = HTML::Parser->new(api_version => 3,
+	               xml_mode => 1);
+
+$p->handler("end" =>
+	    sub {
+		my($tagname, $origtext) = @_;
+		print "not " unless $tagname eq "Xyzzy" && !length($origtext);
+		print "ok 3\n";
+	    }, "tagname,origtext");
+$p->parse("<Xyzzy foo=bar/>and some more")->eof;
