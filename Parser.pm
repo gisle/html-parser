@@ -1,12 +1,12 @@
 package HTML::Parser;
 
-# Author address: <gisle@aas.no>
+# $Id: Parser.pm,v 2.29 1999/10/29 13:39:52 gisle Exp $
 
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.24";  # $Date: 1999/10/29 12:17:55 $
+$VERSION = "2.24";  # $Date: 1999/10/29 13:39:52 $
 
 
 sub new
@@ -23,7 +23,7 @@ sub new
 #
 # It parse <xmp> in the depreceated 'literal' mode, i.e. no tags are
 # recognized until a </xmp> is found.
-# 
+#
 # <listing> is parsed like <pre>, i.e. tags are recognized.  <listing>
 # are presentend in smaller font than <pre>
 #
@@ -227,7 +227,7 @@ sub parse_file
     if (!ref($file) && ref(\$file) ne "GLOB") {
 	# Assume $file is a filename
         local(*F);
-	open(F, $file) || return;
+	open(F, $file) || return undef;
 	$opened++;
 	$file = *F;
     }
@@ -292,7 +292,7 @@ __END__
 
 =head1 NAME
 
-HTML::Parser - SGML parser class
+HTML::Parser - HTML tokenizer
 
 =head1 SYNOPSIS
 
@@ -307,15 +307,17 @@ HTML::Parser - SGML parser class
  $p->parse_file("foo.html");
  # or
  open(F, "foo.html") || die;
- $p->parse_file(\*F);
+ $p->parse_file(*F);
 
 =head1 DESCRIPTION
 
-The C<HTML::Parser> will tokenize an HTML document when the parse()
-method is called by invoking various callback methods.  The document to
-be parsed can be supplied in arbitrary chunks.
+The C<HTML::Parser> will tokenize an HTML document when the parse() or
+parse_file() methods are called.  Tokens are reported by invoking
+various callback methods.  The document to be parsed can be supplied
+in arbitrary chunks.
 
-The external interface the an I<HTML::Parser> is:
+The methods that make up the external interface of the C<HTML::Parser>
+are:
 
 =over 4
 
@@ -325,13 +327,14 @@ The object constructor takes no arguments.
 
 =item $p->parse( $string );
 
-Parse the $string as an HTML document.  Can be called multiple times.
-The return value is a reference to the parser object.
+Parse $string as the next chunk of the HTML document.  The return
+value is a reference to the parser object (i.e. $p).
 
 =item $p->eof
 
-Signals end of document.  Call eof() to flush any remaining buffered
-text.  The return value is a reference to the parser object.
+Signals the end of the HTML document.  Calling the eof() method will
+flush any remaining buffered text.  The return value is a reference to
+the parser object.
 
 =item $p->parse_file( $file );
 
@@ -426,7 +429,7 @@ prevent us from renaming this module as C<SGML::Parser>.
 
 The parser is fairly inefficient if the chunks passed to $p->parse()
 are too big.  The reason is probably that perl ends up with a lot of
-character copying when tokens are removed from the beginning of the
+character copying as tokens are chopped of from the beginning of the
 strings.  A chunk size of about 256-512 bytes was optimal in a test I
 made with some real world HTML documents.  (The parser was about 3
 times slower with a chunk size of 20K).
@@ -446,5 +449,3 @@ This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =cut
-
-
