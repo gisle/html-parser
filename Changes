@@ -9,7 +9,7 @@
 
        - Don't use a perl hash for looking up argspec keywords.
 
-       - Documentation and English tweaks.
+       - Documentation tweaks.
 
 
 
