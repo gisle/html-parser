@@ -1,4 +1,13 @@
-1999-11-06   Gisle Aas <gisle@aas.no>
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_04
+
+   Generalized <XMP>-support to cover all literal parsing.  Currently
+   activated for <script>, <style>, <xmp> and <plaintext>.
+
+
+
+1999-11-05   Gisle Aas <gisle@aas.no>
 
    Release 2.99_03
 
@@ -11,7 +20,7 @@
 
 
 
-1999-11-05   Gisle Aas <gisle@aas.no>
+1999-11-04   Gisle Aas <gisle@aas.no>
 
    Release 2.99_02
 
