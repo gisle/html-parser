@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.19 2000/06/09 06:44:41 gisle Exp $
+# $Id: TokeParser.pm,v 2.20 2000/12/04 18:12:49 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.19 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.20 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -104,19 +104,17 @@ sub unget_token
 sub get_tag
 {
     my $self = shift;
-    my $wanted = shift;
     my $token;
-  GET_TOKEN:
-    {
-	$token = $self->get_token;
-	if ($token) {
-	    my $type = shift @$token;
-	    redo GET_TOKEN if $type !~ /^[SE]$/;
-	    substr($token->[0], 0, 0) = "/" if $type eq "E";
-	    redo GET_TOKEN if defined($wanted) && $token->[0] ne $wanted;
+    while (1) {
+	$token = $self->get_token || return undef;
+	my $type = shift @$token;
+	next unless $type eq "S" || $type eq "E";
+	substr($token->[0], 0, 0) = "/" if $type eq "E";
+	return $token unless @_;
+	for (@_) {
+	    return $token if $token->[0] eq $_;
 	}
     }
-    $token;
 }
 
 
@@ -226,29 +224,41 @@ is the same as the arguments passed to the corresponding HTML::Parser
 v2 compatible callbacks (see L<HTML::Parser>).  In summary, returned
 tokens look like this:
 
-  ["S",  $tag, %$attr, @$attrseq, $text]
+  ["S",  $tag, $attr, $attrseq, $text]
   ["E",  $tag, $text]
   ["T",  $text, $is_data]
   ["C",  $text]
   ["D",  $text]
   ["PI", $token0, $text]
 
+where $attr is a hash reference, $attrseq is an array reference and
+the rest is plain scalars.
+
 =item $p->unget_token($token,...)
 
 If you find out you have read too many tokens you can push them back,
 so that they are returned the next time $p->get_token is called.
 
-=item $p->get_tag( [$tag] )
+=item $p->get_tag( [$tag, ...] )
 
 This method returns the next start or end tag (skipping any other
-tokens), or C<undef> if there are no more tags in the document.  If an
-argument is given, then we skip tokens until the specified tag type is
-found.  The tag is returned as an array reference in the same form as
-for $p->get_token above, but the type code (first element) is missing
-and the name of end tags are prefixed with "/".  This means that the
-tags returned look like this:
+tokens), or C<undef> if there are no more tags in the document.  If
+one or more arguments are given, then we skip tokens until one of the
+specified tag types is found.  For example:
 
-  [$tag, %$attr, @$attrseq, $text]
+   $p->get_tag("font", "/font");
+
+will find the next start or end tag for a font-element.
+
+The tag information is returned as an array reference in the same form
+as for $p->get_token above, but the type code (first element) is
+missing. A start tag will be returned like this:
+
+  [$tag, $attr, $attrseq, $text]
+
+The tagname of end tags are prefixed with "/", i.e. end tag is
+returned like this:
+
   ["/$tag", $text]
 
 =item $p->get_text( [$endtag] )
