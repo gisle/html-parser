@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.19';  # $Date: 2001/03/13 02:26:53 $
+$VERSION = '3.19';  # $Date: 2001/03/13 05:59:18 $
 
 require HTML::Entities;
 
@@ -472,6 +472,35 @@ to $p->handler(start => sub {}), but is more efficient.
 
 This causes no handler to be assosiated with start events.
 If there is a default handler it will be invoked.
+
+=back
+
+Filters based on tags can be set up to limit the number of events
+reported.  The main bottleneck during parsing is often the huge number
+of callbacks made.  Applying filters can improve performance
+significantly.
+
+The following methods control filters:
+
+=over
+
+=item $p->ignore_tags( TAG, ... )
+
+Any C<start> and C<end> events involving any of the tags given are
+suppressed.
+
+=item $p->report_tags( TAG, ... )
+
+Any C<start> and C<end> events I<not> involving any of the tags given
+are suppressed.
+
+=item $p->ignore_elements( TAG, ... )
+
+Both the C<start> and the C<end> event as well as any events that
+would be reported in between are suppressed.  The ignored elements can
+contain nested occurences of itself.  Example:
+
+   $p->ignore_elements(qw(script style));
 
 =back
 
