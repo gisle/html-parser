@@ -24,5 +24,17 @@ print "ok 3\n";
 print "not " unless $p->xml_mode(0) && !$p->xml_mode;
 print "ok 4\n";
 
-print "not " if $p->strict_comment(1) || !$p->strict_comment;
+my $seen_buggy_comment_warning;
+$SIG{__WARN__} =
+    sub {
+	local $_ = shift;
+	$seen_buggy_comment_warning++
+	    if /^netscape_buggy_comment\(\) is depreciated/;
+        print;
+    };
+
+print "not " if $p->strict_comment(1) ||
+                !$p->strict_comment   ||
+                $p->netscape_buggy_comment ||
+                !$seen_buggy_comment_warning;
 print "ok 5\n";
