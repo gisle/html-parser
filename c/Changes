@@ -1,0 +1,19 @@
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_02
+
+   Implemented keep_case() option.  If this attribute is true, then
+   we don't lowercase tag and attribute names.
+
+   Implemented accum() that takes an array reference.  Tokens are
+   pushed onto this array instead of callbacks.
+
+   Implemented strict_comment().
+
+
+
+1999-11-03   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_01
+
+   Baseline of XS implementation
