@@ -3,9 +3,10 @@ package HTML::Filter;
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
+sub process     { $_[0]->output("<?$_[1]>")     }
 sub comment     { $_[0]->output("<!--$_[1]-->") }
 sub start       { $_[0]->output($_[4])          }
 sub end         { $_[0]->output($_[2])          }
@@ -90,10 +91,8 @@ something like this:
 
 =head1 BUGS
 
-Comments in declarations are removed from the declarations and then
-inserted as separate comments after the declaration.  If you turn on
-strict_comment(), then comments with embedded "--" are split into
-multiple comments.
+If you turn on strict_comment(), then comments with embedded "--" are
+split into multiple comments.
 
 =head1 SEE ALSO
 
@@ -101,7 +100,7 @@ L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1997-1998 Gisle Aas.
+Copyright 1997-1999 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
