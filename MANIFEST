@@ -13,6 +13,7 @@ lib/HTML/LinkExtor.pm
 lib/HTML/TokeParser.pm
 mkhctype
 mkpfunc
+tokenpos.h
 t/cases.t
 t/default.t
 t/entities.t
