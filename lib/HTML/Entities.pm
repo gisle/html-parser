@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.20 2001/02/23 06:08:48 gisle Exp $
+# $Id: Entities.pm,v 1.21 2001/02/23 07:07:01 gisle Exp $
 
 =head1 NAME
 
@@ -24,8 +24,8 @@ character entities.  The module provides the following functions:
 =item decode_entities($string)
 
 This routine replaces HTML entities found in the $string with the
-corresponding ISO-8859/1 (or with perl-5.6 Unicode) character.
-Unrecognized entities are left alone.
+corresponding ISO-8859/1 (or with perl-5.7 or better Unicode)
+character.  Unrecognized entities are left alone.
 
 =item encode_entities($string, [$unsafe_chars])
 
@@ -70,10 +70,10 @@ require 5.004;
 require Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(encode_entities decode_entities);
+@EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
