@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+
+use strict;
+use HTML::Parser ();
+use URI;
+
+my %link_attr;
+{
+    # Set up %link_attr by stealing information from HTML::LinkExtor
+    require HTML::LinkExtor;
+    while (my($k,$v) = each %HTML::LinkExtor::LINK_ELEMENT) {
+	if (ref($v)) {
+	    $v = { map {$_ => 1} @$v };
+	}
+	else {
+	    $v = { $v => 1};
+	}
+	$link_attr{$k} = $v;
+    }
+}
+
+my $code = shift;
+my $code = 'sub edit { local $_ = shift; my($attr, $tag) = @_; no strict; ' .
+           $code .
+           '; $_; }';
+#print $code;
+eval $code;
+die $@ if $@;
+
+my $file = shift || die;
+
+my $p = HTML::Parser->new(api_version => 3);
+$p->handler(default => sub { print @_ }, "text");
+$p->handler(start => sub {
+		my($tagname, $pos, $text) = @_;
+		if (my $link_attr = $link_attr{$tagname}) {
+		    shift_pair($pos);  # tagname
+		    my $offset = 0;
+		    while (@$pos) {
+			my($k_offset, $k_len) = shift_pair($pos);
+			$k_offset += $offset;
+			my $attrname = lc(substr($text, $k_offset, $k_len));
+			next unless $link_attr->{$attrname};
+			my($v_offset, $v_len) = shift_pair($pos);
+			next unless $v_offset;
+			$v_offset += $offset;
+			my $v = substr($text, $v_offset, $v_len);
+			chop($v) if $v =~ s/^[\'\"]//;
+			my $new_v = edit($v, $attrname, $tagname);
+			next if $new_v eq $v;
+			$new_v = qq("$new_v");
+			substr($text, $v_offset, $v_len) = $new_v;
+			$offset += length($new_v) - $v_len;
+		    }
+		}
+		print $text;
+	    },
+	    "tagname, tokenpos, text");
+$p->parse_file($file) || die;
+
+sub shift_pair { return shift(@{$_[0]}), shift(@{$_[0]}); }
+
