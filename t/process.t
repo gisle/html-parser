@@ -6,8 +6,8 @@ my $pi;
 my $orig;
 
 use HTML::Parser ();
-my $p = HTML::Parser->new(process_h => ["token1,origtext",
-	                                sub { $pi = shift; $orig = shift; }]
+my $p = HTML::Parser->new(process_h => [sub { $pi = shift; $orig = shift; },
+				        "token1,origtext"]
 	                 );
 
 $p->parse("<a><?foo><a>");

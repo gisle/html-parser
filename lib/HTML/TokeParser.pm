@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.11 1999/11/30 20:37:12 gisle Exp $
+# $Id: TokeParser.pm,v 2.12 1999/11/30 21:51:02 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.11 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.12 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -25,16 +25,16 @@ sub new
     my $self = $class->SUPER::new(3);
     $self->{accum} = [];
     my $push_accum = sub { my $self = shift; push(@{$self->{accum}}, [@_])};
-    $self->handler(start => "self,'S',tagname,attr,attrseq,origtext", $push_accum);
-    $self->handler(end => "self,'E',tagname,origtext",                $push_accum);
-    $self->handler(text => "self,'T',origtext,cdata_flag",            $push_accum);
-    $self->handler(process => "self,'PI',token1,origtext",            $push_accum);
+    $self->handler(start => $push_accum, "self,'S',tagname,attr,attrseq,origtext");
+    $self->handler(end => $push_accum, "self,'E',tagname,origtext");
+    $self->handler(text => $push_accum, "self,'T',origtext,cdata_flag");
+    $self->handler(process => $push_accum, "self,'PI',token1,origtext");
 
     # These two really need some special treatment like we do in v2 backward
     # compatibility section of HTML::Parser.  If we are lucky we can get away
-    # with it....
-    $self->handler(comment => "self,'C',origtext",                    $push_accum);
-    $self->handler(declaration => "self,'D',origtext",                $push_accum);
+    # with it.... XXX
+    $self->handler(comment => $push_accum, "self,'C',origtext");
+    $self->handler(declaration => $push_accum, "self,'D',origtext");
 
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {

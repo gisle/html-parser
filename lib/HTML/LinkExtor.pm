@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.27 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.28 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -83,7 +83,8 @@ non-link attributes are removed.
 sub new
 {
     my($class, $cb, $base) = @_;
-    my $self = $class->SUPER::new(start_h => ["self,tagname,attr", "_start_tag"]);
+    my $self = $class->SUPER::new(start_h => ["_start_tag",
+					      "self,tagname,attr"]);
     $self->{extractlink_cb} = $cb;
     if ($base) {
 	require URI;

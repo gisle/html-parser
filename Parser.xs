@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.59 1999/11/30 20:19:46 gisle Exp $
+/* $Id: Parser.xs,v 2.60 1999/11/30 21:50:43 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -1476,7 +1476,6 @@ handler(pstate, name_sv,...)
 	char *name = SvPV(name_sv, name_len);
         int event = -1;
         struct p_handler *h;
-        int return_count;
     CODE:
 	switch (name_len) {
 	case 3:
@@ -1509,12 +1508,7 @@ handler(pstate, name_sv,...)
 	    croak("No %s handler", name);
 
 	h = &pstate->handlers[event];
-        ST(0) = h->attrspec;
-        return_count = 1;
-        if (GIMME_V == G_ARRAY) {
-	  return_count = 2;
-	  ST(1) = h->cb;
-        }
+        ST(0) = h->cb;
 
         /* update */
         if (items == 3 && SvROK(ST(2))) {
@@ -1527,30 +1521,29 @@ handler(pstate, name_sv,...)
 	  av = (AV*)sv;
 
 	  svp = av_fetch(av, 0, 0);
-	  if (svp && SvOK(*svp)) {
-	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(*svp);
-	  }
-
-	  svp = av_fetch(av, 1, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->cb);
 	    h->cb = SvREFCNT_inc(*svp);
 	  }
+
+	  svp = av_fetch(av, 1, 0);
+	  if (svp) {
+	    SvREFCNT_dec(h->attrspec);
+	    h->attrspec = attrspec_compile(*svp);
+	  }
+
 	}
         else if (items > 2) {
-	  if (SvOK(ST(2))) {
-	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(ST(2));
-	  }
+	  SvREFCNT_dec(h->cb);
+	  h->cb = newSVsv(ST(2));
+
 	  if (items > 3) {
-	    SvREFCNT_dec(h->cb);
-	    h->cb = SvREFCNT_inc(ST(3));
-	    /* XXX should check for CODE reference */
+	    SvREFCNT_dec(h->attrspec);
+	    h->attrspec = attrspec_compile(ST(3));
 	  }
 	}
 
-        XSRETURN(return_count);
+        XSRETURN(1);
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities

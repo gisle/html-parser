@@ -6,7 +6,7 @@ my $p = HTML::Parser->new(xml_mode => 1,
 			 );
 
 my $text = "";
-$p->handler(start => "tagname,attr",
+$p->handler(start =>
 	    sub {
 		 my($tag, $attr) = @_;
 		 $text .= "S[$tag";
@@ -15,19 +15,19 @@ $p->handler(start => "tagname,attr",
 		     $text .= " $k=$v";
 		 }
 		 $text .= "]";
-	     });
-$p->handler(end => "tagname",
+	     }, "tagname,attr");
+$p->handler(end =>
 	     sub {
 		 $text .= "E[" . shift() . "]";
-	     });
-$p->handler(process => "token1",
+	     }, "tagname");
+$p->handler(process => 
 	     sub {
 		 $text .= "PI[" . shift() . "]";
-	     });
-$p->handler(text => "origtext",
+	     }, "token1");
+$p->handler(text =>
 	     sub {
 		 $text .= shift;
-	     });
+	     }, "origtext");
 
 my $xml = <<'EOT';
 <?xml version="1.0"?>

@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_15;  # $Date: 1999/11/30 20:02:39 $
+$VERSION = 2.99_15;  # $Date: 1999/11/30 21:50:43 $
 
 require HTML::Entities;
 
@@ -44,25 +44,25 @@ sub new
     }
     elsif (!$_[0] || $_[0] < 3) {
 	# Set up method callbacks for compatibility with HTML-Parser-2.xx
-	$self->handler(text        => "self,origtext,cdata_flag",    "text");
-	$self->handler(end         => "self,tagname,origtext",        "end");
-	$self->handler(process     => "self,token1,origtext",     "process");
-	$self->handler(start       => "self,tagname,attr,attrseq,origtext",
-			                                            "start");
+	$self->handler(text    => "text",    "self,origtext,cdata_flag");
+	$self->handler(end     => "end",     "self,tagname,origtext");
+	$self->handler(process => "process", "self,token1,origtext");
+	$self->handler(start   => "start",
+		                  "self,tagname,attr,attrseq,origtext");
 
-	$self->handler(comment => "self,tokens",
+	$self->handler(comment =>
 		       sub {
 			   my($self, $tokens) = @_;
 			   for (@$tokens) {
 			       $self->comment($_);
 			   }
-		       });
+		       }, "self,tokens");
 
-	$self->handler(declaration => "self,origtext",
+	$self->handler(declaration =>
 		       sub {
 			   my $self = shift;
 			   $self->declaration(substr($_[0], 2, -1));
-		       });
+		       }, "self,origtext");
     }
     $self;
 }
@@ -146,6 +146,9 @@ This is the new and still experimental XS based HTML::Parser.  It
 should be completely backwards compatible with HTML::Parser version
 2.2x, but has many new features.  This is currently an alpha release.
 The interface to the new features might still change.
+
+B<Warning: This manual page is not up to date.  Lot of the new stuff
+has changed recently.>
 
 =head1 DESCRIPTION
 
