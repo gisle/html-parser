@@ -1,3 +1,24 @@
+1999-12-02   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_17
+
+   HTML::Parser documentation patch from Michael.
+
+   Fix memory leaks in html_handler()
+
+   Patch that makes an array legal as handler destination.
+   Also from Michael.
+
+   The end of marked sections does not eat successive newline
+   any more.
+
+   The artificial end event for empty tag in xml_mode did not
+   report an empty origtext.
+
+   New constructor option: 'api_version'
+
+
+
 1999-12-01   Gisle Aas <gisle@aas.no>
 
    Release 2.99_16
