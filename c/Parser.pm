@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_01';  # $Date: 1999/11/03 16:12:22 $
+$VERSION = '2.99_01';  # $Date: 1999/11/03 17:54:47 $
 
 require DynaLoader;
 @ISA=qw(DynaLoader);
@@ -27,7 +27,7 @@ sub new
 	}
     }
     else {
-	#_set_up_method_callbacks($self);
+	_set_up_method_callbacks($self);
     }
     $self;
 }
@@ -37,12 +37,12 @@ sub _set_up_method_callbacks
     my $self = shift;
     for (qw(text end declaration comment)) {
 	my $meth = $_;
-	$self->callback($_ => sub { $self->$meth(@_) });
+	$self->callback($_ => sub { shift->$meth(@_) });
     }
     require HTML::Entities;
     $self->callback(start =>
 		   sub {
-		       my($tag, $attr, $orig) = @_;
+		       my($obj, $tag, $attr, $orig) = @_;
 		       my(%attr, @seq);
 		       while (@$attr) {
 			   my $key = lc(shift @$attr);
@@ -50,7 +50,7 @@ sub _set_up_method_callbacks
 			   $attr{$key} = $val;
 			   push(@seq, $key);
 		       }
-		       $self->start($tag, \%attr, \@seq, $orig);
+		       $obj->start($tag, \%attr, \@seq, $orig);
 		   });
 }
 

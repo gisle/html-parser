@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.6 1999/11/03 16:13:04 gisle Exp $
+/* $Id: Parser.xs,v 1.7 1999/11/03 17:54:47 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -51,7 +51,7 @@ sv_lower(SV* sv)
 }
 
 static void
-html_text(struct p_state* p_state, char* beg, char *end)
+html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
 {
   SV *cb;
   if (beg == end)
@@ -62,6 +62,7 @@ html_text(struct p_state* p_state, char* beg, char *end)
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
       PUTBACK;
 
@@ -73,9 +74,10 @@ html_text(struct p_state* p_state, char* beg, char *end)
 }
 
 static void
-html_end(struct p_state* p_state,
+html_end(PSTATE* p_state,
 	 char *tag_beg, char *tag_end,
-	 char *beg, char *end)
+	 char *beg, char *end,
+	 SV* cbdata)
 {
   SV *cb = p_state->end_cb;
   if (cb) {
@@ -84,6 +86,7 @@ html_end(struct p_state* p_state,
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
       XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
       PUTBACK;
@@ -96,10 +99,11 @@ html_end(struct p_state* p_state,
 }
 
 static void
-html_start(struct p_state* p_state,
+html_start(PSTATE* p_state,
 	   char *tag_beg, char *tag_end,
 	   AV* tokens,
-	   char *beg, char *end)
+	   char *beg, char *end,
+	   SV* cbdata)
 {
   SV *cb = p_state->start_cb;
   if (cb) {
@@ -107,6 +111,7 @@ html_start(struct p_state* p_state,
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
       XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
       XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
@@ -120,7 +125,7 @@ html_start(struct p_state* p_state,
 }
 
 static void
-html_process(struct p_state* p_state, char*beg, char *end)
+html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->proc_cb;
   if (cb) {
@@ -128,6 +133,7 @@ html_process(struct p_state* p_state, char*beg, char *end)
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
       PUTBACK;
 
@@ -139,7 +145,7 @@ html_process(struct p_state* p_state, char*beg, char *end)
 }
 
 static void
-html_comment(struct p_state* p_state, char *beg, char *end)
+html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->com_cb;
   if (cb) {
@@ -147,6 +153,7 @@ html_comment(struct p_state* p_state, char *beg, char *end)
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
       PUTBACK;
 
@@ -158,7 +165,7 @@ html_comment(struct p_state* p_state, char *beg, char *end)
 }
 
 static void
-html_decl(struct p_state* p_state, AV* tokens, char *beg, char *end)
+html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->decl_cb;
   if (cb) {
@@ -166,6 +173,7 @@ html_decl(struct p_state* p_state, AV* tokens, char *beg, char *end)
       ENTER;
       SAVETMPS;
       PUSHMARK(SP);
+      XPUSHs(cbdata);
       XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
       XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
       PUTBACK;
@@ -179,7 +187,7 @@ html_decl(struct p_state* p_state, AV* tokens, char *beg, char *end)
 
 
 static char*
-html_parse_decl(struct p_state* p_state, char *beg, char *end)
+html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg;
 
@@ -256,7 +264,7 @@ html_parse_decl(struct p_state* p_state, char *beg, char *end)
       goto PREMATURE;
     if (*s == '>') {
       s++;
-      html_decl(p_state, tokens, beg, s-1);
+      html_decl(p_state, tokens, beg, s-1, cbdata);
       if (tokens)
 	SvREFCNT_dec(tokens);
       return s;
@@ -304,7 +312,7 @@ html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	    if (s < end && *s == '>') {
 	      s++;
 	      /* yup */
-	      html_comment(p_state, beg+2, end_com);
+	      html_comment(p_state, beg+2, end_com, cbdata);
 	      return s;
 	    }
 	  }
@@ -323,7 +331,7 @@ html_parse_decl(struct p_state* p_state, char *beg, char *end)
 }
 
 static char*
-html_parse_start(struct p_state* p_state, char *beg, char *end)
+html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg;
   char *tag_end;
@@ -399,7 +407,7 @@ html_parse_start(struct p_state* p_state, char *beg, char *end)
   if (*s == '>') {
     s++;
     /* done */
-    html_start(p_state, beg+1, tag_end, tokens, beg, s);
+    html_start(p_state, beg+1, tag_end, tokens, beg, s, cbdata);
     if (tokens)
       SvREFCNT_dec(tokens);
     return s;
@@ -415,8 +423,9 @@ html_parse_start(struct p_state* p_state, char *beg, char *end)
 }
 
 static void
-html_parse(struct p_state* p_state,
-	   SV* chunk)
+html_parse(PSTATE* p_state,
+	   SV* chunk,
+	   SV* cbdata)
 {
   char *s, *t, *end;
   STRLEN len;
@@ -444,7 +453,7 @@ html_parse(struct p_state* p_state,
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
-      html_text(p_state, s, s+len);
+      html_text(p_state, s, s+len, cbdata);
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -473,7 +482,7 @@ html_parse(struct p_state* p_state,
       s++;
     if (s != t) {
       if (*s == '<') {
-	html_text(p_state, t, s);
+	html_text(p_state, t, s, cbdata);
 	t = s;
       }
       else {
@@ -491,7 +500,7 @@ html_parse(struct p_state* p_state,
 	    s--;
 	}
 	s++;
-	html_text(p_state, t, s);
+	html_text(p_state, t, s, cbdata);
 	t = s;
 	break;
       }
@@ -505,9 +514,11 @@ html_parse(struct p_state* p_state,
 
     if (isALPHA(*s)) {
       /* start tag */
-      char *new_pos = html_parse_start(p_state, s-1, end);
-      if (new_pos == s-1)
+      char *new_pos = html_parse_start(p_state, s-1, end, cbdata);
+      if (new_pos == s-1) {
+	s--;
 	break;
+      }	
       else if (new_pos)
 	t = s = new_pos;
     }
@@ -527,7 +538,7 @@ html_parse(struct p_state* p_state,
 	  if (*s == '>') {
 	    s++;
 	    /* a complete end tag has been recognized */
-	    html_end(p_state, tag_start, tag_end, t, s);
+	    html_end(p_state, tag_start, tag_end, t, s, cbdata);
 	    t = s;
 	  }
 	}
@@ -541,7 +552,7 @@ html_parse(struct p_state* p_state,
       /* declaration or comment */
       char *new_pos;
       s++;
-      new_pos = html_parse_decl(p_state, s, end);
+      new_pos = html_parse_decl(p_state, s, end, cbdata);
       if (new_pos == s) {
 	/* no progress, need more */
 	s = t;
@@ -559,7 +570,7 @@ html_parse(struct p_state* p_state,
       if (*s == '>') {
 	s++;
 	/* a complete processing instruction seen */
-	html_process(p_state, t+2, s-1);
+	html_process(p_state, t+2, s-1, cbdata);
 	t = s;
       }
       else {
@@ -649,11 +660,13 @@ DESTROY(pstate)
 
 
 void
-parse(pstate, chunk)
-	PSTATE* pstate
+parse(self, chunk)
+	SV* self;
 	SV* chunk
+    PREINIT:
+	PSTATE* pstate = get_pstate(self);
     PPCODE:
-	html_parse(pstate, chunk);
+	html_parse(pstate, chunk, self);
 	XSRETURN(1); /* self */
 
 int
