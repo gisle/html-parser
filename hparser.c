@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.8 1999/12/04 23:44:27 gisle Exp $
+/* $Id: hparser.c,v 2.9 1999/12/04 23:59:30 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -191,8 +191,12 @@ report_event(PSTATE* p_state,
 	  SV* attrname = newSVpvn(tokens[i].beg,
 				  tokens[i].end-tokens[i].beg);
 	  SV* attrval;
-	  if (p_state->bool_attr_val && tokens[i].beg == tokens[i+1].beg) {
-	    attrval = newSVsv(p_state->bool_attr_val);
+
+	  if (tokens[i].beg == tokens[i+1].beg) { /* boolean */
+	    if (p_state->bool_attr_val)
+	      attrval = newSVsv(p_state->bool_attr_val);
+	    else
+	      attrval = newSVsv(attrname);
 	  }
 	  else {
 	    char *beg = tokens[i+1].beg;
