@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.30 1999/12/14 09:40:13 gisle Exp $
+/* $Id: hparser.c,v 2.31 1999/12/15 20:56:37 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -240,7 +240,7 @@ report_event(PSTATE* p_state,
 	    char *beg = tokens[i+1].beg;
 	    STRLEN len = tokens[i+1].end - beg;
 	    if (*beg == '"' || *beg == '\'') {
-	      assert(len < 2 || *beg != beg[len-1]);
+	      assert(len >= 2 && *beg == beg[len-1]);
 	      beg++; len -= 2;
 	    }
 	    attrval = newSVpvn(beg, len);
