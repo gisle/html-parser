@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.24 2004/11/23 14:51:50 gisle Exp $
+/* $Id: util.c,v 2.25 2004/11/29 10:53:15 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -266,3 +266,41 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 
     return sv;
 }
+
+#ifdef UNICODE_HTML_PARSER
+static bool
+has_hibit(char *s, char *e)
+{
+    while (s < e) {
+	U8 ch = *s++;
+	if (!UTF8_IS_INVARIANT(ch)) {
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+
+EXTERN bool
+probably_utf8_chunk(pTHX_ char *s, STRLEN len)
+{
+    char *e = s + len;
+    STRLEN clen;
+
+    /* ignore partial utf8 char at end of buffer */
+    while (s < e && UTF8_IS_CONTINUATION((U8)*(e - 1)))
+	e--;
+    if (s < e && UTF8_IS_START((U8)*(e - 1)))
+	e--;
+    clen = len - (e - s);
+    if (clen && UTF8SKIP(e) == clen) {
+	/* all promised continuation bytes are present */
+	e = s + len;
+    }
+
+    if (!has_hibit(s, e))
+	return 0;
+
+    return is_utf8_string(s, e - s);
+}
+#endif

@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.127 2004/11/23 20:38:25 gisle Exp $
+/* $Id: Parser.xs,v 2.128 2004/11/29 10:53:15 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -506,6 +506,23 @@ _decode_entities(string, entities, ...)
 	if (SvREADONLY(string))
 	    croak("Can't inline decode readonly string");
 	decode_entities(aTHX_ string, entities_hv, allow_unterminated);
+
+bool
+_probably_utf8_chunk(string)
+    SV* string
+    PREINIT:
+        STRLEN len;
+        char *s;
+    CODE:
+#ifdef UNICODE_HTML_PARSER
+        sv_utf8_downgrade(string, 0);
+	s = SvPV(string, len);
+        RETVAL = probably_utf8_chunk(aTHX_ s, len);
+#else
+	croak("_probably_utf8_chunk() only works for Unicode enabled perls");
+#endif
+    OUTPUT:
+        RETVAL
 
 int
 UNICODE_SUPPORT()

@@ -11,7 +11,7 @@ use strict;
 use Test qw(plan ok);
 use HTML::Parser;
 
-plan tests => 87;
+plan tests => 97;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -66,6 +66,7 @@ ok($parsed[7][0], "end_document");
 ok($parsed[7][3], length($doc));
 ok($parsed[7][5], length($doc));
 ok($parsed[7][6], length($doc));
+ok(@warn, 0);
 
 # Try to parse it as an UTF8 encoded string
 utf8::encode($doc);
@@ -113,6 +114,9 @@ ok($parsed[7][3], length($doc));
 ok($parsed[7][5], length($doc));
 ok($parsed[7][6], length($doc));
 
+ok(@warn, 1);
+ok($warn[0] =~ /^Parsing of undecoded UTF-8 will give garbage when decoding entities/);
+
 my $file = "test-$$.html";
 open(my $fh, ">:utf8", $file) || die;
 print $fh <<EOT;
@@ -122,7 +126,7 @@ print $fh <<EOT;
 EOT
 close($fh) || die;
 
-ok(!@warn);
+@warn = ();
 @parsed = ();
 $p->parse_file($file);
 ok(@parsed, "11");
@@ -162,5 +166,14 @@ ok($parsed[7][2], "\xE2\x99\xA5 Love \xE2\x99\xA5");
 ok($parsed[10][3], -s $file);
 ok(@warn, 0);
 
-
 unlink($file);
+
+ok(!HTML::Entities::_probably_utf8_chunk(""));
+ok(!HTML::Entities::_probably_utf8_chunk("f"));
+ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5"));
+ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o"));
+ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2"));
+ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2\x99"));
+ok(!HTML::Entities::_probably_utf8_chunk("f\xE2"));
+ok(!HTML::Entities::_probably_utf8_chunk("f\xE2\x99"));
+
