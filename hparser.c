@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.92 2003/08/17 18:19:13 gisle Exp $
+/* $Id: hparser.c,v 2.93 2003/10/03 13:09:05 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1606,6 +1606,8 @@ parse(pTHX_
 		    token.beg = s + 1;
 		    token.end = end;
 		    report_event(p_state, E_COMMENT, s, end, &token, 1, self);
+		    SvREFCNT_dec(p_state->buf);
+		    p_state->buf = 0;
 		}
 		else {
 		    goto REST_IS_TEXT;
