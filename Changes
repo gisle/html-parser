@@ -5,6 +5,9 @@
    Never split words (a sequence of non-space) between two invocations
    of $self->text.  This is just a simplification of the code that tried
    not to break entities.
+   
+   HTML::Parser->parse_file now use smaller chunks as already
+   suggested by the HTML::Parser documentation.
 
 
 
