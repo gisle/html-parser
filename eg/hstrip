@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+# This script cleans up an HTML document
+
+use strict;
+use HTML::Parser ();
+
+my %ignore_attr = map {$_ => 1}
+    qw(bgcolor background color face style link alink x-vlink text
+       onblur onchange onclick ondblclick onfocus onkeydown onkeyup onload
+       onmousedown onmousemove onmouseout onmouseover onmouseup
+       onreset onselect onunload
+      );
+
+my %ignore_tag = map {$_ => 1}
+    qw(font big small b i);
+
+my %ignore_elem = map {$_ => 1}
+    qw(script style);
+
+my %inside_ignore;
+
+sub shift2 { return shift(@{$_[0]}), shift(@{$_[0]}); }
+sub ignore { 0; }
+
+sub tag
+{
+    my $tagname = shift;
+    return if $ignore_tag{$tagname};
+    my $is_end  = shift;
+
+    if ($ignore_elem{$tagname}) {
+	delete $inside_ignore{$tagname}
+	    unless $inside_ignore{$tagname} += ($is_end ? -1 : 1);
+	return;
+    }
+    return if %inside_ignore;
+
+    my($pos, $text) = @_;
+    unless ($is_end) {
+	# Should we kill some attributes?
+	my($t_offset, $t_len) = shift2($pos);  # tagname
+	my $attr_offset = $t_offset + $t_len;
+	my $offset = 0;  # to compensate as we kill stuff
+	while (@$pos) {
+	    my($k_offset, $k_len) = shift2($pos);
+	    $k_offset += $offset;
+	    my($v_offset, $v_len) = shift2($pos);
+	    my $attr_len = $v_offset ? $v_offset - $k_offset + $offset + $v_len
+		                     : $k_len;
+	    $attr_len += $k_offset - $attr_offset;
+	    if ($ignore_attr{lc substr($text, $k_offset, $k_len)}) {
+		substr($text, $attr_offset, $attr_len) = "";
+		$offset -= $attr_len;
+	    }
+	    else {
+		$attr_offset += $attr_len
+	    }
+	}
+    }
+    print $text;
+}
+
+sub decl
+{
+    my $t0 = shift;
+    print shift if $t0 eq "DOCTYPE";
+}
+
+sub text
+{
+    print shift unless %inside_ignore;
+}
+
+HTML::Parser->new(api_version   => 3,
+		  start_h       => [\&tag,   "tagname, '',  tokenpos, text"],
+		  end_h         => [\&tag,   "tagname, '/', undef,    text"],
+                  process_h     => [\&ignore, ""],
+		  comment_h     => [\&ignore, ""],
+                  declaration_h => [\&decl,   "token0, text"],
+                  default_h     => [\&text,   "text"],
+                 )
+    ->parse_file(shift);
+
