@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.109 2001/05/04 20:47:22 gisle Exp $
+/* $Id: Parser.xs,v 2.110 2001/05/08 01:53:46 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -153,6 +153,7 @@ free_pstate(PSTATE* pstate)
     int i;
     SvREFCNT_dec(pstate->buf);
     SvREFCNT_dec(pstate->pend_text);
+    SvREFCNT_dec(pstate->skipped_text);
 #ifdef MARKED_SECTION
     SvREFCNT_dec(pstate->ms_stack);
 #endif

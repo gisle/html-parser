@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.23';  # $Date: 2001/05/07 17:45:08 $
+$VERSION = '3.23';  # $Date: 2001/05/08 01:53:45 $
 
 require HTML::Entities;
 
@@ -677,6 +677,11 @@ C<style>, C<xmp>, and C<plaintext>).
 When the flag is FALSE for a text event, then you should normally
 either use C<dtext> or decode the entities yourself before the text is
 processed further.
+
+=item C<skipped_text>
+
+Skipped_text returns all text of the document that has been skipped
+since the last time an event was reported.
 
 =item C<offset>
 

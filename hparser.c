@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.72 2001/05/07 17:45:08 gisle Exp $
+/* $Id: hparser.c,v 2.73 2001/05/08 01:53:46 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -44,6 +44,7 @@ enum argcode {
     ARG_TEXT,
     ARG_DTEXT,
     ARG_IS_CDATA,
+    ARG_SKIPPED_TEXT,
     ARG_OFFSET,
     ARG_LENGTH,
     ARG_LINE,
@@ -70,6 +71,7 @@ char *argname[] = {
     "text",     /* ARG_TEXT */
     "dtext",    /* ARG_DTEXT */
     "is_cdata", /* ARG_IS_CDATA */
+    "skipped_text", /* ARG_SKIPPED_TEXT */
     "offset",   /* ARG_OFFSET */
     "length",   /* ARG_LENGTH */
     "line",     /* ARG_LINE */
@@ -178,11 +180,11 @@ report_event(PSTATE* p_state,
     }
 
     if (event == E_NONE)
-	return;
+	goto IGNORE;
     
 #ifdef MARKED_SECTION
     if (p_state->ms == MS_IGNORE)
-	return;
+	goto IGNORE;
 #endif
 
     /* tag filters */
@@ -206,7 +208,7 @@ report_event(PSTATE* p_state,
 			p_state->ignoring_element = 0;
 		    }
 		}
-		return;
+		goto IGNORE;
 	    }
 
 	    PERL_HASH(hash, SvPVX(tagname), SvCUR(tagname));
@@ -216,22 +218,22 @@ report_event(PSTATE* p_state,
 	    {
 		p_state->ignoring_element = newSVsv(tagname);
 		p_state->ignore_depth = 1;
-		return;
+		goto IGNORE;
 	    }
 
 	    if (p_state->ignore_tags &&
 		hv_fetch_ent(p_state->ignore_tags, tagname, 0, hash))
 	    {
-		return;
+		goto IGNORE;
 	    }
 	    if (p_state->report_tags &&
 		!hv_fetch_ent(p_state->report_tags, tagname, 0, hash))
 	    {
-		return;
+		goto IGNORE;
 	    }
 	}
 	else if (p_state->ignoring_element) {
-	    return;
+	    goto IGNORE;
 	}
     }
 
@@ -240,7 +242,7 @@ report_event(PSTATE* p_state,
 	/* event = E_DEFAULT; */
 	h = &p_state->handlers[E_DEFAULT];
 	if (!h->cb)
-	    return;
+	    goto IGNORE;
     }
 
     if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
@@ -462,6 +464,11 @@ report_event(PSTATE* p_state,
 	    }
 	    break;
 
+        case ARG_SKIPPED_TEXT:
+	    arg = sv_2mortal(p_state->skipped_text);
+	    p_state->skipped_text = newSVpvn("", 0);
+            break;
+
 	case ARG_OFFSET:
 	    arg = sv_2mortal(newSViv(offset));
 	    break;
@@ -534,6 +541,14 @@ report_event(PSTATE* p_state,
 	FREETMPS;
 	LEAVE;
     }
+    if (p_state->skipped_text)
+	SvCUR_set(p_state->skipped_text, 0);
+    return;
+
+IGNORE:
+    if (p_state->skipped_text)
+	sv_catpvn(p_state->skipped_text, beg, end - beg);
+    return;
 }
 
 
@@ -589,6 +604,11 @@ argspec_compile(SV* src, PSTATE* p_state)
 		    if (!p_state->line)
 			p_state->line = 1; /* enable tracing of line/column */
 		}
+		if (a == ARG_SKIPPED_TEXT) {
+		    if (!p_state->skipped_text) {
+			p_state->skipped_text = newSVpvn("", 0);
+                    }
+                }
 	    }
 	    else {
 		croak("Unrecognized identifier %s in argspec", name);

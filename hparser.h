@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.21 2001/05/07 17:45:08 gisle Exp $
+/* $Id: hparser.h,v 2.22 2001/05/08 01:53:46 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -83,6 +83,9 @@ struct p_state {
     STRLEN pend_text_offset;
     STRLEN pend_text_line;
     STRLEN pend_text_column;
+
+    /* skipped text is accumulated here */
+    SV* skipped_text;
 
 #ifdef MARKED_SECTION
     /* marked section support */
