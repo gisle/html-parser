@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.48 1999/11/30 13:39:38 gisle Exp $
+/* $Id: Parser.xs,v 2.49 1999/11/30 13:43:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -13,9 +13,7 @@
  *   - pic attribute (">" or "?>" are defaults)
  *   - count chars, line numbers
  *   - utf8 mode (entities expand to utf8 chars)
- *   - option that make start tag attrs be returned as a hash
  *   - return partial text from literal/cdata mode
- *   - accum flags (filter out what enters @accum)
  *   - option to avoid attribute value decoding
  *
  * PLAIN BUGS:
@@ -114,13 +112,8 @@ struct p_state {
   /* various boolean configuration attributes */
   bool strict_comment;
   bool strict_names;
-  bool decode_text_entities;
-  bool keep_case;
   bool xml_mode;
-  bool v2_compat;
-  bool pass_self;
   bool unbroken_text;
-  bool attr_pos;
 
   /* special parsing modes */
   char* literal_mode;
@@ -1721,28 +1714,18 @@ strict_comment(pstate,...)
     ALIAS:
 	HTML::Parser::strict_comment = 1
 	HTML::Parser::strict_names = 2
-	HTML::Parser::decode_text_entities = 3
-        HTML::Parser::keep_case = 4
-        HTML::Parser::xml_mode = 5
-	HTML::Parser::v2_compat = 6
-        HTML::Parser::pass_self = 7
-	HTML::Parser::unbroken_text = 8
-        HTML::Parser::attr_pos = 9
-        HTML::Parser::marked_sections = 10
+        HTML::Parser::xml_mode = 3
+	HTML::Parser::unbroken_text = 4
+        HTML::Parser::marked_sections = 5
     PREINIT:
 	bool *attr;
     CODE:
         switch (ix) {
 	case  1: attr = &pstate->strict_comment;       break;
 	case  2: attr = &pstate->strict_names;         break;
-	case  3: attr = &pstate->decode_text_entities; break;
-	case  4: attr = &pstate->keep_case;            break;
-	case  5: attr = &pstate->xml_mode;             break;
-	case  6: attr = &pstate->v2_compat;            break;
-	case  7: attr = &pstate->pass_self;            break;
-	case  8: attr = &pstate->unbroken_text;        break;
-	case  9: attr = &pstate->attr_pos;             break;
-        case 10:
+	case  3: attr = &pstate->xml_mode;             break;
+	case  4: attr = &pstate->unbroken_text;        break;
+        case  5:
 #ifdef MARKED_SECTION
 		 attr = &pstate->marked_sections;      break;
 #else
