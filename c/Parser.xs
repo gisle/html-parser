@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.27 1999/11/08 10:50:49 gisle Exp $
+/* $Id: Parser.xs,v 1.28 1999/11/08 12:52:25 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -7,15 +7,17 @@
  */
 
 /* TODO:
+ *   - embed entity encode/decode
  *   - direct method calls
  *   - accum flags (filter out what enters @accum)
- *   - embed entity encode/decode
  *   - return partial text from literal mode
- *   - <plaintext> should not end with </plaintext>
  *   - marked sections?
- *   - unicode support
+ *   - unicode support (whatever that means)
+ *
+ * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
  *     the attribute as value.  Perhaps not really a problem.
+ *   - <plaintext> should not end with </plaintext>
  */
 
 #ifdef __cplusplus
@@ -90,6 +92,95 @@ sv_lower(SV* sv)
    return sv;
 }
 
+static SV*
+decode_entities(SV* sv, HV* entity2char)
+{
+  STRLEN len;
+  char *s = SvPV_force(sv, len);
+  char *t = s;
+  char *end = s + len;
+  char *ent_start;
+
+  char *repl;
+  STRLEN repl_len;
+  char buf[1];
+  
+
+  while (s < end) {
+    assert(t <= s);
+
+    if ((*t++ = *s++) != '&')
+      continue;
+
+    ent_start = s;
+    repl = 0;
+
+    if (*s == '#') {
+      int num = 0;
+      /* currently this code is limited to numeric references with values
+       * below 256.  Doing more need Unicode support.
+       */
+
+      s++;
+      if (*s == 'x' || *s == 'X') {
+	char *tmp;
+	s++;
+	while (*s) {
+	  char *tmp = strchr(PL_hexdigit, *s);
+	  if (!tmp)
+	    break;
+	  s++;
+	  if (num < 256) {
+	    num = num << 4 | ((tmp - PL_hexdigit) & 15);
+	  }
+	}
+      }
+      else {
+	while (isDIGIT(*s)) {
+	  if (num < 256)
+	    num = num*10 + (*s - '0');
+	  s++;
+	}
+      }
+      if (num && num < 256) {
+	buf[0] = num;
+	repl = buf;
+	repl_len = 1;
+      }
+    }
+    else {
+      char *ent_name = s;
+      while (isALNUM(*s))
+	s++;
+      if (ent_name != s && entity2char) {
+	/* XXX lookup ent_name */
+	SV** svp = hv_fetch(entity2char, ent_name, s - ent_name, 0);
+	if (svp)
+	  repl = SvPV(*svp, repl_len);
+      }
+    }
+
+    if (repl) {
+      if (*s == ';')
+	s++;
+      t--;  /* '&' already copied, undo it */
+      if (t + repl_len > s)
+	croak("Growing string not supported yet");
+      while (repl_len--)
+	*t++ = *repl++;
+    }
+    else {
+      while (ent_start < s)
+	*t++ = *ent_start++;
+    }
+  }
+
+  if (t != s) {
+    *t = '\0';
+    SvCUR_set(sv, t - SvPVX(sv));
+  }
+  return sv;
+}
 
 static void
 html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
@@ -1105,4 +1196,27 @@ callback(pstate, name_sv, cb)
 	}
 	else
 	    croak("Can't set %s callback", name);
+
+
+MODULE = HTML::Parser		PACKAGE = HTML::Entities
+
+void
+decode_entities(...)
+    PREINIT:
+	HV* entity2char = perl_get_hv("HTML::Entities::entity2char", 0);
+        int i;
+    PPCODE:
+	if (GIMME_V == G_SCALAR && items > 1)
+            items = 1;
+	for (i = 0; i < items; i++) {
+	    if (GIMME_V != G_VOID)
+	        ST(i) = sv_2mortal(newSVsv(ST(i)));
+	    else if (SvREADONLY(ST(i)))
+		croak("Can't inline decode readonly string");
+	    decode_entities(ST(i), entity2char);
+	}
+        XSRETURN(items);
+
+
+MODULE = HTML::Parser		PACKAGE = HTML::Parser
 
