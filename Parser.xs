@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.75 1999/12/07 12:56:05 gisle Exp $
+/* $Id: Parser.xs,v 2.76 1999/12/08 13:58:44 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -145,7 +145,7 @@ check_handler(char* name, SV* cb, SV* argspec, SV* self)
     break;
   default:
     { /* Didn't match */
-      croak("Handler (%d) for %s is not a method, subroutine, or array ref",
+      croak("Handler (%s) for %d is not a method, subroutine, or array ref",
 	    name, type);
     }
   }
@@ -306,7 +306,7 @@ handler(pstate, name_sv,...)
 	    croak("No %s handler", name);
 
 	h = &pstate->handlers[event];
-        ST(0) = h->cb;
+	ST(0) = &PL_sv_undef;
 
         /* update */
         if (items == 3 && SvROK(ST(2))) {
@@ -339,9 +339,6 @@ handler(pstate, name_sv,...)
 	  SvREFCNT_dec(h->cb);
 	  h->cb = check_handler(name, ST(2), h->argspec, self);
 	}
-
-        XSRETURN(1);
-
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
 
