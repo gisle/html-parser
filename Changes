@@ -1,3 +1,12 @@
+2000-01-14   Gisle Aas <gisle@aas.no>
+
+    Release 3.03
+
+    We did not get out of comment mode for comments ending with an
+    odd number of "-" before ">".  Patch by la mouton <kero@3sheep.com>
+
+
+
 1999-12-21   Gisle Aas <gisle@aas.no>
 
     Release 3.02
