@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.27 2003/10/10 09:56:18 gisle Exp $
+# $Id: Entities.pm,v 1.28 2004/11/23 14:52:00 gisle Exp $
 
 =head1 NAME
 
@@ -39,6 +39,22 @@ or later) will replace to Unicode characters.  Unrecognized
 entities are left alone.
 
 This routine is exported by default.
+
+=item _decode_entities( $string, \%entity2char )
+
+=item _decode_entities( $string, \%entity2char, $allow_unterminated )
+
+This will in-line replace HTML entities in $string.  The %entity2char
+hash must be provided.  Named entities not found in the %entity2char
+hash are left alone.  Numeric entities are always expanded.
+
+If $allow_unterminated is TRUE then we also unterminated named
+entities will also be expanded.  The longest matching name in
+%entity2char will be used.
+
+   $string = "foo&nbspbar";
+   _decode_entities($string, { nb => "@", nbsp => "\xA0" }, 1);
+   print $string;  # will print "foo bar"
 
 =item encode_entities( $string )
 
@@ -89,7 +105,7 @@ corresponding entities (and vice versa, respectively).
 
 =head1 COPYRIGHT
 
-Copyright 1995-2003 Gisle Aas. All rights reserved.
+Copyright 1995-2004 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -107,7 +123,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.27 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.28 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

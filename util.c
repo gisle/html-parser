@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.23 2004/11/17 12:35:36 gisle Exp $
+/* $Id: util.c,v 2.24 2004/11/23 14:51:50 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -63,7 +63,7 @@ grow_gap(pTHX_ SV* sv, STRLEN grow, char** t, char** s, char** e)
 }
 
 EXTERN SV*
-decode_entities(pTHX_ SV* sv, HV* entity2char)
+decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 {
     STRLEN len;
     char *s = SvPV_force(sv, len);
@@ -190,6 +190,18 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 #ifdef UNICODE_HTML_PARSER
 		    repl_utf8 = SvUTF8(*svp);
 #endif
+		}
+		else if (allow_unterminated) {
+		    char *ss = s - 1;
+		    while (ss > ent_name) {
+			svp = hv_fetch(entity2char, ent_name, ss - ent_name, 0);
+			if (svp) {
+			    repl = SvPV(*svp, repl_len);
+			    s = ss;
+			    break;
+			}
+			ss--;
+		    }
 		}
 	    }
 #ifdef UNICODE_HTML_PARSER

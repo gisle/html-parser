@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.110 2004/11/23 10:56:33 gisle Exp $
+/* $Id: hparser.c,v 2.111 2004/11/23 14:51:49 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -446,7 +446,7 @@ report_event(PSTATE* p_state,
 			if (utf8)
 			    SvUTF8_on(attrval);
 			if (!p_state->attr_encoded)
-			    decode_entities(aTHX_ attrval, p_state->entity2char);
+			    decode_entities(aTHX_ attrval, p_state->entity2char, 0);
 		    }
 		    else { /* boolean */
 			if (p_state->bool_attr_val)
@@ -511,7 +511,7 @@ report_event(PSTATE* p_state,
 		if (utf8)
 		    SvUTF8_on(arg);
 		if (!p_state->is_cdata)
-		    decode_entities(aTHX_ arg, p_state->entity2char);
+		    decode_entities(aTHX_ arg, p_state->entity2char, 1);
 	    }
 	    break;
       

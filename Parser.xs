@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.125 2004/11/23 10:56:33 gisle Exp $
+/* $Id: Parser.xs,v 2.126 2004/11/23 14:51:49 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -478,16 +478,17 @@ decode_entities(...)
 	        ST(i) = sv_2mortal(newSVsv(ST(i)));
 	    else if (SvREADONLY(ST(i)))
 		croak("Can't inline decode readonly string");
-	    decode_entities(aTHX_ ST(i), entity2char);
+	    decode_entities(aTHX_ ST(i), entity2char, 0);
 	}
 	SP += items;
 
 void
-_decode_entities(string, entities)
+_decode_entities(string, entities, ...)
     SV* string
     SV* entities
     PREINIT:
 	HV* entities_hv;
+        bool allow_unterminated = (items > 2) ? SvTRUE(ST(2)) : 0;
     CODE:
         if (SvOK(entities)) {
 	    if (SvROK(entities) && SvTYPE(SvRV(entities)) == SVt_PVHV) {
@@ -502,7 +503,7 @@ _decode_entities(string, entities)
         }
 	if (SvREADONLY(string))
 	    croak("Can't inline decode readonly string");
-	decode_entities(aTHX_ string, entities_hv);
+	decode_entities(aTHX_ string, entities_hv, allow_unterminated);
 
 int
 UNICODE_SUPPORT()

@@ -29,7 +29,6 @@ MINOR "BUGS" (alias FEATURES)
 
 
 MSIE bug compatibility
- - unterminated entities like foo&nbspbar in plain text (not in attributes)
  - recognize server side includes as comments; <% ... %>
    if no matching %> found tread "<% ..." as text
  - skip quoted strings when looking for PIC

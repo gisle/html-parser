@@ -55,6 +55,8 @@ package main;
 @tests =
     (
      '<a ">' => ['START[a]', "\t\": \""],
+     '<a x="foo&nbsp;bar">' => ['START[a]', "\tx: foo\xA0bar"],
+     '<a x="foo&nbspbar">' => ['START[a]', "\tx: foo&nbspbar"],
      '<å >' => ['TEXT[<å]', 'TEXT[ >]'],
      '2 < 5' => ['TEXT[2 ]', 'TEXT[<]', 'TEXT[ 5]'],
      '2 <5> 2' => ['TEXT[2 ]', 'TEXT[<5>]', 'TEXT[ 2]'],
@@ -111,6 +113,10 @@ while (@tests) {
 	    print( "not " );
 	    last; 
 	}
+    }
+    if (@result) {
+	print "\nGot: @result\n";
+	print "not ";
     }
 
    print "ok $i\n";
