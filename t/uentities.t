@@ -2,8 +2,7 @@
 
 BEGIN {
     if ($] < 5.006) {
-	print "This perl does not support Unicode\n";
-	print "1..0\n";
+	print "1..0 # skipped: This perl does not support Unicode\n";
 	exit;
     }
 }
@@ -11,8 +10,7 @@ BEGIN {
 use HTML::Entities;
 
 unless (&HTML::Entities::UNICODE_SUPPORT) {
-    print "Unicode entities not selected\n";
-    print "1..0\n";
+    print "1..0 # skipped: Unicode entities not selected\n";
     exit;
 }
 
