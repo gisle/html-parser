@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.95 2000/12/26 08:52:44 gisle Exp $
+/* $Id: Parser.xs,v 2.96 2001/02/01 04:27:44 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -111,7 +111,7 @@ static PSTATE*
 get_pstate_iv(SV* sv)
 {
   dTHX;
-  PSTATE* p = (PSTATE*)SvIV(sv);
+  PSTATE* p = INT2PTR(PSTATE*, SvIV(sv));
   if (p->signature != P_SIGNATURE)
     croak("Bad signature in parser state object at %p", p);
   return p;
@@ -199,7 +199,7 @@ _alloc_pstate(self)
 	Newz(56, pstate, 1, PSTATE);
 	pstate->signature = P_SIGNATURE;
 
-	sv = newSViv((IV)pstate);
+	sv = newSViv(PTR2IV(pstate));
 	sv_magic(sv, 0, '~', 0, 0);
 	mg = mg_find(sv, '~');
         assert(mg);
