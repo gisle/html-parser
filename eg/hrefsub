@@ -18,9 +18,10 @@ use strict;
 use HTML::Parser ();
 use URI;
 
+# Construct a hash of tag names that may have links.
 my %link_attr;
 {
-    # To simplify things we reformat the %HTML::Tagset::linkElements
+    # To simplify things, reformat the %HTML::Tagset::linkElements
     # hash so that it is always a hash of hashes.
     require HTML::Tagset;
     while (my($k,$v) = each %HTML::Tagset::linkElements) {
@@ -32,9 +33,14 @@ my %link_attr;
 	}
 	$link_attr{$k} = $v;
     }
+    # Uncomment this to see what HTML::Tagset::linkElements thinks are
+    # the tags with link attributes
     #use Data::Dump; Data::Dump::dump(\%link_attr); exit;
 }
 
+# Create a subroutine named 'edit' to perform the operation
+# passed in from the command line.  The code should modify $_
+# to change things.
 my $code = shift;
 my $code = 'sub edit { local $_ = shift; my($attr, $tag) = @_; no strict; ' .
            $code .
@@ -43,9 +49,14 @@ my $code = 'sub edit { local $_ = shift; my($attr, $tag) = @_; no strict; ' .
 eval $code;
 die $@ if $@;
 
-
+# Set up the parser.
 my $p = HTML::Parser->new(api_version => 3);
+
+# The default is to print everything as is.
 $p->handler(default => sub { print @_ }, "text");
+
+# All links are found in start tags.  This handler will evaluate
+# &edit for each link attribute found.
 $p->handler(start => sub {
 		my($tagname, $pos, $text) = @_;
 		if (my $link_attr = $link_attr{$tagname}) {
@@ -70,6 +81,7 @@ $p->handler(start => sub {
 	    },
 	    "tagname, tokenpos, text");
 
+# Parse the file passed in from the command line
 my $file = shift || usage();
 $p->parse_file($file) || die "Can't open file $file: $!\n";
 
