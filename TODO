@@ -7,8 +7,6 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
-  - perhaps 'bytepos/offset' in attrspec?
-
 PLAIN BUGS
 
   - the tokenpos reported for the generated end event for
@@ -23,7 +21,6 @@ ISSUES
   - Should we report tokens for 'text'?  If all you want is to know
     the length of a text segment, then 'tokenpos' could be used instead
     of asking for 'text' and then applying length($text).
-  - Flat tokens? Something like '@tokens' in argspec?
   - Something better than '' as the default argspec?
 
   - Should some '\n' be part of markup instead of text.  The SGML standard
@@ -34,7 +31,6 @@ ISSUES
 
 FEATURES THAT CAN WAIT
 
- - report 'bytepos/offset'
  - report 'linenumber'
  - unbroken_text option
  - utf8 mode (where entities expand to utf8 chars instead of latin1 chars)
