@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.112 2001/05/10 19:18:07 gisle Exp $
+/* $Id: Parser.xs,v 2.113 2002/03/08 03:49:23 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -297,6 +297,8 @@ strict_comment(pstate,...)
         HTML::Parser::xml_mode = 3
 	HTML::Parser::unbroken_text = 4
         HTML::Parser::marked_sections = 5
+        HTML::Parser::attr_encoded = 6
+        HTML::Parser::case_sensitive = 7
     PREINIT:
 	bool *attr;
     CODE:
@@ -311,6 +313,8 @@ strict_comment(pstate,...)
 #else
 	         croak("marked sections not supported"); break;
 #endif
+	case  6: attr = &pstate->attr_encoded;         break;
+	case  7: attr = &pstate->case_sensitive;       break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }

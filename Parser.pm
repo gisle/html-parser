@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.25';  # $Date: 2001/05/11 17:24:09 $
+$VERSION = '3.25';  # $Date: 2002/03/08 03:49:23 $
 
 require HTML::Entities;
 
@@ -426,6 +426,16 @@ honoured.
 
 There are currently no events associated with the marked section
 markup, but the text can be returned as C<skipped_text>.
+
+=item $p->attr_encoded( [$bool] )
+
+By default, attr and @attr decode general enitites for attribute values.
+This turns off that behavior.
+
+=item $p->case_sensititve( [$bool] )
+
+By default, attr and @attr downcase attribute names. This turns off
+that behavior.
 
 =back
 

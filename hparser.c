@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.78 2001/05/10 19:23:05 gisle Exp $
+/* $Id: hparser.c,v 2.79 2002/03/08 03:49:23 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -84,6 +84,8 @@ char *argname[] = {
     /* ARG_FLAG_FLAT_ARRAY */
 };
 
+#define CASE_SENSITIVE(p_state) \
+         ((p_state)->xml_mode || (p_state)->case_sensitive)
 
 static void flush_pending_text(PSTATE* p_state, SV* self);
 
@@ -198,7 +200,7 @@ report_event(PSTATE* p_state,
 
 	    assert(num_tokens >= 1);
 	    sv_setpvn(tagname, tokens[0].beg, tokens[0].end - tokens[0].beg);
-	    if (!p_state->xml_mode)
+	    if (!CASE_SENSITIVE(p_state))
 		sv_lower(aTHX_ tagname);
 
 	    if (p_state->ignoring_element) {
@@ -364,7 +366,7 @@ report_event(PSTATE* p_state,
 	    if (num_tokens >= 1) {
 		arg = sv_2mortal(newSVpvn(tokens[0].beg,
 					  tokens[0].end - tokens[0].beg));
-		if (!p_state->xml_mode && argcode != ARG_TOKEN0)
+		if (!CASE_SENSITIVE(p_state) && argcode != ARG_TOKEN0)
 		    sv_lower(aTHX_ arg);
 		if (argcode == ARG_TAG && event != E_START) {
 		    char *e_type = "!##/#?#";
@@ -398,7 +400,8 @@ report_event(PSTATE* p_state,
 			    beg++; len -= 2;
 			}
 			attrval = newSVpvn(beg, len);
-			decode_entities(aTHX_ attrval, p_state->entity2char);
+			if (!p_state->attr_encoded)
+			    decode_entities(aTHX_ attrval, p_state->entity2char);
 		    }
 		    else { /* boolean */
 			if (p_state->bool_attr_val)
@@ -407,7 +410,7 @@ report_event(PSTATE* p_state,
 			    attrval = newSVsv(attrname);
 		    }
 
-		    if (!p_state->xml_mode)
+		    if (!CASE_SENSITIVE(p_state))
 			sv_lower(aTHX_ attrname);
 
 		    if (argcode == ARG_ATTR) {
@@ -440,7 +443,7 @@ report_event(PSTATE* p_state,
 		for (i = 1; i < num_tokens; i += 2) {
 		    SV* attrname = newSVpvn(tokens[i].beg,
 					    tokens[i].end-tokens[i].beg);
-		    if (!p_state->xml_mode)
+		    if (!CASE_SENSITIVE(p_state))
 			sv_lower(aTHX_ attrname);
 		    av_push(av, attrname);
 		}

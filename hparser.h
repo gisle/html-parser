@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.22 2001/05/08 01:53:46 gisle Exp $
+/* $Id: hparser.h,v 2.23 2002/03/08 03:49:23 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -99,6 +99,8 @@ struct p_state {
     bool strict_names;
     bool xml_mode;
     bool unbroken_text;
+    bool attr_encoded;
+    bool case_sensitive;
 
     /* other configuration stuff */
     SV* bool_attr_val;
