@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.9 1999/11/09 15:36:06 gisle Exp $
+/* $Id: Parser.xs,v 2.10 1999/11/09 15:52:21 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -277,7 +277,7 @@ html_end(PSTATE* p_state,
     
     av_push(av, newSVpv("E", 1));
     av_push(av, tag);
-    av_push(av, newSVpv(beg, end - beg));
+    av_push(av, newSVpvn(beg, end - beg));
     av_push(accum, (SV*)av);
     return;
   }
@@ -295,7 +295,7 @@ html_end(PSTATE* p_state,
     if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
     XPUSHs(sv);
-    XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
     perl_call_sv(cb, G_DISCARD);
@@ -314,10 +314,9 @@ html_start(PSTATE* p_state,
 	   char *beg, char *end,
 	   SV* cbdata)
 {
-  AV *accum;
-  SV *cb;
+  AV *accum = p_state->accum;
+  SV *cb = p_state->start_cb;
 
-  accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
     SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
@@ -327,15 +326,10 @@ html_start(PSTATE* p_state,
     av_push(av, newSVpv("S", 1));
     av_push(av, tag);
     av_push(av, SvREFCNT_inc((SV*)tokens));
-    if (p_state->xml_mode)
-      av_push(av, newSVsv(boolSV(empty_tag)));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, (SV*)av);
-    return;
   }
-
-  cb = p_state->start_cb;
-  if (cb) {
+  else if (cb) {
     SV *sv;
     dSP;
     ENTER;
@@ -348,8 +342,6 @@ html_start(PSTATE* p_state,
       sv_lower(sv);
     XPUSHs(sv);
     XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
-    if (p_state->xml_mode)
-      XPUSHs(boolSV(empty_tag));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -357,6 +349,10 @@ html_start(PSTATE* p_state,
 
     FREETMPS;
     LEAVE;
+  }
+
+  if (empty_tag) {
+    html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, cbdata);
   }
 }
 
