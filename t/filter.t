@@ -49,7 +49,7 @@ print "ok 1\n";
 }
 
 my $f2 = MyFilter->new->parse_file($tmpfile)->filtered_html;
-unlink($tmpfile) or warn "$!";
+unlink($tmpfile) or warn "Can't unlink $tmpfile: $!";
 
 #print $f2;
 
