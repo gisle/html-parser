@@ -23,19 +23,27 @@ my $err;
 
 $p->handler(default =>
 	    sub {
-		my($offset, $text) = @_;
+		my($offset, $length, $line, $col, $text) = @_;
 		my $copy = $text;
 		$copy =~ s/\n/\\n/g;
 		substr($copy, 30) = "..." if length($copy) > 32;
-		printf ">>> %3d %s\n", $offset, $copy;
+		printf ">>> %d.%d %s\n", $line, $col, $copy;
 		if ($offset != $sum_len) {
 		   print "offset mismatch $offset vs $sum_len\n";
 		   $err++;
                 }
-		$sum_len += length($text);
+		if ($length != length($text)) {
+		   print "length mismatch\n";
+		   $err++;
+		}
+                if (substr($HTML, $offset, $length) ne $text) {
+		   print "content mismatch\n";
+		   $err++;
+		}
+		$sum_len += $length;
 		$count++;
 	    },
-	    'offset,text');
+	    'offset,length,line,column,text');
 
 for (split(//, $HTML)) {
    $p->parse($_);
