@@ -1,3 +1,23 @@
+1999-11-15   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_09
+
+   Grammar fixes by Michael A. Chase <mchase@ix.netcom.com>
+
+   Some more test suite patches for Win32 by Michael A. Chase
+   <mchase@ix.netcom.com>
+
+   Implemented $p->strict_names() attribute.  By default we now
+   allow almost anything in tag and attribute names.  This is much
+   closer to the behaviour of some popular browsers.  This allow us
+   to parse broken tags like this example from the LWP mailing list:
+   <IMG ALIGN=MIDDLE SRC=newprevlstGr.gif ALT=[PREV LIST] BORDER=0>
+
+   Introduced some tables in "hctype.h" and "pfunc.h".  These
+   are built by the corresponding "mk..." script.
+
+
+
 1999-11-10   Gisle Aas <gisle@aas.no>
 
    Release 2.99_08
