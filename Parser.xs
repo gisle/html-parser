@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.99 2001/03/02 21:04:01 gisle Exp $
+/* $Id: Parser.xs,v 2.100 2001/03/10 04:25:57 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -79,9 +79,6 @@ newSVpvn(char *s, STRLEN len)
 #endif
 
 #define EXTERN static /* Don't pollute */
-
-EXTERN
-HV* entity2char;            /* %HTML::Entities::entity2char */
 
 #include "hparser.h"
 #include "util.c"
@@ -199,6 +196,7 @@ _alloc_pstate(self)
 
 	Newz(56, pstate, 1, PSTATE);
 	pstate->signature = P_SIGNATURE;
+	pstate->entity2char = perl_get_hv("HTML::Entities::entity2char", TRUE);
 
 	sv = newSViv(PTR2IV(pstate));
 	sv_magic(sv, 0, '~', 0, 0);
@@ -338,6 +336,7 @@ void
 decode_entities(...)
     PREINIT:
         int i;
+	HV *entity2char = perl_get_hv("HTML::Entities::entity2char", FALSE);
     PPCODE:
 	if (GIMME_V == G_SCALAR && items > 1)
             items = 1;
@@ -386,6 +385,3 @@ UNICODE_SUPPORT()
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
-
-BOOT:
-    entity2char = get_hv("HTML::Entities::entity2char", TRUE);

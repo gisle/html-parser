@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.12 2001/02/23 07:08:01 gisle Exp $
+/* $Id: hparser.h,v 2.13 2001/03/10 04:25:57 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -89,6 +89,9 @@ struct p_state {
     /* other configuration stuff */
     SV* bool_attr_val;
     struct p_handler handlers[EVENT_COUNT];
+
+    /* cache */
+    HV* entity2char;            /* %HTML::Entities::entity2char */
 };
 typedef struct p_state PSTATE;
 

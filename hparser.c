@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.52 2001/02/23 07:08:01 gisle Exp $
+/* $Id: hparser.c,v 2.53 2001/03/10 04:25:57 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -278,7 +278,7 @@ report_event(PSTATE* p_state,
 			    beg++; len -= 2;
 			}
 			attrval = newSVpvn(beg, len);
-			decode_entities(aTHX_ attrval, entity2char);
+			decode_entities(aTHX_ attrval, p_state->entity2char);
 		    }
 		    else { /* boolean */
 			if (p_state->bool_attr_val)
@@ -321,7 +321,7 @@ report_event(PSTATE* p_state,
 	    if (event == E_TEXT) {
 		arg = sv_2mortal(newSVpvn(beg, end - beg));
 		if (!p_state->is_cdata)
-		    decode_entities(aTHX_ arg, entity2char);
+		    decode_entities(aTHX_ arg, p_state->entity2char);
 	    }
 	    break;
       
