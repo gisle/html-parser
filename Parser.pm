@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/07 10:56:57 $
+$VERSION = 2.99_94;  # $Date: 1999/12/07 12:54:46 $
 
 require HTML::Entities;
 
@@ -402,6 +402,9 @@ If $p->strict_comments is disabled, there will be only one sub-comment.
 
 For C<start> events, this contains the original tag name followed by
 the attribute name/value pairs.
+Boolean attributes' values will be either
+the value set by $p->boolean_attribute_value
+or the attribute name if no value has been set by $p->boolean_attribute_value.
 
 For C<end> events, this contains the original tag name.
 
@@ -416,8 +419,15 @@ For each string that appears in C<tokens>, this array contains two numbers.
 The first number is the offset of the start of the token in the original text
 C<text> and the second number is the length of the token.
 
+Boolean attributes in a C<start> event will have (0,0)
+for the attribute value offset and length.
+
 This passes undef if there are no tokens in the event (e.g., C<text>)
 and for artifical C<end> events triggered by empty start tags
+
+If you are using these offsets and lengths to modify C<text>,
+you should either work from right to left,
+or be very careful to calculate the changes to the offsets.
 
 =item C<token0>
 
@@ -438,6 +448,10 @@ disabled, the tag name is forced to lower case.
 
 Attr causes a reference to a hash of attribute name/value pairs to be
 passed.
+
+Boolean attributes' values will be either
+the value set by $p->boolean_attribute_value
+or the attribute name if no value has been set by $p->boolean_attribute_value.
 
 This passes undef except for C<start> events.
 
@@ -639,7 +653,7 @@ features provided.]
 
 HTML::Parser will leave <plaintext> mode when it sees </plaintext>
 
-<style> and <script> sections does not end with the first "</", but
+<style> and <script> sections do not end with the first "</", but
 need the complete corresponding end tag.
 
 =head1 SEE ALSO
