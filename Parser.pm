@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/08 12:14:33 $
+$VERSION = 2.99_94;  # $Date: 1999/12/08 17:27:36 $
 
 require HTML::Entities;
 
@@ -56,17 +56,17 @@ sub new
     if (my $h = delete $arg{handlers}) {
 	$h = {@$h} if ref($h) eq "ARRAY";
 	while (my($event, $cb) = each %$h) {
-	    $self->handler($event => $cb);
+	    $self->handler($event => @$cb);
 	}
     }
 
     # In the end we try to assume plain attribute or handler
-    for (keys %arg) {
-	if (/^(\w+)_h$/) {
-	    $self->handler($1 => $arg{$_});
+    while (my($option, $val) = each %arg) {
+	if ($option =~ /^(\w+)_h$/) {
+	    $self->handler($1 => @$val);
 	}
 	else {
-	    $self->$_($arg{$_});
+	    $self->$option($val);
 	}
     }
 
@@ -174,7 +174,7 @@ returns it.  Key/value pair arguments may provided to set up
 event handlers or set parser options.
 See L</PARSER OPTIONS> and L</HANDLERS>.
 
-Multiple handlers may be assigned with the 'handlers => [handlers]' option.
+Multiple handlers may be assigned with the 'handlers => [%handlers]' option.
 If a top level key is in the form "<event>_h" (e.g., "text_h"}
 then it assigns a handler to that event, otherwise it sets a parser option.
 
@@ -350,28 +350,22 @@ Argspec is a string that describes the information reported by the
 event.  Any requested information that does not apply to an event is
 passed as undef.
 
-The subroutine, method_name, or accum and the argspec may also be grouped
-in an array reference.
-
 Examples:
 
-    $p->handler(start =>  "start", 'self,attr,attrseq,text' );
-    $p->handler(start => ["start", 'self,attr,attrseq,text']);
+    $p->handler(start =>  "start", 'self, attr, attrseq, text' );
 
 These cause the "start" method of object $p to be called for 'start' events.
 The callback signature is $p->start(\%attr, \@attr_seq, $text).
 
     $p->handler(start =>  \&start, 'attr, attrseq, text' );
-    $p->handler(start => [\&start, 'attr, attrseq, text']);
 
 These cause subroutine start() to be called for 'start' events.
 The callback signature is start(\%attr, \@attr_seq, $text).
 
-    $p->handler(start =>  \@accum, '"start",attr,attrseq,text' );
-    $p->handler(start => [\@accum, '"start",attr,attrseq,text']);
+    $p->handler(start =>  \@accum, '"S", attr, attrseq, text' );
 
 These cause 'start' event information to be saved in @accum.
-The array elements will be ['start', \%attr, \@attr_seq, $text].
+The array elements will be ['S', \%attr, \@attr_seq, $text].
 
 =back
 

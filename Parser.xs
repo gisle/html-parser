@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.78 1999/12/08 15:14:54 gisle Exp $
+/* $Id: Parser.xs,v 2.79 1999/12/08 17:27:36 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -247,47 +247,24 @@ handler(pstate, eventname,...)
 	if (h->cb) {
 	  ST(0) = (SvTYPE(h->cb) == SVt_PVAV)
 	             ? sv_2mortal(newRV_inc(h->cb))
-	             : h->cb;
+	             : sv_2mortal(newSVsv(h->cb));
 	}
         else {
 	  ST(0) = &PL_sv_undef;
         }
 
         /* update */
-        if (items == 3 && SvROK(ST(2))) {
-	  SV* sv = SvRV(ST(2));
-	  AV* av;
-	  SV** svp;
-
-	  if (SvTYPE(sv) != SVt_PVAV)
-	    croak("Handler argument reference is not an array");
-	  av = (AV*)sv;
-
-	  svp = av_fetch(av, 1, 0);
-	  if (svp) {
-	    SvREFCNT_dec(h->argspec);
-	    h->argspec = 0;
-	    h->argspec = argspec_compile(*svp);
-	  }
-
-	  svp = av_fetch(av, 0, 0);
-	  if (svp) {
-	    SvREFCNT_dec(h->cb);
-	    h->cb = 0;
-	    h->cb = check_handler(*svp);
-	  }
-	}
-        else if (items > 2) {
-	  if (items > 3) {
+        if (items > 3) {
 	    SvREFCNT_dec(h->argspec);
 	    h->argspec = 0;
 	    h->argspec = argspec_compile(ST(3));
-	  }
-
-	  SvREFCNT_dec(h->cb);
-          h->cb = 0;
-	  h->cb = check_handler(ST(2));
 	}
+        if (items > 2) {
+	    SvREFCNT_dec(h->cb);
+            h->cb = 0;
+	    h->cb = check_handler(ST(2));
+	}
+
         XSRETURN(1);
 
 
