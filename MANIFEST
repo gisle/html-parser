@@ -24,7 +24,6 @@ t/argspec.t		Test argspec
 t/cases.t		Test various interesting cases
 t/default.t		Test default handler
 t/entities.t		Test encoding/decoding of entities
-t/exit-via-next.t	Test that core dumped
 t/filter.t		Test HTML::Filter
 t/headparser.t		Test HTML::HeadParser
 t/headparser-http.t	Test HTML::HeadParser
