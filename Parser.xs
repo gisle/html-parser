@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.44 1999/11/30 05:45:10 gisle Exp $
+/* $Id: Parser.xs,v 2.45 1999/11/30 06:26:10 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -268,7 +268,18 @@ html_handle(PSTATE* p_state,
 {
   int i;
   char *s = beg;
-  printf("handle %d [", event);
+
+  switch(event) {
+  case E_DECLARATION: printf("DECLARATION"); break;
+  case E_COMMENT:     printf("COMMENT"); break;
+  case E_START:       printf("START"); break;
+  case E_END:         printf("END"); break;
+  case E_TEXT:        printf("TEXT"); break;
+  case E_PROCESS:     printf("PROCESS"); break;
+  default:            printf("EVENT #%d", event); break;
+  }
+
+  printf(" [");
   while (s < end) {
     if (*s == '\n') {
       putchar('\\'); putchar('n');
@@ -1043,23 +1054,16 @@ static char*
 html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
-  char *tag_end;
-  char *prev_end;
-  AV* tokens = 0;
   SV* attr;
   int empty_tag = 0;  /* XML feature */
+  dTOKENS(16);
 
   hctype_t tag_name_first, tag_name_char;
   hctype_t attr_name_first, attr_name_char;
 
-  if (p_state->strict_names) {
+  if (p_state->strict_names || p_state->xml_mode) {
     tag_name_first = attr_name_first = HCTYPE_NAME_FIRST;
     tag_name_char  = attr_name_char  = HCTYPE_NAME_CHAR;
-  }
-  else if (p_state->xml_mode) {
-    tag_name_first = tag_name_char = HCTYPE_NOT_SPACE_SLASH_GT;
-    attr_name_first = HCTYPE_NOT_SPACE_SLASH_GT;
-    attr_name_char  = HCTYPE_NOT_SPACE_EQ_SLASH_GT;
   }
   else {
     tag_name_first = tag_name_char = HCTYPE_NOT_SPACE_GT;
@@ -1073,28 +1077,25 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 
   while (s < end && isHCTYPE(*s, tag_name_char))
     s++;
-  tag_end = s;
-  prev_end = tag_end;
+  PUSH_TOKEN(beg+1, s);  /* tagname */
+
   while (isHSPACE(*s))
     s++;
   if (s == end)
     goto PREMATURE;
 
-  tokens = newAV();
-
   while (isHCTYPE(*s, attr_name_first)) {
     /* attribute */
-    char *attr_beg = s;
+    char *attr_name_beg = s;
+    char *attr_name_end;
     s++;
     while (s < end && isHCTYPE(*s, attr_name_char))
       s++;
     if (s == end)
       goto PREMATURE;
 
-    attr = newSVpv(attr_beg, s - attr_beg);
-    if (!p_state->keep_case && !p_state->xml_mode)
-      sv_lower(attr);
-    av_push(tokens, attr);
+    attr_name_end = s;
+    PUSH_TOKEN(attr_name_beg, attr_name_end); /* attr name */
 
     while (isHSPACE(*s))
       s++;
@@ -1110,7 +1111,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 	goto PREMATURE;
       if (*s == '>') {
 	/* parse it similar to ="" */
-	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, s, s, 0));
+	PUSH_TOKEN(s, s);
 	break;
       }
       if (*s == '"' || *s == '\'') {
@@ -1121,7 +1122,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 	if (s == end)
 	  goto PREMATURE;
 	s++;
-	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, str_beg, s, 1));
+	PUSH_TOKEN(str_beg, s);
       }
       else {
 	char *word_start = s;
@@ -1132,19 +1133,15 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 	}
 	if (s == end)
 	  goto PREMATURE;
-	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, word_start, s, 0));
+	PUSH_TOKEN(word_start, s);
       }
-      prev_end = s;
       while (isHSPACE(*s))
 	s++;
       if (s == end)
 	goto PREMATURE;
     }
     else {
-      char *attr_end = attr_beg + SvCUR(attr);
-      av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg,
-			       0, attr_end, 0));
-      prev_end = attr_end;
+      PUSH_TOKEN(attr_name_beg, attr_name_end); /* boolean attr value */
     }
   }
 
@@ -1158,14 +1155,16 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
   if (*s == '>') {
     s++;
     /* done */
-    html_start(p_state, beg+1, tag_end, tokens, empty_tag, beg, s, self);
-    SvREFCNT_dec(tokens);
+    html_handle(p_state, E_START, beg, s, tokens, num_tokens, self);
+    if (empty_tag)
+      html_handle(p_state, E_END, beg, s, tokens, 1, self);
+    FREE_TOKENS;
 
     if (1) {
       /* find out if this start tag should put us into literal_mode
        */
       int i;
-      int tag_len = tag_end - beg - 1;
+      int tag_len = tokens[0].end - tokens[0].beg;
 
       for (i = 0; literal_mode_elem[i].len; i++) {
 	if (tag_len == literal_mode_elem[i].len) {
@@ -1193,11 +1192,11 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
     return s;
   }
   
-  SvREFCNT_dec(tokens);
+  FREE_TOKENS;
   return 0;
 
  PREMATURE:
-  SvREFCNT_dec(tokens);
+  FREE_TOKENS;
   return beg;
 }
 
