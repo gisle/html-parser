@@ -3,7 +3,7 @@ print "1..3\n";
 
 my $text = "";
 use HTML::Parser ();
-my $p = HTML::Parser->new(default_h => [origtext => sub { $text .= shift }],
+my $p = HTML::Parser->new(default_h => [sub { $text .= shift }, "origtext"],
                          );
 
 my $html = <<'EOT';
@@ -23,8 +23,8 @@ print "not " unless $text eq $html;
 print "ok 1\n";
 
 $text = "";
-$p->handler(start => "", sub { });
-$p->handler(declaration => "", sub { });
+$p->handler(start => sub { }, "");
+$p->handler(declaration => sub { }, "");
 $p->parse($html)->eof;
 
 my $html2;
@@ -36,7 +36,7 @@ print "not " unless $text eq $html2;
 print "ok 2\n";
 
 $text = "";
-$p->handler(start => "", undef);
+$p->handler(start => undef);
 $p->parse($html)->eof;
 
 $html2 = $html;
