@@ -2,9 +2,9 @@
 
     Release 3.02
 
-    Hide ~-magic by an additional reference.  This allow copying of
-    the internal _hparser_xs_state element, and allow HTML-Tree-0.61
-    to work again.
+    Hide ~-magic IV-pointer to 'struct p_state' behind a reference.
+    This allow copying of the internal _hparser_xs_state element, and
+    will make HTML-Tree-0.61 to work again.
 
     Introduced $p->init() which might be useful for subclasses that
     only want the initialization part of the constructor.
