@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1993';  # $Date: 2001/03/27 19:36:33 $
+$VERSION = '3.1993';  # $Date: 2001/03/27 20:33:23 $
 
 require HTML::Entities;
 
@@ -591,6 +591,12 @@ The declaration type of declaration elements is also passed as a tagname,
 even if that is a bit strange.
 In fact, in the current implementation tagname is
 identical to C<token0> except that the name may be forced to lower case.
+
+=item C<tag>
+
+Same as C<tagname>, but prefixed with "/" if it belongs to an C<end>
+event and "!" for a declaration.  The C<tag> does not have any prefix
+for C<start> events, and is in this case identical to C<tagname>.
 
 =item C<attr>
 
