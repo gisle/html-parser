@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.23 1999/11/15 14:21:37 gisle Exp $
+/* $Id: Parser.xs,v 2.24 1999/11/17 11:17:52 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -639,6 +639,11 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 
+static char*
+html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+{
+  return 0; /* not yet implemented */
+}
 
 static char*
 html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
@@ -661,6 +666,24 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
     tmp = html_parse_comment(p_state, s, end, cbdata);
     return (tmp == s) ? beg : tmp;
+  }
+
+  if (*s == '[') {
+    /* marked section */
+    char *tmp;
+    s++;
+    tmp = html_parse_marked_section(p_state, s, end, cbdata);
+    return (tmp == s) ? beg : tmp;
+  }
+
+  if (*s == '>') {
+    /* make <!> into empty comment <SGML Handbook 36:32> */
+    s++;
+    if (!p_state->accum && !p_state->com_cb)
+      html_default(p_state, beg, s, cbdata);
+    else
+      html_comment(p_state, s-1, s-1, cbdata);
+    return s;
   }
 
   if (isALPHA(*s)) {
