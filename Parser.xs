@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.110 2001/05/08 01:53:46 gisle Exp $
+/* $Id: Parser.xs,v 2.111 2001/05/09 21:09:11 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -37,6 +37,10 @@ extern "C" {
 
 #ifndef PL_hexdigit
    #define PL_hexdigit hexdigit
+#endif
+
+#ifndef ERRSV
+   #define ERRSV GvSV(errgv)
 #endif
 
 #if (PATCHLEVEL == 4 && SUBVERSION <= 4)
