@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.53 1999/11/30 17:12:01 gisle Exp $
+/* $Id: Parser.xs,v 2.54 1999/11/30 18:57:15 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -9,7 +9,6 @@
 /* TODO:
  *   - write test scritps
  *   - update/write documentation
- *   - readable callback parameter spec
  *   - pic attribute (">" or "?>" are defaults)
  *   - utf8 mode (entities expand to utf8 chars)
  *   - count chars, line numbers
@@ -308,14 +307,15 @@ html_handle(PSTATE* p_state,
     dSP;
     STRLEN my_na;
     char *attrspec = SvPV(h->attrspec, my_na);
+    char *s;
 
     ENTER;
     SAVETMPS;
     PUSHMARK(SP);
 
-    for (; *attrspec; attrspec++) {
+    for (s = attrspec; *s; s++) {
       SV* arg = 0;
-      switch(*attrspec) {
+      switch(*s) {
       case 's':
 	arg = self;
 	break;
@@ -423,14 +423,14 @@ html_handle(PSTATE* p_state,
       case 'L':
 	/* literal */
 	{
-	  int len = attrspec[1];
-	  arg = sv_2mortal(newSVpvn(attrspec+2, len));
-	  attrspec += len + 1;
+	  int len = s[1];
+	  arg = sv_2mortal(newSVpvn(s+2, len));
+	  s += len + 1;
 	}
 	break;
 
       default:
-	arg = sv_2mortal(newSVpvn(attrspec, 1));
+	arg = sv_2mortal(newSVpvn(s, 1));
 	break;
       }
 
@@ -441,8 +441,14 @@ html_handle(PSTATE* p_state,
     }
 
     PUTBACK;
-  
-    perl_call_sv(h->cb, G_DISCARD | G_VOID);
+
+    if (*attrspec == 's' && SvTYPE(h->cb) <= SVt_PVLV) {
+      char *method = SvPV(h->cb, my_na);
+      perl_call_method(method, G_DISCARD | G_VOID);
+    }
+    else {
+      perl_call_sv(h->cb, G_DISCARD | G_VOID);
+    }
 
     FREETMPS;
     LEAVE;
