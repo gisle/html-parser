@@ -21,11 +21,14 @@ ISSUES
     has a few things to say about this.  A '\n' following a start tag should
     be considered part of that tag.  A '\n' preceeding an end tag should
     be part of that tag and not part of the text flow. According to
-    '../html4.0.1/appendix/notes.html#h-B.3.1'
+    '../html4.0.1/appendix/notes.html#h-B.3.1'  Problematic when NL sometimes
+    is \r\n and sometimes just \r (from Mac servers)
+  - Should there be a way to get quotes into literal strings in argspec.
 
 
 FEATURES THAT CAN WAIT
 
+ - remove 255 char limit on literal strings in argspec
  - report 'line'
  - unbroken_text option
  - utf8 mode (where entities expand to utf8 chars instead of latin1 chars)
@@ -36,7 +39,7 @@ FEATURES THAT CAN WAIT
  - $p->ignore_element("script", "style");
  - $p->ignore_tag("font", "big", "small");
  - "IGNORE" as handler destination (similar to $SIG{IGNORE}) might
-   be more efficient than 'sub {}'
+   be more efficient than 'sub {}'  Perhaps $p->handler(start => undef, "");
 
 
 SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
