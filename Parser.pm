@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_17;  # $Date: 1999/12/02 11:32:29 $
+$VERSION = 2.99_17;  # $Date: 1999/12/03 08:52:04 $
 
 require HTML::Entities;
 
@@ -538,22 +538,19 @@ This is equivilent to the following method calls:
 
 =head1 EXAMPLES
 
-B<Note: These examples are not updated yet to reflect the new handler
-API>
-
 Strip out <font> tags:
 
   sub ignore_font { print pop unless shift eq "font" }
-  HTML::Parser->new(default_cb => [sub { print shift }, 'origtext'],
-                    start_cb => [\&ignore_font, 'tagname,origtext'],
-                    end_cb => [\&ignore_font, 'tagname,origtext'],
-		    marked_sections => 0 #(the default)
+  HTML::Parser->new(default_h => [sub { print shift }, 'origtext'],
+                    start_h => [\&ignore_font, 'tagname,origtext'],
+                    end_h => [\&ignore_font, 'tagname,origtext'],
+		    marked_sections => 0,
 		    )->parse_file(shift);
 
 Strip out comments:
 
-  HTML::Parser->new(default_cb => [sub { print shift }, 'origtext'],
-                    comment_cb => [sub { }, ''],
+  HTML::Parser->new(default_h => [sub { print shift }, 'origtext'],
+                    comment_h => [sub { }, ''],
                    )->parse_file(shift);
 
 [XXX I want this to be an HTML::Parser cookbook.  Also show how we
