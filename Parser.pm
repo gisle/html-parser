@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.03';  # $Date: 2000/01/15 15:35:35 $
+$VERSION = '3.03';  # $Date: 2000/01/15 15:45:35 $
 
 require HTML::Entities;
 
@@ -17,12 +17,6 @@ require DynaLoader;
 @ISA=qw(DynaLoader);
 HTML::Parser->bootstrap($VERSION);
 
-
-my %allowed_handlers = map { ($_ => 1) }
-    qw( declaration comment start end text process default );
-my %allowed_options = map { ($_ => 1) } # not netscape_buggy_comment!
-    qw( strict_comment strict_names boolean_attribute_value
-	xml_mode unbroken_text marked_sections );
 
 sub new
 {
@@ -71,35 +65,21 @@ sub init
     if (my $h = delete $arg{handlers}) {
 	$h = {@$h} if ref($h) eq "ARRAY";
 	while (my($event, $cb) = each %$h) {
-            if (! $allowed_handlers{$event}) {
-		require Carp;
-	        Carp::croak("Bad constructor handler '$event'");
-	    }
-            if ('ARRAY' ne ref $cb) {
-		require Carp;
-	        Carp::croak("Constructor handler '$event' value must be " .
-			    "an array reference");
-	    }
 	    $self->handler($event => @$cb);
 	}
     }
 
     # In the end we try to assume plain attribute or handler
     while (my($option, $val) = each %arg) {
-	if ($allowed_options{$option}) {
-            $self->$option($val);
+	if ($option =~ /^(\w+)_h$/) {
+	    $self->handler($1 => @$val);
 	}
-        elsif ($option =~ /^(\w+)_h$/ && $allowed_handlers{$1}) {
-            if ('ARRAY' ne ref $val) {
-	    require Carp;
-	        Carp::croak("Constructor handler '$option' value must be " .
-			    "an array reference");
-	    }
-            $self->handler($1 => @$val);
-        }
-	else {
+        elsif ($option =~ /^(text|start|end|process|declaration|comment)$/) {
 	    require Carp;
 	    Carp::croak("Bad constructor option '$option'");
+        }
+	else {
+	    $self->$option($val);
 	}
     }
 
