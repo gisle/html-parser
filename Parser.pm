@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_92;  # $Date: 1999/12/05 20:49:53 $
+$VERSION = 2.99_92;  # $Date: 1999/12/05 20:52:53 $
 
 require HTML::Entities;
 
@@ -292,8 +292,9 @@ are reported by the C<tagname> and C<attr> argspecs.
 Empty element tags look like start tags, but end with the character
 sequence "/>".  When recognized by HTML::Parser they cause an
 artificial end event in addition to the start event.  The
-C<text> for this generated end event will be empty and
-the tokens and tokenpos arrays will be ('') and (0,0) respectively.
+C<text> for this generated end event will be empty
+and the offset value in the tokenpos array will be invalid even though
+the only element in the token array will have the correct tag name.
 
 XML processing instructions are terminated by "?>" instead of a simple
 ">" as is the case for HTML.
@@ -405,12 +406,16 @@ triggered by empty start tags.
 
 For C<process> events, this contains the process instructions.
 
+This passes undef if there are no tokens in the event (e.g., C<text>).
+
 =item tokenpos
 
 Tokenpos causes a reference to an array of token positions to be passed.
 For each string that appears in C<tokens>, this array contains two numbers.
 The first number is the offset of the start of the token in the original text
 C<text> and the second number is the length of the token.
+
+This passes undef if there are no tokens in the event (e.g., C<text>).
 
 =item token1
 
