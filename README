@@ -3,7 +3,7 @@ HTML-Parser
 
 This is a collection of modules that parse and extract information
 from HTML documents.  Bug reports and discussions about these modules
-can be sent to the <libwww@perl.org> mailing list.  Remember to
+can be sent to the <libwww@perl.org> mailing list.  Remember to also
 look at the HTML-Tree package that creates and extracts information from
 HTML syntax trees.
 
