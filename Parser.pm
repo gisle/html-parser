@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.01';  # $Date: 1999/12/17 14:38:43 $
+$VERSION = '3.02';  # $Date: 1999/12/21 09:42:48 $
 
 require HTML::Entities;
 
@@ -17,11 +17,19 @@ require DynaLoader;
 @ISA=qw(DynaLoader);
 HTML::Parser->bootstrap($VERSION);
 
+
 sub new
 {
     my $class = shift;
     my $self = bless {}, $class;
-    _alloc_pstate($self);
+    return $self->init(@_);
+}
+
+
+sub init
+{
+    my $self = shift;
+    $self->_alloc_pstate;
 
     my %arg = @_;
     my $api_version = delete $arg{api_version} || (@_ ? 3 : 2);
@@ -751,7 +759,8 @@ Setup of these handlers can also be requested with the "api_version =>
 
 The C<HTML::Parser> class is subclassable.  Parser objects are plain
 hashes and C<HTML::Parser> reserves only hash keys that start with
-"_hparser".
+"_hparser".  The parser state can be set up by invoking the init()
+method which takes the same arguments as new().
 
 =head1 EXAMPLES
 
@@ -822,7 +831,96 @@ recognized.
 
 =head1 DIAGNOSTICS
 
-[To be provided]
+The following diagnostics can occur with HTML::Parser.  The notation
+used for this listings is the same as for L<perldiag>:
+
+=over
+
+=item Not a reference to a hash
+
+(F) The object that is blessed into (or isa) HTML::Parser is not a
+hash as the HTML::Parser methods assume.
+
+=item Bad signature in parser state object at %p
+
+(F) The _hparser_xs_state element does not point to a valid 'struct
+p_state'.  Something must have changed the internal pointer value
+stored in this hash element, or the memory has been overwritten.
+
+=item _hparser_xs_state element is not a reference
+
+(F) The _hparser_xs_state element is destroyed.
+
+=item Can't find '_hparser_xs_state' element in HTML::Parser hash
+
+(F) The _hparser_xs_state element has been deleted from the parser
+hash.
+
+=item API version %s not supported by HTML::Parser %s
+
+(F) The constructor option 'api_version' with an argument greater
+or equal to 4 is reserved for future extentions.
+
+=item Bad constructor option '%s'
+
+(F) An unknown constructor option key was passed to the new() or
+init() methods.
+
+=item Parse loop not allowed
+
+(F) A handler is not allowed to invoke the parse() or parse_file()
+methods.
+
+=item marked sections not supported
+
+(F) If the parser has been compiled without support for marked
+sections, and you try to invoke the $p->marked_sections() method.
+
+=item Unknown boolean attribute (%d)
+
+(F) Something is wrong with the internal logic that set up aliases for
+boolean attributes.
+
+=item Only code or array references allowed as handler
+
+(F) The second argument for $p->handler must be either a subroutine
+reference, then name of a subroutine or method, or an reference to an
+array.
+
+=item No handler for %s events
+
+(F) The first argument to $p->handler must be a valid event name; i.e. one
+of "start", "end", "text", "process", "declaration" or "comment".
+
+=item Unrecognized identifier %s in argspec
+
+(F) The argspec name is now known.  Use one of the names mentioned in
+the argspec section above.
+
+=item Literal string is longer than 255 chars in argspec
+
+(F) The current implementation limits the length of literals in
+argspec to 255 characters.  Use a shorted literal.
+
+=item Backslash reserved for literal string in argspec
+
+(F) The backslash character "\" can't currently be used in argspec
+literals.  It is reserved so that we can implement quoting or quotes
+later.
+
+=item Unterminated literal string in argspec
+
+(F) No terminating quote character for a string literal was found.
+
+=item Bad argspec (%s)
+
+(F) Only identifier names, space and comma is allowed in argspec.
+
+=item Missing comma separator in argspec
+
+(F) Identifiers in argspec must be separated with ","
+
+=back
 
 =head1 SEE ALSO
 
