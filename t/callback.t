@@ -1,5 +1,6 @@
 print "1..47\n";
 
+use strict;
 use HTML::Parser;
 
 my @expected;
@@ -15,7 +16,7 @@ my $doc = <<'EOT';
 EOT
 
 $p->parse($doc)->eof;
-#use Data::Dump; Data::Dump::dump(@res);
+#use Data::Dump; Data::Dump::dump(@expected);
 
 my $testno = 1;
 
