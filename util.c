@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.6 2000/09/17 01:19:53 gisle Exp $
+/* $Id: util.c,v 2.7 2000/12/04 04:55:42 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  *
@@ -19,6 +19,24 @@ sv_lower(SV* sv)
    for (; len--; s++)
 	*s = toLOWER(*s);
    return sv;
+}
+
+EXTERN int
+strnEQx(const char* s1, const char* s2, STRLEN n, int ignore_case)
+{
+    while (n--) {
+	if (ignore_case) {
+	    if (toLOWER(*s1) != toLOWER(*s2))
+		return 0;
+	}
+	else {
+	    if (*s1 != *s2)
+		return 0;
+	}
+	s1++;
+	s2++;
+    }
+    return 1;
 }
 
 EXTERN SV*

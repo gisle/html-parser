@@ -23,12 +23,12 @@ $p->parse(<<EOT)->eof;
   "http://www.w3.org/TR/html40/strict.dtd">
 
 <!ENTITY foo "<!-- foo -->">
-<!entity foo "<!-- foo -->">
+<!Entity foo "<!-- foo -->">
 
 <!row --> foo
 EOT
 
-#print $res;
+print $res;
 
 print "not " unless $res eq <<EOT; print "ok 1\n";
 [<DOCTYPE>
@@ -41,7 +41,9 @@ print "not " unless $res eq <<EOT; print "ok 1\n";
 [<ENTITY>
 <foo>
 <"<!-- foo -->">]
-<!entity foo "<!-- foo -->">
+[<Entity>
+<foo>
+<"<!-- foo -->">]
 
 <!row --> foo
 EOT

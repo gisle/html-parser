@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.45 2000/09/14 18:20:32 gisle Exp $
+/* $Id: hparser.c,v 2.46 2000/12/04 04:55:42 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -767,8 +767,10 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
     decl_id_len = s - decl_id;
 
     /* just hardcode a few names as the recognized declarations */
-    if (!((decl_id_len == 7 && strnEQ(decl_id, "DOCTYPE", 7)) ||
-	  (decl_id_len == 6 && strnEQ(decl_id, "ENTITY",  6))
+    if (!((decl_id_len == 7 &&
+	   strnEQx(decl_id, "DOCTYPE", 7, !p_state->xml_mode)) ||
+	  (decl_id_len == 6 &&
+	   strnEQx(decl_id, "ENTITY",  6, !p_state->xml_mode))
          )
        )
     {
