@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.113 2002/03/08 03:49:23 gisle Exp $
+/* $Id: Parser.xs,v 2.114 2003/04/17 00:36:07 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -101,9 +101,8 @@ newSVpvn(char *s, STRLEN len)
  */
 
 static SV*
-check_handler(SV* h)
+check_handler(pTHX_ SV* h)
 {
-    dTHX;
     if (SvROK(h)) {
 	SV* myref = SvRV(h);
 	if (SvTYPE(myref) == SVt_PVCV)
@@ -117,9 +116,8 @@ check_handler(SV* h)
 
 
 static PSTATE*
-get_pstate_iv(SV* sv)
+get_pstate_iv(pTHX_ SV* sv)
 {
-    dTHX;
     PSTATE* p = INT2PTR(PSTATE*, SvIV(sv));
     if (p->signature != P_SIGNATURE)
 	croak("Bad signature in parser state object at %p", p);
@@ -128,9 +126,8 @@ get_pstate_iv(SV* sv)
 
 
 static PSTATE*
-get_pstate_hv(SV* sv)                               /* used by XS typemap */
+get_pstate_hv(pTHX_ SV* sv)                               /* used by XS typemap */
 {
-    dTHX;
     HV* hv;
     SV** svp;
 
@@ -141,7 +138,7 @@ get_pstate_hv(SV* sv)                               /* used by XS typemap */
     svp = hv_fetch(hv, "_hparser_xs_state", 17, 0);
     if (svp) {
 	if (SvROK(*svp))
-	    return get_pstate_iv(SvRV(*svp));
+	    return get_pstate_iv(aTHX_ SvRV(*svp));
 	else
 	    croak("_hparser_xs_state element is not a reference");
     }
@@ -151,9 +148,8 @@ get_pstate_hv(SV* sv)                               /* used by XS typemap */
 
 
 static void
-free_pstate(PSTATE* pstate)
+free_pstate(pTHX_ PSTATE* pstate)
 {
-    dTHX;
     int i;
     SvREFCNT_dec(pstate->buf);
     SvREFCNT_dec(pstate->pend_text);
@@ -182,7 +178,7 @@ free_pstate(PSTATE* pstate)
 static int
 magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
-    free_pstate(get_pstate_iv(sv));
+    free_pstate(aTHX_ get_pstate_iv(aTHX_ sv));
     return 0;
 }
 
@@ -233,7 +229,7 @@ parse(self, chunk)
 	SV* self;
 	SV* chunk
     PREINIT:
-	PSTATE* p_state = get_pstate_hv(self);
+	PSTATE* p_state = get_pstate_hv(aTHX_ self);
     CODE:
 	if (p_state->parsing)
     	    croak("Parse loop not allowed");
@@ -278,7 +274,7 @@ SV*
 eof(self)
 	SV* self;
     PREINIT:
-	PSTATE* p_state = get_pstate_hv(self);
+	PSTATE* p_state = get_pstate_hv(aTHX_ self);
     CODE:
         if (p_state->parsing)
             p_state->eof = 1;
@@ -436,7 +432,7 @@ handler(pstate, eventname,...)
         if (items > 2) {
 	    SvREFCNT_dec(h->cb);
             h->cb = 0;
-	    h->cb = check_handler(ST(2));
+	    h->cb = check_handler(aTHX_ ST(2));
 	}
 
 
