@@ -1,6 +1,7 @@
-/* $Id: Parser.xs,v 2.54 1999/11/30 18:57:15 gisle Exp $
+/* $Id: Parser.xs,v 2.55 1999/11/30 19:00:18 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
+ * Copyright 1999, Michael A. Chase.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
