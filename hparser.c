@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.84 2003/05/12 20:44:57 gisle Exp $
+/* $Id: hparser.c,v 2.85 2003/05/13 19:32:54 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1266,7 +1266,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
     char *s = beg+2;
     hctype_t name_first, name_char;
 
-    if (p_state->strict_names) {
+    if (p_state->strict_names || p_state->xml_mode) {
 	name_first = HCTYPE_NAME_FIRST;
 	name_char  = HCTYPE_NAME_CHAR;
     }
