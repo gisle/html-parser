@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.64 2001/03/30 07:11:00 gisle Exp $
+/* $Id: hparser.c,v 2.65 2001/03/30 07:33:50 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -170,7 +170,7 @@ report_event(PSTATE* p_state,
 	    s++;
 	}
 	if (nl)
-	    p_state->column = end - nl;
+	    p_state->column = end - nl - 1;
 	else
 	    p_state->column += end - beg;
     }
