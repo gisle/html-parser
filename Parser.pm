@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/07 01:27:04 $
+$VERSION = 2.99_94;  # $Date: 1999/12/07 09:42:45 $
 
 require HTML::Entities;
 
@@ -383,12 +383,12 @@ used:
 
 =over
 
-=item self
+=item C<self>
 
 Self causes the current object to be passed to the handler.
 If the handler is a method, this must be the first element in the argspec.
 
-=item tokens
+=item C<tokens>
 
 Tokens causes a reference to an array of token strings to be passed.
 The strings are exactly as they were found in the original text,
@@ -409,7 +409,7 @@ For C<process> events, this contains the process instructions.
 
 This passes C<undef> if there are no tokens in the event (e.g., C<text>).
 
-=item tokenpos
+=item C<tokenpos>
 
 Tokenpos causes a reference to an array of token positions to be passed.
 For each string that appears in C<tokens>, this array contains two numbers.
@@ -419,7 +419,7 @@ C<text> and the second number is the length of the token.
 This passes undef if there are no tokens in the event (e.g., C<text>)
 and for artifical C<end> events triggered by empty start tags
 
-=item token0
+=item C<token0>
 
 Token0 causes the original text of the first token string to be passed.
 
@@ -429,12 +429,12 @@ For C<start> and C<end> events, this is the tag name.
 
 This passes undef if there are no tokens in the event.
 
-=item tagname
+=item C<tagname>
 
 Tagname is identical to C<token0> except that if $p->xml_mode is
 disabled, the tag name is forced to lower case.
 
-=item attr
+=item C<attr>
 
 Attr causes a reference to a hash of attribute name/value pairs to be
 passed.
@@ -447,7 +447,7 @@ case.
 General entities are decoded in the attribute values and
 quotes around the attribute values are removed.
 
-=item attrseq
+=item C<attrseq>
 
 Attrseq causes a reference to an array of attribute names to be
 passed.  This can be useful if you want to walk the C<attr> hash in
@@ -457,11 +457,11 @@ This passes undef except for C<start> events.
 
 If $p->xml_mode is disabled, the attribute names are forced to lower case.
 
-=item text
+=item C<text>
 
 Text causes the original event text (including delimiters) to be passed.
 
-=item dtext
+=item C<dtext>
 
 Dtext causes the decoded text to be passed.  General entities are
 decoded unless the event was inside a CDATA section or was between
@@ -471,7 +471,7 @@ C<plaintext>).
 This passes undef except for C<text> events.
 
 
-=item cdata_flag
+=item C<cdata_flag>
 
 Cdata_flag causes a TRUE value to be passed
 if the event inside a CDATA section
@@ -482,29 +482,34 @@ When the flag is FALSE for a text event, then you should normally
 either use C<dtext> or decode the entities yourself before the text is
 processed further.
 
-=item offset
+=item C<offset>
 
 Offset causes the byte position of the start of the event to be passed.
 The first byte in the document is 0.
 
-=item length
+=item C<length>
 
 This returns the number of bytes in C<text>.
 
-=item event
+=item C<event>
 
 Event causes the event name to be provided.
 
 The event name is one of C<text>, C<start>, C<end>, C<declaration>,
 C<comment>, C<process> or C<default>.
 
-=item line
+=item C<line>
 
 I<Note: This is not supported yet!>
 
 Line causes the line number of the start of the event to be passed.
 The first line in the document is 1.  Line counting doesn't start
 until at least one handler requests this value.
+
+=item C<"...">
+
+A literal string enclosed in single or double quotes is passed as
+written.
 
 =back
 
@@ -514,7 +519,7 @@ Handlers for the following events can be registered:
 
 =over
 
-=item text
+=item C<text>
 
 This event is triggered when plain text is recognized.
 The text may contain multiple lines.  A sequence of text
@@ -524,7 +529,7 @@ unless $p->unbroken_text is enabled.
 The parser will make sure that it does not break a word or a sequence
 of spaces between two text events.
 
-=item start
+=item C<start>
 
 This event is triggered when a start tag is recognized.
 
@@ -532,7 +537,7 @@ Example:
 
   <A href="http://www.perl.com/">
 
-=item end
+=item C<end>
 
 This event is triggered when an end tag is recognized.
 
@@ -540,7 +545,7 @@ Example:
 
   </A>
 
-=item declaration
+=item C<declaration>
 
 This event is triggered when a I<markup declaration> is recognized.
 
@@ -554,7 +559,7 @@ Example:
 
 DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
-=item comment
+=item C<comment>
 
 This event is triggered when a markup comment is recognized.
 
@@ -562,7 +567,7 @@ Example:
 
   <!-- This is a comment -- -- So is this -->
 
-=item process
+=item C<process>
 
 This event is triggered when a processing instructions element is recognized.
 
@@ -576,7 +581,7 @@ Examples:
   <? HTML processing instructions >
   <? XML processing instructions ?>
 
-=item default
+=item C<default>
 
 This event is triggered for events that do not have a specific handler.
 
