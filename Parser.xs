@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.4 1999/11/08 23:15:00 gisle Exp $
+/* $Id: Parser.xs,v 2.5 1999/11/09 14:18:40 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -489,7 +489,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	if (s == end)
 	  goto PREMATURE;
 	if (*s != '-')
-	  goto ERROR;
+	  goto FAIL;
 	s++;
 
 	while (1) {
@@ -531,7 +531,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       return s;
     }
 
-  ERROR:
+  FAIL:
     SvREFCNT_dec(tokens);
     return 0;
 
