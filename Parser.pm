@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.22";  # $Date: 1998/12/18 15:09:01 $
+$VERSION = "2.22";  # $Date: 1999/04/05 13:01:58 $
 
 
 sub new
@@ -342,7 +342,7 @@ parse_file() is a reference to the parser object.
 
 By default we parse comments similar to how the popular browsers (like
 Netscape and MSIE) do it.  This means that comments will always be
-terminated by the first occurence of "-->".  This is not correct
+terminated by the first occurrence of "-->".  This is not correct
 according to the "official" HTML standards.  The official behaviour
 can be enabled by calling the strict_comment() method with a TRUE
 argument.
@@ -394,8 +394,8 @@ expanded.  You should call HTML::Entities::decode($text) before you
 process the text any further.
 
 A sequence of text in the HTML document can be broken between several
-invokations of $self->text.  The parser will make sure that it does
-not break a word or a sequence of spaces between two invokations of
+invocations of $self->text.  The parser will make sure that it does
+not break a word or a sequence of spaces between two invocations of
 $self->text().
 
 =item $self->comment($comment)
@@ -418,9 +418,9 @@ prevent us from renaming this module as C<SGML::Parser>.
 The parser is fairly inefficient if the chunks passed to $p->parse()
 are too big.  The reason is probably that perl ends up with a lot of
 character copying when tokens are removed from the beginning of the
-strings.  A chunck size of about 256-512 bytes was optimal in a test I
+strings.  A chunk size of about 256-512 bytes was optimal in a test I
 made with some real world HTML documents.  (The parser was about 3
-times slower with a chunck size of 20K).
+times slower with a chunk size of 20K).
 
 =head1 SEE ALSO
 
@@ -431,9 +431,11 @@ L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
 
 =head1 COPYRIGHT
 
-Copyright 1996-1998 Gisle Aas. All rights reserved.
+Copyright 1996-1999 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =cut
+
+
