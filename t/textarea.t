@@ -42,6 +42,7 @@ $p->parse($html)->eof;
 #print $dump;
 
 print "not " unless $dump eq <<'EOT'; print "ok 1\n";
+start_document||<undef>
 start|<html>|<undef>
 text|\n|
 comment|<!--comment-->|<undef>
@@ -60,4 +61,5 @@ end|</FORM>|<undef>
 text|\n\n|
 end|</html>|<undef>
 text|\n|
+end_document||<undef>
 EOT

@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.23';  # $Date: 2001/05/04 20:47:22 $
+$VERSION = '3.23';  # $Date: 2001/05/07 17:45:08 $
 
 require HTML::Entities;
 
@@ -786,6 +786,15 @@ Examples:
 
   <? HTML processing instructions >
   <? XML processing instructions ?>
+
+=item C<start_document>
+
+This event is triggered first.  A handler for it can be set up to do
+various initializations.
+
+=item C<end_document>
+
+This event is triggered after $p->eof called.
 
 =item C<default>
 

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.71 2001/04/27 14:54:09 gisle Exp $
+/* $Id: hparser.c,v 2.72 2001/05/07 17:45:08 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1296,6 +1296,7 @@ parse(pTHX_
 
     if (!chunk) {
 	/* eof */
+	char empty[1];
 	if (p_state->buf && SvOK(p_state->buf)) {
 	    /* flush it */
 	    STRLEN len;
@@ -1313,6 +1314,13 @@ parse(pTHX_
 	    SvREFCNT_dec(p_state->ignoring_element);
 	    p_state->ignoring_element = 0;
 	}
+	report_event(p_state, E_END_DOCUMENT, empty, empty, 0, 0, self);
+
+	/* reset state */
+	p_state->offset = 0;
+	if (p_state->line)
+	    p_state->line = 1;
+	p_state->column = 0;
 	return;
     }
 
@@ -1322,6 +1330,8 @@ parse(pTHX_
     }
     else {
 	beg = SvPV(chunk, len);
+	if (p_state->offset == 0)
+	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, self);
     }
 
     if (!len)

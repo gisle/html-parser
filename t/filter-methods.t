@@ -24,11 +24,11 @@ EOT
 my $t = join("||", map join("|", @$_), @{$p->handler("default")});
 #print "$t\n";
 
-print "not " unless $t eq "start|<html>||start|<head>||start|<title>||text|foo||end|</title>||start|<body>||text|
+print "not " unless $t eq "start_document|||start|<html>||start|<head>||start|<title>||text|foo||end|</title>||start|<body>||text|
 This is an italic and bold text.
 ||end|</body>||text|
 ||end|</html>||text|
-";
+||end_document|";
 print "ok 1\n";
 
 
