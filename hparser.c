@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.58 2001/03/19 04:05:30 gisle Exp $
+/* $Id: hparser.c,v 2.59 2001/03/19 04:49:42 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -336,8 +336,10 @@ report_event(PSTATE* p_state,
 	    if (event == E_START) {
 		HV* hv;
 		int i;
-		if (argcode == ARG_ATTR)
+		if (argcode == ARG_ATTR) {
 		    hv = newHV();
+		    arg = sv_2mortal(newRV_noinc((SV*)hv));
+		}
 		else
 		    push_arg = 0;  /* deal with argument pushing here */
 
@@ -383,8 +385,6 @@ report_event(PSTATE* p_state,
 			}
 		    }
 		}
-		if (argcode == ARG_ATTR)
-		    arg = sv_2mortal(newRV_noinc((SV*)hv));
 	    }
 	    else if (argcode == ARG_ATTRARR) {
 		push_arg = 0;
