@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.15 2001/03/26 22:27:48 gisle Exp $
+/* $Id: util.c,v 2.16 2003/07/21 06:42:40 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -171,12 +171,12 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 
 #ifdef UNICODE_ENTITIES
 	    if (!SvUTF8(sv) && repl_utf8) {
-		int len = t - SvPVX(sv);
+		STRLEN len = t - SvPVX(sv);
 		if (len) {
 		    /* need to upgrade the part that we have looked though */
-		    int old_len = len;
+		    STRLEN old_len = len;
 		    char *ustr = bytes_to_utf8(SvPVX(sv), &len);
-		    int grow = len - old_len;
+		    STRLEN grow = len - old_len;
 		    if (grow) {
 			/* XXX It might already be enough gap, so we don't need this,
 			   but it should not hurt either.
