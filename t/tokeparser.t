@@ -1,4 +1,4 @@
-print "1..4\n";
+print "1..5\n";
 
 use strict;
 use HTML::TokeParser;
@@ -48,23 +48,31 @@ if ($p->get_tag("title")) {
 }
 undef($p);
 
+# Test with reference to glob
 open(F, $file) || die "Can't open $file: $!";
 $p = HTML::TokeParser->new(\*F);
 my $scount = 0;
 my $ecount = 0;
+my $tcount = 0;
 while (my $token = $p->get_token) {
     $scount++ if $token->[0] eq "S";
     $ecount++ if $token->[0] eq "E";
 }
 undef($p);
 
-$p = HTML::TokeParser->new($file) || die;
-my $tcount = 0;
+# Test with glob
+open(F, $file) || die "Can't open $file: $!";
+$p = HTML::TokeParser->new(*F);
 $tcount++ while $p->get_tag;
 undef($p);
 
-#print "Number of tokens found: $tcount = $scount + $ecount\n";
-print "not " unless $tcount == 16 && $scount == 9 && $ecount == 7;
+# Test with plain file name
+$p = HTML::TokeParser->new($file) || die;
+$tcount++ while $p->get_tag;
+undef($p);
+
+#print "Number of tokens found: $tcount/2 = $scount + $ecount\n";
+print "not " unless $tcount == 32 && $scount == 9 && $ecount == 7;
 print "ok 2\n";
 
 print "not " if HTML::TokeParser->new("/noT/thEre/$$");
@@ -79,4 +87,15 @@ undef($p);
 #print "ATEXT: $atext\n";
 print "not " unless $atext eq "Perl\240Institute";
 print "ok 4\n";
+
+$p = HTML::TokeParser->new(\<<HTML);
+<title>Title</title>
+<H1>
+Heading
+</h1>
+HTML
+
+print "not " unless $p->get_tag("h1") && $p->get_trimmed_text eq "Heading";
+print "ok 5\n";
+undef($p);
 
