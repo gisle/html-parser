@@ -141,7 +141,7 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	s++;
 
       if (s == end)
-	return beg;
+	goto PREMATURE;
 
       if (*s == '"' || *s == '\'') {
 	char *str_beg = s;
@@ -149,7 +149,7 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	while (s < end && *s != *str_beg)
 	  s++;
 	if (s == end)
-	  return beg;
+	  goto PREMATURE;
 	s++;
 	av_push(tokens, newSVpv(str_beg, s - str_beg));
       }
@@ -158,19 +158,19 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	char *com_beg = s;
 	s++;
 	if (s == end)
-	  return beg;
+	  goto PREMATURE;
 	if (*s != '-')
-	  return 0;
+	  goto ERROR;
 	s++;
 
 	while (1) {
 	  while (s < end && *s != '-')
 	    s++;
 	  if (s == end)
-	    return beg;
+	    goto PREMATURE;
 	  s++;
 	  if (s == end)
-	    return beg;
+	    goto PREMATURE;
 	  if (*s == '-') {
 	    s++;
 	    av_push(tokens, newSVpv(com_beg, s - com_beg));
@@ -185,7 +185,7 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
 	while (s < end && !isSPACE(*s) && *s != '>')
 	  s++;
 	if (s == end)
-	  return beg;
+	  goto PREMATURE;
 	av_push(tokens, newSVpv(word_beg, s - word_beg));
       }
       else {
@@ -194,13 +194,24 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
     }
 
     if (s == end)
-      return beg;
+      goto PREMATURE;
     if (*s == '>') {
       s++;
       html_decl(p_state, tokens, beg, s-1);
+      if (tokens)
+	SvREFCNT_dec(tokens);
       return s;
     }
+
+  ERROR:
+    if (tokens)
+      SvREFCNT_dec(tokens);
     return 0;
+
+  PREMATURE:
+    if (tokens)
+      SvREFCNT_dec(tokens);
+    return beg;
 
   } else if (*s == '-') {
     s++;
@@ -267,7 +278,7 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
   while (s < end && isSPACE(*s))
     s++;
   if (s == end)
-    return beg;
+    goto PREMATURE;
 
   tokens = newAV();
 
@@ -282,7 +293,7 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
     while (s < end && isSPACE(*s))
       s++;
     if (s == end)
-      return beg;
+      goto PREMATURE;
 
     if (*s == '=') {
       /* with a value */
@@ -290,7 +301,7 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
       while (s < end && isSPACE(*s))
 	s++;
       if (s == end)
-	return beg;
+	goto PREMATURE;
       if (*s == '>') {
 	/* parse it similar to ="" */
 	av_push(tokens, newSVpvn("", 0));
@@ -302,7 +313,7 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
 	while (s < end && *s != *str_beg)
 	  s++;
 	if (s == end)
-	  return beg;
+	  goto PREMATURE;
 	s++;
 	av_push(tokens, newSVpvn(str_beg+1, s - str_beg - 2));
       }
@@ -311,14 +322,14 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
 	while (s < end && !isSPACE(*s) && *s != '>')
 	  s++;
 	if (s == end)
-	  return beg;
+	  goto PREMATURE;
 	av_push(tokens, newSVpv(word_start, s - word_start));
       }
 
       while (s < end && isSPACE(*s))
 	s++;
       if (s == end)
-	return beg;
+	goto PREMATURE;
     }
     else {
       av_push(tokens, &PL_sv_yes);
@@ -329,9 +340,18 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
     s++;
     /* done */
     html_start(p_state, beg+1, tag_end, tokens, beg, s);
+    if (tokens)
+      SvREFCNT_dec(tokens);
     return s;
   }
+  if (tokens)
+    SvREFCNT_dec(tokens);
   return 0;
+
+ PREMATURE:
+  if (tokens)
+    SvREFCNT_dec(tokens);
+  return beg;
 }
 
 void html_parse(struct p_state* p_state,
