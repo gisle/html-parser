@@ -18,6 +18,7 @@ lib/HTML/Entities.pm	Encode and decode entities in strings
 lib/HTML/Filter.pm	HTML::Filter class
 lib/HTML/HeadParser.pm  HTML::HeadParser class
 lib/HTML/LinkExtor.pm   HTML::LinkExtor class
+lib/HTML/PullParser.pm  HTML::PullParser class
 lib/HTML/TokeParser.pm	HTML::TokeParser class
 mkhctype		Generates 'hctype.h'
 mkpfunc			Generates 'pfunc.h'

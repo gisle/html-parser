@@ -1,24 +1,23 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.22 2001/03/25 20:22:46 gisle Exp $
+# $Id: TokeParser.pm,v 2.23 2001/03/26 00:32:51 gisle Exp $
 
-require HTML::Parser;
-@ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.22 $ =~ /(\d+)\.(\d+)/);
+require HTML::PullParser;
+@ISA=qw(HTML::PullParser);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.23 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
 use HTML::Entities qw(decode_entities);
 
-my %DEF_ARG =
+my %ARGS =
 (
- # event        # argspec ('|' marks start of user changeable stuff)
- start       => "'S',tagname,attr|attrseq,text",
- end         => "'E',tagname|text",
+ start       => "'S',tagname,attr,attrseq,text",
+ end         => "'E',tagname,text",
  text        => "'T',text,is_cdata",
- process     => "'PI'|token0,text",
- comment     => "'C'|text",
- declaration => "'D'|text",
+ process     => "'PI',token0,text",
+ comment     => "'C',text",
+ declaration => "'D',text",
 );
 
 
@@ -27,106 +26,11 @@ sub new
     my $class = shift;
     my %cnf = (@_ == 1) ? (file => $_[0]) : @_;
 
-    # Construct argspecs for the various events
-    my %argspec;
-    while (my($event, $def_arg) = each %DEF_ARG) {
-	my $args = delete $cnf{$event . "_args"};
-	my $ignore = delete $cnf{"ignore_" . $event};
-	next if $ignore;
-	if (defined $args) {
-	    my $tmp = $args;
-	    $args = $def_arg;
-	    $args =~ s/\|.*//;
-	    $args .= ",$tmp";
-	}
-	else {
-	    ($args = $def_arg) =~ s/\|/,/;
-	}
-	$argspec{$event} = $args;
-    }
-
-    my $file = delete $cnf{file};
-    Carp::croak("Usage: $class->new(\$file)")
-	  unless defined $file;
-
-    if (!ref($file) && ref(\$file) ne "GLOB") {
-	require IO::File;
-	$file = IO::File->new($file, "r") || return;
-    }
-
     my $textify = delete $cnf{textify} || {img => "alt", applet => "alt"};
 
     # Create object
-    $cnf{api_version} = 3;
-    my $self = $class->SUPER::new(%cnf);
+    my $self = $class->SUPER::new(%cnf, %ARGS) || return undef;
     $self->{textify} = $textify;
-
-    my $accum = $self->{accum} = [];
-    while (my($event, $argspec) = each %argspec) {
-	$self->handler($event => $accum, $argspec);
-    }
-
-    if (ref($file) eq "SCALAR") {
-	if (!defined $$file) {
-	    Carp::carp("HTML::TokeParser got undefined value as document")
-		if $^W;
-	    $self->{toke_eof}++;
-	}
-	else {
-	    $self->{toke_scalar} = $file;
-	    $self->{toke_scalarpos}  = 0;
-	}
-    }
-    else {
-	$self->{toke_file} = $file;
-    }
-    $self;
-}
-
-
-sub get_token
-{
-    my $self = shift;
-    while (!@{$self->{accum}} && !$self->{toke_eof}) {
-	if (my $f = $self->{toke_file}) {
-	    # must try to parse more from the file
-	    my $buf;
-	    if (read($f, $buf, 512)) {
-		$self->parse($buf);
-	    } else {
-		$self->eof;
-		$self->{toke_eof}++;
-		delete $self->{toke_file};
-	    }
-	}
-	elsif (my $sref = $self->{toke_scalar}) {
-	    # must try to parse more from the scalar
-	    my $pos = $self->{toke_scalarpos};
-	    my $chunk = substr($$sref, $pos, 512);
-	    $self->parse($chunk);
-	    $pos += length($chunk);
-	    if ($pos < length($$sref)) {
-		$self->{toke_scalarpos} = $pos;
-	    }
-	    else {
-		$self->eof;
-		$self->{toke_eof}++;
-		delete $self->{toke_scalar};
-		delete $self->{toke_scalarpos};
-	    }
-	}
-	else {
-	    die;
-	}
-    }
-    shift @{$self->{accum}};
-}
-
-
-sub unget_token
-{
-    my $self = shift;
-    unshift @{$self->{accum}}, @_;
     $self;
 }
 
@@ -352,11 +256,11 @@ This example extract the <TITLE> from the document:
 
 =head1 SEE ALSO
 
-L<HTML::Parser>
+L<HTML::PullParser>, L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1998-2000 Gisle Aas.
+Copyright 1998-2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
