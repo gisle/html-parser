@@ -1,3 +1,25 @@
+1999-12-09   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_95 (this is a 3.00 candidate)
+
+    Fixed core dump when "<" was followed by an 8-bit character.
+    Spotted and test case provided by Doug MacEachern.  Doug had
+    been running HTML-Parser-XS trough more that 1 million urls that
+    had been downloaded via LWP.
+
+    Michael once again fixed my bad English in the HTML::Parser
+    documentation.
+
+    netscape_buggy_comment will carp instead of warn
+
+    updated TODO/README
+
+    Documented that HTML::Filter is depreciated.
+
+    Added several new test scripts.
+
+
+
 1999-12-08   Gisle Aas <gisle@aas.no>
 
     Release 2.99_94 (should almost be a 3.00 candidate)
