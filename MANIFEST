@@ -61,6 +61,7 @@ t/plaintext.t		Test parsing of <plaintext>
 t/process.t		Test process instruction support
 t/pullparser.t		Test HTML::PullParser
 t/skipped-text.t	Test skipped_text argspec
+t/stack-realloc.t	Test that stack reallocation bug don't come back
 t/textarea.t	        Test handling of <textarea>
 t/tokeparser.t		Test HTML::TokeParser
 t/uentities.t           Test encoding/decoding of Unicode entities
