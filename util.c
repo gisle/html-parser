@@ -1,4 +1,10 @@
-/* util.c - $Id: util.c,v 2.1 1999/12/03 11:32:00 gisle Exp $ */
+/* $Id: util.c,v 2.2 1999/12/03 12:20:42 gisle Exp $
+ *
+ * Copyright 1999, Gisle Aas.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the same terms as Perl itself.
+ */
 
 #ifndef EXTERN
 #define EXTERN extern
