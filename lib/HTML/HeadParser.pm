@@ -17,20 +17,15 @@ HTML::HeadParser - Parse <HEAD> section of a HTML document
 =head1 DESCRIPTION
 
 The I<HTML::HeadParser> is a specialized (and lightweight)
-I<HTML::Parser> that will only parse the E<lt>HEAD>...E<lt>/HEAD> section of a
-HTML document.  The parse() and parse_file() methods will return a
-FALSE value as soon as a E<lt>BODY> element is found, and should not be
-called again after this.
+I<HTML::Parser> that will only parse the E<lt>HEAD>...E<lt>/HEAD>
+section of an HTML document.  The parse() and parse_file() methods
+will return a FALSE value as soon as some E<lt>BODY> element or body
+text are found, and should not be called again after this.
 
-The I<HTML::HeadParser> constructor takes an optional I<HTTP::Headers>
-object reference as argument.  The parser will update this header
-object as the various E<lt>HEAD> elements are recognized.  If no
-header is given we will create an internal (and initially empty)
-header object.  This header object can be accessed with the header()
-method.
-
-The following header fields are initialized from elements found in the
-E<lt>HEAD> section of the HTML document:
+The I<HTML::HeadParser> keeps a reference to a header object, and the
+parser will update this header object as the various elements of the
+E<lt>HEAD> section of the HTML document are recognized.  The following
+header fields are affected:
 
 =over 4
 
@@ -51,11 +46,11 @@ element in the E<lt>head>.  The header value is initialized from the
 I<prompt> attribute if it is present.  If not I<prompt> attribute is
 given it will have '?' as the value.
 
-=item X-Meta-Foo
+=item X-Meta-Foo:
 
 All E<lt>meta> elements will initialize headers with the prefix
-"X-Meta-".  If the element contains a I<http-equiv> attribute, then it
-will be honored as the header name.
+"C<X-Meta->" on the name.  If the E<lt>meta> element contains a
+C<http-equiv> attribute, then it will be honored as the header name.
 
 =back
 
@@ -73,24 +68,35 @@ require HTML::Parser;
 @ISA = qw(HTML::Parser);
 
 use HTML::Entities ();
-require HTTP::Headers;
 
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
 =item $hp = HTML::HeadParser->new( [$header] )
+
+The object constructor.  The optional $header argument should be a
+reference to an object that implement the header() and push_header()
+methods as defined by the I<HTTP::Headers> class.  Normally it will be
+of some class that isa or delegates to the I<HTTP::Headers> class.
+
+If no $header is given I<HTML::HeadParser> will create an
+I<HTTP::Header> object by itself (initially empty).
 
 =cut
 
 sub new
 {
     my($class, $header) = @_;
-    $header ||= HTTP::Headers->new;
-    my $self = bless HTML::Parser->new, $class;
+    unless ($header) {
+	require HTTP::Headers;
+	$header = HTTP::Headers->new;
+    }
+
+    my $self = $class->SUPER::new;
     $self->{'header'} = $header;
     $self->{'tag'} = '';   # name of active element that takes textual content
     $self->{'text'} = '';  # the accumulated text associated with the element
@@ -118,11 +124,12 @@ sub parse
 
 =item $hp->header;
 
-Returns a reference to the HTML::Header object.
+Returns a reference to the header object.
 
 =item $hp->header( $key )
 
-Returns a header value.
+Returns a header value.  It is just a shorter way to write
+C<$hp-E<gt>header-E<gt>header($key)>.
 
 =cut
 
@@ -133,13 +140,7 @@ sub header
     $self->{'header'}->header(@_);
 }
 
-=item $hp->as_string;
-
-Same as $hp->header->as_string
-
-=cut
-
-sub as_string
+sub as_string    # legacy
 {
     my $self = shift;
     $self->{'header'}->as_string;
@@ -155,7 +156,7 @@ sub flush_text   # internal
     $text =~ s/\s+/ /g;
     print "FLUSH $tag => '$text'\n"  if $DEBUG;
     if ($tag eq 'title') {
-	$self->{'header'}->header(title => $text);
+	$self->{'header'}->header(Title => $text);
     }
     $self->{'tag'} = $self->{'text'} = '';
 }
@@ -233,7 +234,7 @@ sub text
 
 __END__
 
-=head1 EXAMPLES
+=head1 EXAMPLE
 
  $h = HTTP::Headers->new;
  $p = HTML::HeadParser->new($h);
@@ -248,6 +249,9 @@ __END__
 =head1 SEE ALSO
 
 L<HTML::Parser>, L<HTTP::Headers>
+
+The I<HTTP::Headers> class is distributed as part of the I<libwww-perl>
+package.
 
 =head1 COPYRIGHT
 
