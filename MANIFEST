@@ -7,6 +7,7 @@ lib/HTML/Entities.pm
 lib/HTML/Filter.pm
 lib/HTML/HeadParser.pm
 lib/HTML/LinkExtor.pm
+t/cases.t
 t/entities.t
 t/filter.t
 t/headparser.t
