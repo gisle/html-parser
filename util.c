@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.10 2001/02/23 06:06:55 gisle Exp $
+/* $Id: util.c,v 2.11 2001/02/23 06:53:11 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -50,7 +50,7 @@ grow_gap(SV* sv, STRLEN grow, char** t, char** s, char** e)
     STRLEN t_offset = *t - SvPVX(sv);
     STRLEN s_offset = *s - SvPVX(sv);
     STRLEN e_offset = *e - SvPVX(sv);
-    
+
     SvGROW(sv, e_offset + grow + 1);
 
     *t = SvPVX(sv) + t_offset;
@@ -213,10 +213,9 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     }
   }
 
-  if (t != s) {
-    *t = '\0';
-    SvCUR_set(sv, t - SvPVX(sv));
-  }
+  *t = '\0';
+  SvCUR_set(sv, t - SvPVX(sv));
+
   //sv_dump(sv);
   return sv;
 }
