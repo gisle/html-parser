@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.115 2004/11/29 11:09:29 gisle Exp $
+/* $Id: hparser.c,v 2.116 2004/11/29 13:35:58 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -446,8 +446,10 @@ report_event(PSTATE* p_state,
 			if (utf8)
 			    SvUTF8_on(attrval);
 			if (!p_state->attr_encoded) {
+#ifdef UNICODE_HTML_PARSER
 			    if (p_state->utf8_mode)
 				sv_utf8_decode(attrval);
+#endif
 			    decode_entities(aTHX_ attrval, p_state->entity2char, 0);
 			    if (p_state->utf8_mode)
 				SvUTF8_off(attrval);
@@ -516,8 +518,10 @@ report_event(PSTATE* p_state,
 		if (utf8)
 		    SvUTF8_on(arg);
 		if (!p_state->is_cdata) {
+#ifdef UNICODE_HTML_PARSER
 		    if (p_state->utf8_mode)
 			sv_utf8_decode(arg);
+#endif
 		    decode_entities(aTHX_ arg, p_state->entity2char, 1);
 		    if (p_state->utf8_mode)
 			SvUTF8_off(arg);
