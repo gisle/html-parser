@@ -1,3 +1,22 @@
+2003-10-10   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.32
+
+     If the document parsed ended with some kind of unterminated markup,
+     then the parser state was not reset properly and this piece of markup
+     would show up in the beginning of the next document parsed.
+     <http://rt.cpan.org/Ticket/Display.html?id=3954>
+
+     The get_text and get_trimmed_text methods of HTML::TokeParser can
+     now take multiple end tags as argument.  Patch by <siegmann@tinbergen.nl>
+     at <http://rt.cpan.org/Ticket/Display.html?id=3166>.
+
+     Various documentation tweaks.
+
+     Included another example program: hdump
+
+
+
 2003-08-19   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.31

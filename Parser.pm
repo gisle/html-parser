@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.31';  # $Date: 2003/10/10 11:34:39 $
+$VERSION = '3.32';  # $Date: 2003/10/10 14:27:13 $
 
 require HTML::Entities;
 
