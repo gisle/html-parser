@@ -1,10 +1,12 @@
 package HTML::Parser;
 
+# Author address: <gisle@aas.no>
+
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.20";  # $Date: 1998/07/08 11:14:22 $
+$VERSION = "2.20";  # $Date: 1998/07/08 13:07:39 $
 
 
 sub new
