@@ -20,19 +20,39 @@ struct p_state {
   CV* com_cb;
 };
 
+int isHALNUM(int c)
+{
+  return isALNUM(c) || c == '.' || c == '-';
+}
+
 void html_text(struct p_state* p_state, char* beg, char *end)
 {
   if (beg == end)
     return;
   printf(">> text: [");
-  while (beg < end) {
+  while (beg < end)
     putchar(*beg++);
-  }
   putchar(']');
   putchar('\n');
 }
 
-int html_parse(struct p_state* p_state,
+void html_end(struct p_state* p_state,
+	      char *tag_beg, char *tag_end,
+	      char *beg, char *end)
+{
+  printf(">> end: [");
+  while (tag_beg < tag_end) {
+    int l = toLOWER(*tag_beg);
+    putchar(l);
+    tag_beg++;
+  }
+  printf("] [");
+  while (beg < end)
+    putchar(*beg++);
+  printf("]\n");
+}
+
+void html_parse(struct p_state* p_state,
 	       SV* chunk)
 {
   char *s, *t, *end;
@@ -84,7 +104,8 @@ int html_parse(struct p_state* p_state,
   end = s + len;
 
   while (1) {
-  TEXT:
+
+    /* first we try to match as much text as possible */
     while (s < end && *s != '<')
       s++;
     if (s != t) {
@@ -119,22 +140,45 @@ int html_parse(struct p_state* p_state,
     /* next char is known to be '<' */
     s++;
 
-    switch (*s) {
-    case '!':
-      /* declaration or comment */
-    case '/':
+    if (isALPHA(*s)) {
+      /* start tag */
+    }
+    else if (*s == '/') {
       /* end tag */
-    case '?':
-      /* processing instruction */
-    default:
+      s++;
       if (isALPHA(*s)) {
-	/* start tag */
-      }
-      else {
-	/* non-conforming, i.e. treat it as text */
-	goto TEXT;
+	char *tag_start = s;
+	char *tag_end;
+	s++;
+	while (s < end && isHALNUM(*s))
+	  s++;
+	tag_end = s;
+	while (s < end && isSPACE(*s))
+	  s++;
+	if (s < end) {
+	  if (*s == '>') {
+	    s++;
+	    /* a complete end tag has been recognized */
+	    html_end(p_state, tag_start, tag_end, t, s);
+	    t = s;
+	  }
+	}
+	else {
+	  s = t;
+	  break;  /* need to see more stuff */
+	}
       }
     }
+    else if (*s == '!') {
+      /* declaration or comment */
+    }
+    else if (*s == '?') {
+      /* processing instruction */
+    }
+
+    /* if we get out here thene this was not a conforming tag, so
+     * treat it is plain text.
+     */
   }
 
   if (s == end) {
@@ -173,9 +217,9 @@ int main(int argc, char** argv, char** env)
 
   memset(&p, 0, sizeof(p));
   sv1 = newSVpv("bar <a href='foo'>foo</a>   ", 0);
-  sv2 = newSVpv("<a href=\"", 0);
-  sv3 = newSVpv("'>'\">bar</a>", 0);
-  sv4 = newSVpv("foo &bar", 0);
+  sv2 = newSVpv("<font size=+3><a href=\"", 0);
+  sv3 = newSVpv("'>'\">bar</A></fo", 0);
+  sv4 = newSVpv("NT>foo &bar", 0);
   
 
   html_parse(&p, sv1);
