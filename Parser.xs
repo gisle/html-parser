@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.52 1999/11/30 16:06:45 gisle Exp $
+/* $Id: Parser.xs,v 2.53 1999/11/30 17:12:01 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -447,7 +447,87 @@ html_handle(PSTATE* p_state,
     FREETMPS;
     LEAVE;
   }
+}
 
+
+static SV*
+attrspec_compile(SV* src)
+{
+  SV* attrspec = newSVpvn("", 0);
+  STRLEN len;
+  char *s = SvPV(src, len);
+  char *end = s + len;
+
+  static HV* names = 0;
+  if (!names) {
+    /* printf("Init attrspec names\n"); */
+    names = newHV();
+    hv_store(names, "self", 4,          newSVpvn("s", 1), 0);
+    hv_store(names, "tokens", 6,        newSVpvn("t", 1), 0);
+    hv_store(names, "tokenpos", 8,      newSVpvn("#", 1), 0);
+    hv_store(names, "tagname", 7,       newSVpvn("n", 1), 0);
+    hv_store(names, "gi", 2,            newSVpvn("n", 1), 0);
+    hv_store(names, "attr", 4,          newSVpvn("a", 1), 0);
+    hv_store(names, "attrseq", 7,       newSVpvn("A", 1), 0);
+    hv_store(names, "origtext", 8,      newSVpvn("d", 1), 0);
+    hv_store(names, "decoded_text", 12, newSVpvn("D", 1), 0);
+    hv_store(names, "cdata_flag", 10,   newSVpvn("c", 1), 0);
+  }
+
+  while (isHSPACE(*s))
+    s++;
+  while (s < end) {
+    if (isHNAME_FIRST(*s)) {
+      char *name = s;
+      SV** svp;
+      s++;
+      while (isHNAME_CHAR(*s))
+	s++;
+
+      /* check identifier */
+      svp = hv_fetch(names, name, s - name, 0);
+      if (svp) {
+	sv_catsv(attrspec, *svp);
+      }
+      else {
+	*s = '\0';
+	croak("Unrecognized identifier %s in attrspec", name);
+      }
+    }
+    else if (*s == '"' || *s == '\'') {
+      char *string_beg = s;
+      s++;
+      while (s < end && *s != *string_beg)
+	s++;
+      if (*s == *string_beg) {
+	/* literal */
+	int len = s - string_beg - 1;
+	if (len > 255)
+	  croak("Can't have literal strings longer than 255 chars in attrspec");
+	sv_catpvf(attrspec, "L%c", len);
+	sv_catpvn(attrspec, string_beg+1, len);
+	s++;
+      }
+      else {
+	croak("Unterminated literal string in attrspec");
+      }
+    }
+    else {
+      croak("Bad attrspec (%s)", s);
+    }
+
+    while (isHSPACE(*s))
+      s++;
+    if (s == end)
+      break;
+    if (*s != ',') {
+      croak("Missing comma separator in attrspec");
+    }
+    s++;
+    while (isHSPACE(*s))
+      s++;
+  }
+  return attrspec;
 }
 
 
@@ -1421,8 +1501,10 @@ handler(pstate, name_sv,...)
 
         /* update */
         if (items > 2) {
-	  SvREFCNT_dec(h->attrspec);
-	  h->attrspec = SvREFCNT_inc(ST(2));
+	  if (SvOK(ST(2))) {
+	    SvREFCNT_dec(h->attrspec);
+	    h->attrspec = attrspec_compile(ST(2));
+	  }
 	  if (items > 3) {
 	    SvREFCNT_dec(h->cb);
 	    h->cb = SvREFCNT_inc(ST(3));
