@@ -1,5 +1,22 @@
 2003-10-10   Gisle Aas <gisle@ActiveState.com>
 
+     Release 3.33
+
+     Perl 5.005 or better is now required.  For some reason we get
+     a test failure with perl-5.004 and I don't really feel like
+     debugging that perl any more.  Details about this failure can
+     be found at <http://rt.cpan.org/Ticket/Display.html?id=4065>.
+
+     New HTML::TokeParser method called 'get_phrase'.  It returns
+     all current text while ignoring any phrase-level markup.
+
+     The HTML::TokeParser method 'get_text' now expands skipped 
+     non-phrase-level tags as a single space.
+
+
+
+2003-10-10   Gisle Aas <gisle@ActiveState.com>
+
      Release 3.32
 
      If the document parsed ended with some kind of unterminated markup,
