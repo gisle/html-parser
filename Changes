@@ -1,3 +1,19 @@
+2004-12-04   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.42
+
+     Avoid sv_catpvn_utf8_upgrade() as that macro was not
+     available in perl-5.8.0.
+     Patch by Reed Russell <Russell.Reed@acxiom.com>.
+
+     Add casts to suppress compilation warnings for char/U8
+     mismatches.
+
+     HTML::HeadParser will always push new header values.
+     This make sure we never loose old header values.
+
+
+
 2004-11-30   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.41
