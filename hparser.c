@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.63 2001/03/27 20:46:50 gisle Exp $
+/* $Id: hparser.c,v 2.64 2001/03/30 07:11:00 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -44,6 +44,8 @@ enum argcode {
     ARG_IS_CDATA,
     ARG_OFFSET,
     ARG_LENGTH,
+    ARG_LINE,
+    ARG_COLUMN,
     ARG_EVENT,
     ARG_UNDEF,
     ARG_LITERAL, /* Always keep last */
@@ -68,6 +70,8 @@ char *argname[] = {
     "is_cdata", /* ARG_IS_CDATA */
     "offset",   /* ARG_OFFSET */
     "length",   /* ARG_LENGTH */
+    "line",     /* ARG_LINE */
+    "column",   /* ARG_COLUMN */
     "event",    /* ARG_EVENT */
     "undef",    /* ARG_UNDEF */
     /* ARG_LITERAL (not compared) */
@@ -101,7 +105,6 @@ report_event(PSTATE* p_state,
 	     event_id_t event,
 	     char *beg, char *end,
 	     token_pos_t *tokens, int num_tokens,
-	     STRLEN offset,
 	     SV* self
 	    )
 {
@@ -112,6 +115,11 @@ report_event(PSTATE* p_state,
     STRLEN my_na;
     char *argspec;
     char *s;
+
+    /* capture offsets */
+    STRLEN offset = p_state->offset;
+    STRLEN line = p_state->line;
+    STRLEN column = p_state->column;
 
 #if 0
     {  /* used for debugging at some point */
@@ -126,6 +134,7 @@ report_event(PSTATE* p_state,
 	case E_END:         printf("END"); break;
 	case E_TEXT:        printf("TEXT"); break;
 	case E_PROCESS:     printf("PROCESS"); break;
+	case E_NONE:        printf("NONE"); break;
 	default:            printf("EVENT #%d", event); break;
 	}
 
@@ -148,6 +157,27 @@ report_event(PSTATE* p_state,
     }
 #endif
 
+    /* update offsets */
+    p_state->offset += end - beg;
+    if (line) {
+	char *s = beg;
+	char *nl = NULL;
+	while (s < end) {
+	    if (*s == '\n') {
+		p_state->line++;
+		nl = s;
+	    }
+	    s++;
+	}
+	if (nl)
+	    p_state->column = end - nl;
+	else
+	    p_state->column += end - beg;
+    }
+
+    if (event == E_NONE)
+	return;
+    
 #ifdef MARKED_SECTION
     if (p_state->ms == MS_IGNORE)
 	return;
@@ -232,7 +262,9 @@ report_event(PSTATE* p_state,
 	}
 	else {
 	INIT_PEND_TEXT:
-	    p_state->pend_text_offset = p_state->chunk_offset + offset;
+	    p_state->pend_text_offset = offset;
+	    p_state->pend_text_line = line;
+	    p_state->pend_text_column = column;
 	    p_state->pend_text_is_cdata = p_state->is_cdata;
 	    sv_setpvn(p_state->pend_text, "", 0);
 	}
@@ -432,11 +464,19 @@ report_event(PSTATE* p_state,
 	    break;
 
 	case ARG_OFFSET:
-	    arg = sv_2mortal(newSViv(p_state->chunk_offset + offset));
+	    arg = sv_2mortal(newSViv(offset));
 	    break;
 
 	case ARG_LENGTH:
 	    arg = sv_2mortal(newSViv(end - beg));
+	    break;
+
+	case ARG_LINE:
+	    arg = sv_2mortal(newSViv(line));
+	    break;
+
+	case ARG_COLUMN:
+	    arg = sv_2mortal(newSViv(column));
 	    break;
 
 	case ARG_EVENT:
@@ -499,7 +539,7 @@ report_event(PSTATE* p_state,
 
 
 EXTERN SV*
-argspec_compile(SV* src)
+argspec_compile(SV* src, PSTATE* p_state)
 {
     dTHX;
     SV* argspec = newSVpvn("", 0);
@@ -545,6 +585,11 @@ argspec_compile(SV* src)
 	    if (a < ARG_LITERAL) {
 		char c = (unsigned char) a;
 		sv_catpvn(argspec, &c, 1);
+
+		if (a == ARG_LINE || a == ARG_COLUMN) {
+		    if (!p_state->line)
+			p_state->line = 1; /* enable tracing of line/column */
+		}
 	    }
 	    else {
 		croak("Unrecognized identifier %s in argspec", name);
@@ -611,30 +656,35 @@ flush_pending_text(PSTATE* p_state, SV* self)
     bool   old_unbroken_text = p_state->unbroken_text;
     SV*    old_pend_text     = p_state->pend_text;
     bool   old_is_cdata      = p_state->is_cdata;
-    STRLEN old_chunk_offset  = p_state->chunk_offset;
+    STRLEN old_offset        = p_state->offset;
+    STRLEN old_line          = p_state->line;
+    STRLEN old_column        = p_state->column;
 
     assert(p_state->pend_text && SvOK(p_state->pend_text));
 
     p_state->unbroken_text = 0;
     p_state->pend_text     = 0;
     p_state->is_cdata      = p_state->pend_text_is_cdata;
-    p_state->chunk_offset  = p_state->pend_text_offset;
+    p_state->offset        = p_state->pend_text_offset;
+    p_state->line          = p_state->pend_text_line;
+    p_state->column        = p_state->pend_text_column;
 
     report_event(p_state, E_TEXT,
 		 SvPVX(old_pend_text), SvEND(old_pend_text),
-		 0, 0, 0,
-		 self);
+		 0, 0, self);
     SvOK_off(old_pend_text);
 
     p_state->unbroken_text = old_unbroken_text;
     p_state->pend_text     = old_pend_text;
     p_state->is_cdata      = old_is_cdata;
-    p_state->chunk_offset  = old_chunk_offset;
+    p_state->offset        = old_offset;
+    p_state->line          = old_line;
+    p_state->column        = old_column;
 }
 
 
 static char*
-parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
+parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg;
 
@@ -663,7 +713,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 		report_event(p_state, E_COMMENT,
 			     beg - 4, s,
 			     tokens, num_tokens,
-			     offset, self);
+			     self);
 		FREE_TOKENS;
 
 		return s;
@@ -708,7 +758,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 		    s++;
 		    /* yup */
 		    report_event(p_state, E_COMMENT, beg-4, s, &token_pos, 1,
-				 offset, self);
+				 self);
 		    return s;
 		}
 	    }
@@ -857,7 +907,7 @@ PREMATURE:
 
 
 static char*
-parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
+parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg + 2;
 
@@ -875,7 +925,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	/* yes, two dashes seen */
 	s++;
 
-	tmp = parse_comment(p_state, s, end, offset, self);
+	tmp = parse_comment(p_state, s, end, self);
 	return (tmp == s) ? beg : tmp;
     }
 
@@ -895,7 +945,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	empty.beg = s;
 	empty.end = s;
 	s++;
-	report_event(p_state, E_COMMENT, beg, s, &empty, 1, offset, self);
+	report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
 	return s;
     }
 
@@ -986,8 +1036,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	    goto PREMATURE;
 	if (*s == '>') {
 	    s++;
-	    report_event(p_state, E_DECLARATION, beg, s, tokens, num_tokens,
-			 offset, self);
+	    report_event(p_state, E_DECLARATION, beg, s, tokens, num_tokens, self);
 	    FREE_TOKENS;
 	    return s;
 	}
@@ -1006,7 +1055,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 
 
 static char*
-parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
+parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg;
     SV* attr;
@@ -1108,10 +1157,9 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
     if (*s == '>') {
 	s++;
 	/* done */
-	report_event(p_state, E_START, beg, s, tokens, num_tokens, offset, self);
+	report_event(p_state, E_START, beg, s, tokens, num_tokens, self);
 	if (empty_tag)
-	    report_event(p_state, E_END, s, s, tokens, 1,
-			 offset + (s - beg), self);
+	    report_event(p_state, E_END, s, s, tokens, 1, self);
 
 	if (!p_state->xml_mode) {
 	    /* find out if this start tag should put us into literal_mode
@@ -1158,7 +1206,7 @@ PREMATURE:
 
 
 static char*
-parse_end(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
+parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg+2;
     hctype_t name_first, name_char;
@@ -1184,7 +1232,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	    if (*s == '>') {
 		s++;
 		/* a complete end tag has been recognized */
-		report_event(p_state, E_END, beg, s, &tagname, 1, offset, self);
+		report_event(p_state, E_END, beg, s, &tagname, 1, self);
 		return s;
 	    }
 	}
@@ -1197,8 +1245,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 
 
 static char*
-parse_process(PSTATE* p_state, char *beg, char *end,
-	      STRLEN offset, SV* self)
+parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg + 2;  /* skip '<?' */
     /* processing instruction */
@@ -1219,7 +1266,7 @@ parse_process(PSTATE* p_state, char *beg, char *end,
       
 	    /* a complete processing instruction seen */
 	    report_event(p_state, E_PROCESS, beg, s,
-			 &token_pos, 1, offset, self);
+			 &token_pos, 1, self);
 	    return s;
 	}
 	s++;
@@ -1229,7 +1276,7 @@ parse_process(PSTATE* p_state, char *beg, char *end,
 
 
 static char*
-parse_null(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
+parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     return 0;
 }
@@ -1254,8 +1301,7 @@ parse(pTHX_
 	    STRLEN len;
 	    char *s = SvPV(p_state->buf, len);
 	    assert(len);
-	    report_event(p_state, E_TEXT, s, s+len, 0, 0, 0, self);
-	    p_state->chunk_offset += len;
+	    report_event(p_state, E_TEXT, s, s+len, 0, 0, self);
 	    SvREFCNT_dec(p_state->buf);
 	    p_state->buf = 0;
 	}
@@ -1327,9 +1373,9 @@ parse(pTHX_
 			s++;
 			if (t != end_text)
 			    report_event(p_state, E_TEXT, t, end_text,
-					 0, 0, t - beg, self);
+					 0, 0, self);
 			report_event(p_state, E_END,  end_text, s,
-				     &end_token, 1, end_text - beg, self);
+				     &end_token, 1, self);
 			p_state->literal_mode = 0;
 			p_state->is_cdata = 0;
 			t = s;
@@ -1352,7 +1398,7 @@ parse(pTHX_
 			/* marked section end */
 			if (t != end_text)
 			    report_event(p_state, E_TEXT, t, end_text,
-					 0, 0, t - beg, self);
+					 0, 0, self);
 			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
 			marked_section_update(p_state);
@@ -1378,7 +1424,7 @@ parse(pTHX_
 		    if (*s == '>') {
 			s++;
 			report_event(p_state, E_TEXT, t, end_text,
-				     0, 0, t - beg, self);
+				     0, 0, self);
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
 			marked_section_update(p_state);    
 			t = s;
@@ -1391,7 +1437,7 @@ parse(pTHX_
 	}
 	if (s != t) {
 	    if (*s == '<') {
-		report_event(p_state, E_TEXT, t, s, 0, 0, t - beg, self);
+		report_event(p_state, E_TEXT, t, s, 0, 0, self);
 		t = s;
 	    }
 	    else {
@@ -1410,7 +1456,7 @@ parse(pTHX_
 		}
 		s++;
 		if (s != t)
-		    report_event(p_state, E_TEXT, t, s, 0, 0, t - beg, self);
+		    report_event(p_state, E_TEXT, t, s, 0, 0, self);
 		break;
 	    }
 	}
@@ -1421,7 +1467,7 @@ parse(pTHX_
 	/* next char is known to be '<' and pointed to by 't' as well as 's' */
 	s++;
 
-	if ( (new_pos = parsefunc[(unsigned char)*s](p_state, t, end, t - beg, self))) {
+	if ( (new_pos = parsefunc[(unsigned char)*s](p_state, t, end, self))) {
 	    if (new_pos == t) {
 		/* no progress, need more data to know what it is */
 		s = t;
@@ -1437,8 +1483,6 @@ parse(pTHX_
     }
 
 DONE:
-
-    p_state->chunk_offset += (s - beg);
 
     if (s == end || p_state->eof) {
 	if (p_state->buf) {

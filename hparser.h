@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.16 2001/03/26 22:05:39 gisle Exp $
+/* $Id: hparser.h,v 2.17 2001/03/30 07:11:00 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -37,7 +37,8 @@ enum event_id {
     E_PROCESS,
     E_DEFAULT,
     /**/
-    EVENT_COUNT
+    EVENT_COUNT,
+    E_NONE,
 };
 typedef enum event_id event_id_t;
 
@@ -59,8 +60,12 @@ struct p_handler {
 
 struct p_state {
     U32 signature;
+
+    /* state */
     SV* buf;
-    STRLEN chunk_offset;
+    STRLEN offset;
+    STRLEN line;
+    STRLEN column;
     bool parsing;
     bool eof;
 
@@ -72,6 +77,8 @@ struct p_state {
     SV*    pend_text;
     bool   pend_text_is_cdata;
     STRLEN pend_text_offset;
+    STRLEN pend_text_line;
+    STRLEN pend_text_column;
 
 #ifdef MARKED_SECTION
     /* marked section support */

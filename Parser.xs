@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.105 2001/03/26 22:05:38 gisle Exp $
+/* $Id: Parser.xs,v 2.106 2001/03/30 07:11:00 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -383,7 +383,7 @@ handler(pstate, eventname,...)
         if (items > 3) {
 	    SvREFCNT_dec(h->argspec);
 	    h->argspec = 0;
-	    h->argspec = argspec_compile(ST(3));
+	    h->argspec = argspec_compile(ST(3), pstate);
 	}
         if (items > 2) {
 	    SvREFCNT_dec(h->cb);

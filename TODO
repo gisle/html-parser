@@ -1,8 +1,8 @@
 TODO
 
+ - offsets/line/column wrong after marked sections
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
- - report 'line'
  - <![%app1;[...]]> (parameter entities)
  - limit the length of markup elements that never end.   Perhaps by
    configurable limits on the length that markup can have and still

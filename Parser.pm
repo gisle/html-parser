@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1993';  # $Date: 2001/03/27 20:33:23 $
+$VERSION = '3.1993';  # $Date: 2001/03/30 07:11:00 $
 
 require HTML::Entities;
 
@@ -690,11 +690,14 @@ C<comment>, C<process> or C<default>.
 
 =item C<line>
 
-I<Note: This is not supported yet!>
-
 Line causes the line number of the start of the event to be passed.
 The first line in the document is 1.  Line counting doesn't start
 until at least one handler requests this value.
+
+=item C<column>
+
+Column causes the column number of the start of the event to be passed.
+The first column on a line is 0.
 
 =item C<'...'>
 
