@@ -128,7 +128,8 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 
         # then we can parse it.
         $p->parse_file($file);
-        unlink($tmpfile) || warn "Can't unlink: $tmpfile";;
+        close $file if $chunksize eq "filehandle";
+        unlink($tmpfile) || warn "Can't unlink $tmpfile: $!";
     } else {
 	my $copy = $HTML;
 	while (length $copy) {
