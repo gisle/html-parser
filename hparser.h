@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.7 1999/12/14 09:40:13 gisle Exp $
+/* $Id: hparser.h,v 2.8 1999/12/17 14:11:40 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -33,7 +33,7 @@ enum marked_section_t {
 #endif /* MARKED_SECTION */
 
 
-#define P_MAGIC 0x16091964  /* used to tag struct p_state for safer cast */
+#define P_SIGNATURE 0x16091964  /* tag struct p_state for safer cast */
 
 enum event_id {
   E_DECLARATION = 0,
@@ -65,7 +65,7 @@ struct p_handler {
 };
 
 struct p_state {
-  U32 magic;
+  U32 signature;
   SV* buf;
   STRLEN chunk_offset;
   bool parsing;

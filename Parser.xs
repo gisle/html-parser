@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.81 1999/12/09 19:07:33 gisle Exp $
+/* $Id: Parser.xs,v 2.82 1999/12/17 14:11:40 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -91,7 +91,17 @@ check_handler(SV* h)
 
 
 static PSTATE*
-get_pstate(SV* sv)                               /* used by XS typemap */
+get_pstate_iv(SV* sv)
+{
+    PSTATE* p = (PSTATE*)SvIV(sv);
+    if (p->signature != P_SIGNATURE)
+      croak("Bad signature in parser state object at %p", p);
+    return p;
+}
+
+
+static PSTATE*
+get_pstate_hv(SV* sv)                               /* used by XS typemap */
 {
   HV* hv;
   SV** svp;
@@ -101,17 +111,40 @@ get_pstate(SV* sv)                               /* used by XS typemap */
     croak("Not a reference to a hash");
   hv = (HV*)sv;
   svp = hv_fetch(hv, "_hparser_xs_state", 17, 0);
-  if (svp) {
-    PSTATE* p = (PSTATE*)SvIV(*svp);
-#ifdef P_MAGIC
-    if (p->magic != P_MAGIC)
-      croak("Bad magic in parser state object at %p", p);
-#endif
-    return p;
-  }
+  if (svp)
+    return get_pstate_iv(*svp);
   croak("Can't find '_hparser_xs_state' element in HTML::Parser hash");
   return 0;
 }
+
+
+static void
+free_pstate(PSTATE* pstate)
+{
+  int i;
+  SvREFCNT_dec(pstate->buf);
+#ifdef MARKED_SECTION
+  SvREFCNT_dec(pstate->ms_stack);
+#endif
+  SvREFCNT_dec(pstate->bool_attr_val);
+  for (i = 0; i < EVENT_COUNT; i++) {
+    SvREFCNT_dec(pstate->handlers[i].cb);
+    SvREFCNT_dec(pstate->handlers[i].argspec);
+  }
+  pstate->signature = 0;
+  Safefree(pstate);
+}
+
+
+static int
+magic_free_pstate(SV *sv, MAGIC *mg)
+{
+  free_pstate(get_pstate_iv(sv));
+  return 0;
+}
+
+
+MGVTBL vtbl_free_pstate = {0, 0, 0, 0, magic_free_pstate};
 
 
 
@@ -130,6 +163,8 @@ _alloc_pstate(self)
 	PSTATE* pstate;
 	SV* sv;
 	HV* hv;
+        MAGIC* mg;
+
     CODE:
 	sv = SvRV(self);
         if (!sv || SvTYPE(sv) != SVt_PVHV)
@@ -137,39 +172,23 @@ _alloc_pstate(self)
 	hv = (HV*)sv;
 
 	Newz(56, pstate, 1, PSTATE);
-#ifdef P_MAGIC
-	pstate->magic = P_MAGIC;
-#endif
+	pstate->signature = P_SIGNATURE;
+
 	sv = newSViv((IV)pstate);
+	sv_magic(sv, 0, '~', 0, 0);
+	mg = mg_find(sv, '~');
+        assert(mg);
+        mg->mg_virtual = &vtbl_free_pstate;
 	SvREADONLY_on(sv);
 
 	hv_store(hv, "_hparser_xs_state", 17, sv, 0);
-
-void
-DESTROY(pstate)
-	PSTATE* pstate
-    PREINIT:
-        int i;
-    CODE:
-	SvREFCNT_dec(pstate->buf);
-#ifdef MARKED_SECTION
-        SvREFCNT_dec(pstate->ms_stack);
-#endif
-        SvREFCNT_dec(pstate->bool_attr_val);
-        for (i = 0; i < EVENT_COUNT; i++) {
-          SvREFCNT_dec(pstate->handlers[i].cb);
-          SvREFCNT_dec(pstate->handlers[i].argspec);
-        }
-
-	Safefree(pstate);
-
 
 SV*
 parse(self, chunk)
 	SV* self;
 	SV* chunk
     PREINIT:
-	PSTATE* p_state = get_pstate(self);
+	PSTATE* p_state = get_pstate_hv(self);
     CODE:
 	if (p_state->parsing)
     	    croak("Parse loop not allowed");
@@ -185,7 +204,7 @@ SV*
 eof(self)
 	SV* self;
     PREINIT:
-	PSTATE* p_state = get_pstate(self);
+	PSTATE* p_state = get_pstate_hv(self);
     CODE:
         if (p_state->parsing)
             p_state->eof = 1;
