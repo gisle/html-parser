@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.106 2004/11/22 11:58:56 gisle Exp $
+/* $Id: hparser.c,v 2.107 2004/11/22 16:08:57 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1475,10 +1475,31 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 
 	while (p_state->literal_mode) {
 	    char *l = p_state->literal_mode;
+	    bool skip_quoted_end = (strEQ(l, "script") || strEQ(l, "style"));
+	    char inside_quote = 0;
+	    bool escape_next = 0;
 	    char *end_text;
 
-	    while (s < end && *s != '<')
+	    while (s < end) {
+		if (*s == '<' && !inside_quote)
+		    break;
+		if (skip_quoted_end) {
+		    if (escape_next) {
+			escape_next = 0;
+		    }
+		    else {
+			if (*s == '\\')
+			    escape_next = 1;
+			else if (inside_quote && *s == inside_quote)
+			    inside_quote = 0;
+			else if (*s == '\r' || *s == '\n')
+			    inside_quote = 0;
+			else if (*s == '"' || *s == '\'')
+			    inside_quote = *s;
+		    }
+		}
 		s++;
+	    }
 
 	    if (s == end) {
 		s = t;

@@ -29,11 +29,5 @@ MINOR "BUGS" (alias FEATURES)
 
 
 MSIE bug compatibility
- - <script><!-- ... '</script>' ... --></script>
-                     - similar to the behaviour for end
-                       tags, MSIE apparently has some kind
-                       of quoted text skipping behaviour.
-	               Unclear if it is really JavaScript
-                       aware.
  - unterminated entities like foo&nbspbar
  - reparse in broken mode if literal elements are not terminated
