@@ -1,4 +1,4 @@
-print "1..3\n";
+print "1..4\n";
 
 { package H;
   sub new { bless {}, shift; }
@@ -134,3 +134,20 @@ print $p->as_string;
 
 print "not " if $p->header("Title") ne "Å være eller å ikke være";
 print "ok 3\n";
+
+
+# We got into an infinite loop on data without tags and no EOL.
+# This was actually a HTML::Parser bug.
+print "\n\n#### Try to reproduce bug with empty file\n\n";
+open(FILE, ">$file") or die "Can't create $file: $!";
+print FILE "Foo";
+close(FILE);
+
+$p = HTML::HeadParser->new(H->new);
+$p->parse_file($file);
+unlink($file) or warn "Can't unlink $file: $!";
+
+print "not " if $p->as_string;
+print "ok 4\n";
+
+

@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.92 2000/09/17 01:48:07 gisle Exp $
+/* $Id: Parser.xs,v 2.93 2000/12/03 19:04:12 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -223,8 +223,11 @@ eof(self)
     CODE:
         if (p_state->parsing)
             p_state->eof = 1;
-        else
+        else {
+	    p_state->parsing = 1;
 	    parse(p_state, 0, self); /* flush */
+	    p_state->parsing = 0;
+	}
 
 SV*
 strict_comment(pstate,...)

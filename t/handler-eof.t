@@ -1,4 +1,4 @@
-print "1..5\n";
+print "1..6\n";
 
 use strict;
 use HTML::Parser ();
@@ -27,3 +27,20 @@ eval {
 print "not " unless $@ && $@ =~ /Parse loop not allowed/;
 print "ok 5\n";
 
+# We used to get into an infinite loop if the eof triggered
+# handler called ->eof
+
+use HTML::Parser;
+$p = HTML::Parser->new(api_version => 3);
+
+my $i;
+$p->handler("default" =>
+	    sub {
+		my $p=shift;
+	        #++$i; print "$i @_\n";
+		$p->eof;
+	    }, "self, event");
+$p->parse("Foo");
+$p->eof;
+
+print "ok 6\n";
