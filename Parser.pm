@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_95;  # $Date: 1999/12/09 13:41:35 $
+$VERSION = 2.99_95;  # $Date: 1999/12/09 15:29:59 $
 
 require HTML::Entities;
 
@@ -709,6 +709,12 @@ This is equivalent to the following method calls:
 Setup of these handlers can also be requested with the "api_version =>
 2" constructor option.
 
+=head1 SUBCLASSING
+
+The C<HTML::Parser> class is subclassable.  Parser objects are plain
+hashes and C<HTML::Parser> only reserve hash keys with the "_hparser"
+prefix.
+
 =head1 EXAMPLES
 
 Strip out <font> tags:
@@ -757,6 +763,9 @@ shorthand for "<code>...</code>".
 Unclosed start or end tags, e.g. "<tt<b>...</b</tt>" are not
 recognized.
 
+=head1 DIAGNOSTICS
+
+[To be provided]
 
 =head1 SEE ALSO
 
