@@ -7,7 +7,7 @@ HTML::LinkExtor - Extract links from an HTML document
 =head1 SYNOPSIS
 
  require HTML::LinkExtor;
- $p = HTML::LinkExtor->new(\&cb, "http://www.sn.no/");
+ $p = HTML::LinkExtor->new(\&cb, "http://www.perl.org/");
  sub cb {
      my($tag, %links) = @_;
      print "$tag @{[%links]}\n";
@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.30 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use HTML::Tagset ();
@@ -55,8 +55,10 @@ non-link attributes are removed.
 sub new
 {
     my($class, $cb, $base) = @_;
-    my $self = $class->SUPER::new(start_h => ["_start_tag",
-					      "self,tagname,attr"]);
+    my $self = $class->SUPER::new(
+                    start_h => ["_start_tag", "self,tagname,attr"],
+		    report_only_tags => [keys %HTML::Tagset::linkElements],
+	       );
     $self->{extractlink_cb} = $cb;
     if ($base) {
 	require URI;
@@ -68,7 +70,6 @@ sub new
 sub _start_tag
 {
     my($self, $tag, $attr) = @_;
-    return unless exists $HTML::Tagset::linkElements{$tag};
 
     my $base = $self->{extractlink_base};
     my $links = $HTML::Tagset::linkElements{$tag};
@@ -138,8 +139,8 @@ received using LWP:
   use HTML::LinkExtor;
   use URI::URL;
 
-  $url = "http://www.sn.no/";  # for instance
-  $ua = new LWP::UserAgent;
+  $url = "http://www.perl.org/";  # for instance
+  $ua = LWP::UserAgent->new;
 
   # Set up a callback that collect image links
   my @imgs = ();
@@ -170,7 +171,7 @@ L<HTML::Parser>, L<HTML::Tagset>, L<LWP>, L<URI::URL>
 
 =head1 COPYRIGHT
 
-Copyright 1996-2000 Gisle Aas.
+Copyright 1996-2001 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
