@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/07 12:54:46 $
+$VERSION = 2.99_94;  # $Date: 1999/12/07 13:41:27 $
 
 require HTML::Entities;
 
@@ -32,7 +32,7 @@ sub new
 
     if ($api_version < 3) {
 	# Set up method callbacks compatible with HTML-Parser-2.xx
-	$self->handler(text    => "text",    "self,text,cdata_flag");
+	$self->handler(text    => "text",    "self,text,is_cdata");
 	$self->handler(end     => "end",     "self,tagname,text");
 	$self->handler(process => "process", "self,token0,text");
 	$self->handler(start   => "start",
@@ -485,9 +485,9 @@ C<plaintext>).
 This passes undef except for C<text> events.
 
 
-=item C<cdata_flag>
+=item C<is_cdata>
 
-Cdata_flag causes a TRUE value to be passed
+Is_cdata causes a TRUE value to be passed
 if the event inside a CDATA section
 or was between literal start and end tags
 (C<script>, C<style>, C<xmp>, and C<plaintext>).
@@ -613,20 +613,20 @@ Version 2 callback methods.
 
 This is equivilent to the following method calls:
 
-   $p->handler(text    => "text",    "self,text,cdata_flag");
-   $p->handler(end     => "end",     "self,tagname,text");
-   $p->handler(process => "process", "self,token0,text");
-   $p->handler(start   => "start",   "self,tagname,attr,attrseq,text");
+   $p->handler(text    => "text",    "self, text, is_cdata");
+   $p->handler(end     => "end",     "self, tagname, text");
+   $p->handler(process => "process", "self, token0, text");
+   $p->handler(start   => "start",   "self, tagname, attr, attrseq, text");
    $p->handler(comment =>
              sub {
 		 my($self, $tokens) = @_;
 		 for (@$tokens) {$self->comment($_);}},
-             "self,tokens");
+             "self, tokens");
    $p->handler(declaration =>
              sub {
 		 my $self = shift;
 		 $self->declaration(substr($_[0], 2, -1));},
-             "self,text");
+             "self, text");
 
 =head1 EXAMPLES
 

@@ -13,7 +13,7 @@ my $argspec = join ',',
     qw( self offset length
 	event tagname token0
 	text
-	cdata_flag dtext
+	is_cdata dtext
 	tokens
 	tokenpos
 	attr

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.20 1999/12/07 10:56:57 gisle Exp $
+/* $Id: hparser.c,v 2.21 1999/12/07 13:41:27 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -38,7 +38,7 @@ enum argcode {
   ARG_ATTRSEQ,
   ARG_TEXT,
   ARG_DTEXT,
-  ARG_CDATA_FLAG,
+  ARG_IS_CDATA,
   ARG_OFFSET,
   ARG_LENGTH,
   ARG_EVENT,
@@ -268,7 +268,7 @@ report_event(PSTATE* p_state,
       }
       break;
       
-    case ARG_CDATA_FLAG:
+    case ARG_IS_CDATA:
       if (event == E_TEXT) {
 	arg = boolSV(CDATA_MODE(p_state));
       }
@@ -349,20 +349,20 @@ argspec_compile(SV* src)
   if (!names) {
     /* printf("Init argspec names\n"); */
     names = newHV();
-    hv_store(names, "self", 4,        newSViv(ARG_SELF),       0);
-    hv_store(names, "tokens", 6,      newSViv(ARG_TOKENS),     0);
-    hv_store(names, "tokenpos", 8,    newSViv(ARG_TOKENPOS),   0);
-    hv_store(names, "token0", 6,      newSViv(ARG_TOKEN0),     0);
-    hv_store(names, "tagname", 7,     newSViv(ARG_TAGNAME),    0);
-    hv_store(names, "attr", 4,        newSViv(ARG_ATTR),       0);
-    hv_store(names, "attrseq", 7,     newSViv(ARG_ATTRSEQ),    0);
-    hv_store(names, "text", 4,        newSViv(ARG_TEXT),       0);
-    hv_store(names, "dtext", 5,       newSViv(ARG_DTEXT),      0);
-    hv_store(names, "cdata_flag", 10, newSViv(ARG_CDATA_FLAG), 0);
-    hv_store(names, "offset", 6,      newSViv(ARG_OFFSET),     0);
-    hv_store(names, "length", 6,      newSViv(ARG_LENGTH),     0);
-    hv_store(names, "event", 5,       newSViv(ARG_EVENT),      0);
-    hv_store(names, "undef", 5,       newSViv(ARG_UNDEF),      0);
+    hv_store(names, "self", 4,        newSViv(ARG_SELF),      0);
+    hv_store(names, "tokens", 6,      newSViv(ARG_TOKENS),    0);
+    hv_store(names, "tokenpos", 8,    newSViv(ARG_TOKENPOS),  0);
+    hv_store(names, "token0", 6,      newSViv(ARG_TOKEN0),    0);
+    hv_store(names, "tagname", 7,     newSViv(ARG_TAGNAME),   0);
+    hv_store(names, "attr", 4,        newSViv(ARG_ATTR),      0);
+    hv_store(names, "attrseq", 7,     newSViv(ARG_ATTRSEQ),   0);
+    hv_store(names, "text", 4,        newSViv(ARG_TEXT),      0);
+    hv_store(names, "dtext", 5,       newSViv(ARG_DTEXT),     0);
+    hv_store(names, "is_cdata", 8,    newSViv(ARG_IS_CDATA),  0);
+    hv_store(names, "offset", 6,      newSViv(ARG_OFFSET),    0);
+    hv_store(names, "length", 6,      newSViv(ARG_LENGTH),    0);
+    hv_store(names, "event", 5,       newSViv(ARG_EVENT),     0);
+    hv_store(names, "undef", 5,       newSViv(ARG_UNDEF),     0);
   }
 
   while (isHSPACE(*s))

@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.16 1999/12/05 21:09:00 gisle Exp $
+# $Id: TokeParser.pm,v 2.17 1999/12/07 13:41:27 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.17 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -26,7 +26,7 @@ sub new
     my $accum = $self->{accum} = [];
     $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,text");
     $self->handler(end =>     $accum, "'E',tagname,text");
-    $self->handler(text =>    $accum, "'T',text,cdata_flag");
+    $self->handler(text =>    $accum, "'T',text,is_cdata");
     $self->handler(process => $accum, "'PI',token0,text");
 
     # XXX The following two are not strictly V2 compatible.  We used
