@@ -37,6 +37,7 @@ WriteMakefile(
 		      'HTML::Tagset' => 3,
                     },
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean        => { FILES => 'hctype.h pfunc.h' },
     @extra,
 );
 
