@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1991';  # $Date: 2001/03/19 19:19:19 $
+$VERSION = '3.1991';  # $Date: 2001/03/26 07:31:07 $
 
 require HTML::Entities;
 
@@ -203,7 +203,7 @@ makes on-the-fly parsing as documents are received from the network
 possible.
 
 If event driven parsing does not feel right for your application, you
-might want to use C<HTML::TokeParser>.  It is a
+might want to use C<HTML::PullParser>.  It is a
 C<HTML::Parser> subclass that allows a more conventional program
 structure.
 
@@ -975,7 +975,7 @@ are allowed in argspecs.
 
 =head1 SEE ALSO
 
-L<HTML::Entities>, L<HTML::TokeParser>, L<HTML::HeadParser>,
+L<HTML::Entities>, L<HTML::PullParser>, L<HTML::TokeParser>, L<HTML::HeadParser>,
 L<HTML::LinkExtor>, L<HTML::Form>
 
 L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
