@@ -1,9 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.3 1998/07/08 13:04:01 aas Exp $
+# $Id: TokeParser.pm,v 2.4 1998/11/13 21:27:46 aas Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp qw(croak);
@@ -15,14 +16,19 @@ sub new
     my $class = shift;
     my $file = shift;
     croak "Usage: $class->new(\$file)" unless defined $file;
-    unless (ref $file) {
+    if (!ref($file) && ref(\$file) ne "GLOB") {
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
     }
     my $self = $class->SUPER::new;
-    $self->{file} = $file;
     $self->{tokens} = [];
     $self->{textify} = {img => "alt", applet => "alt"};
+    if (ref($file) eq "SCALAR") {
+	$self->parse($$file);
+	$self->eof;
+    } else {
+	$self->{file} = $file;
+    }
     $self;
 }
 
@@ -144,7 +150,7 @@ HTML::TokeParser - Alternative HTML::Parser interface
 
 The HTML::TokeParser is an alternative interface to the HTML::Parser class.
 It basically turns the HTML::Parser inside out.  You associate a file
-(or any IO::Handle object) with the parser at construction time and
+(or any IO::Handle object or string) with the parser at construction time and
 then repeatedly call $parser->get_token to obtain the tags and text
 found in the parsed document.  No need to make a subclass to make the
 parser do anything.
@@ -154,12 +160,22 @@ confusing, so don't do that.  Use the following methods instead:
 
 =over 4
 
-=item $p = HTML::TokeParser->new( $file );
+=item $p = HTML::TokeParser->new( $file_or_doc );
 
-The object constructor needs a file name or a reference to some file
-handle object as argument.  If a file name (plain scalar) is passed to
-the constructor and the file can't be opened for reading, then the
-constructor will return an undefined value.
+The object constructor argument is either a file name, a file handle
+object, or the complete document to be parsed.
+
+If the argument is a plain scalar, then it is taken as the name of a
+file to be opened and parsed.  If the file can't be opened for
+reading, then the constructor will return an undefined value and $!
+will tell you why it failed.
+
+If the argument is a reference to a plain scalar, then this scalar is
+taken to be the document to parse.
+
+Otherwise the argument is taken to be some object that the
+C<HTML::TokeParser> can read() from when it need more data.  The
+stream will be read() until EOF, but not closed.
 
 =item $p->get_token
 
