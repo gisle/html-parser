@@ -25,12 +25,12 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.23 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.24 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
 
-# Elements that might contain links and the name of the link attribute(s)
+# Tags that might contain links and the link attribute name(s)
 %LINK_ELEMENT =
 (
  a       => 'href',
