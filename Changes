@@ -1,3 +1,31 @@
+1999-11-09   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_07
+
+   Entities in attribute values are now always expanded.
+
+   If you set the $p->decode_text_entities to a true value, then
+   you don't have to decode the text yourself.
+
+   In xml_mode we don't report empty element tags as a start tag
+   with an extra parameter any more.  Instead we generate an artificial
+   end tag.
+
+   'xml_mode' now implies 'keep_case'.
+
+   The parser now keeps its own copy of the bool_attr_value value.
+
+   Avoid memory leak for text callbacks
+
+   Avoid using ERROR as a goto label.
+
+   Introduced common internal accessor function for all boolean parser
+   attributes.
+
+   Tweaks to make Parser.xs compile under perl5.004.
+
+
+
 1999-11-08   Gisle Aas <gisle@aas.no>
 
    Release 2.99_06
