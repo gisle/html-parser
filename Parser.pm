@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_90;  # $Date: 1999/12/03 22:30:46 $
+$VERSION = 2.99_91;  # $Date: 1999/12/04 12:48:18 $
 
 require HTML::Entities;
 
@@ -454,6 +454,10 @@ or was between literal start and end tags
 When the flag is FALSE for a text event, the you should either use
 C<dtext> or decode the entities yourself before the text is
 processed further.
+
+=item offset
+
+The byte position of the C<text> withing the HTML document.
 
 =item event
 
