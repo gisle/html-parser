@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.9 1999/12/04 23:59:30 gisle Exp $
+/* $Id: hparser.c,v 2.10 1999/12/05 20:50:41 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -285,7 +285,7 @@ report_event(PSTATE* p_state,
       arg = &PL_sv_undef;
 
     if (array) {
-      /* MAC: have to fix mortality here or
+      /* have to fix mortality here or
 	 add mortality to XPUSHs after removing it from the switch cases */
       av_push(array, SvREFCNT_inc(arg));
     }
@@ -1064,8 +1064,7 @@ parse(PSTATE* p_state,
 	  if (*s == '>') {
 	    s++;
 	    if (t != end_text)
-	      report_event(p_state, E_TEXT, t, end_text, 0, 0,
-			   t - beg, self);
+	      report_event(p_state, E_TEXT, t, end_text, 0, 0, t - beg, self);
 	    report_event(p_state, E_END,  end_text, s, &end_token, 1,
 			 end_text - beg, self);
 	    p_state->literal_mode = 0;
@@ -1113,8 +1112,7 @@ parse(PSTATE* p_state,
 	  s++;
 	  if (*s == '>') {
 	    s++;
-	    report_event(p_state, E_TEXT, t, end_text, 0, 0,
-			 t - beg, self);
+	    report_event(p_state, E_TEXT, t, end_text, 0, 0, t - beg, self);
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);    
 	    t = s;
