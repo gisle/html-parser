@@ -1,13 +1,13 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.9 1999/11/11 09:12:21 gisle Exp $
+# $Id: TokeParser.pm,v 2.10 1999/11/29 11:07:28 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
-use Carp qw(croak);
+use Carp ();
 use HTML::Entities qw(decode_entities);
 
 
@@ -15,7 +15,9 @@ sub new
 {
     my $class = shift;
     my $file = shift;
-    croak "Usage: $class->new(\$file)" unless defined $file;
+    Carp::croak("Usage: $class->new(\$file)")
+	  unless defined $file;
+
     if (!ref($file) && ref(\$file) ne "GLOB") {
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
@@ -25,9 +27,17 @@ sub new
 				 );
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
-	$self->{toke_scalar} = $file;
-	$self->{toke_scalarpos}  = 0;
-    } else {
+	if (!defined $$file) {
+	    Carp::carp("HTML::TokeParser got undefined value as document")
+		if $^W;
+	    $self->{toke_eof}++;
+	}
+	else {
+	    $self->{toke_scalar} = $file;
+	    $self->{toke_scalarpos}  = 0;
+	}
+    }
+    else {
 	$self->{toke_file} = $file;
     }
     $self;
