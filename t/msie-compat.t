@@ -29,6 +29,7 @@ $p->parse("</a \"foo<>\"");
 $p->parse(" \"bar>\" x>");
 $p->parse("</ foo bar>");
 $p->parse("</ \"<>\" >");
+$p->parse("<! \"<>\" >");
 $p->eof;
 
 print $TEXT;
@@ -40,5 +41,6 @@ print "not " unless $TEXT eq <<'EOT'; print "ok 1\n";
 [end,a,</a "foo<>" "bar>" x>]
 [comment, foo bar,</ foo bar>]
 [comment, "<>" ,</ "<>" >]
+[comment, "<>" ,<! "<>" >]
 [end_document,<undef>,]
 EOT

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.87 2003/08/15 00:15:20 gisle Exp $
+/* $Id: hparser.c,v 2.88 2003/08/15 00:22:57 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1116,10 +1116,8 @@ DECL_FAIL:
 	return 0;
 
     /* consider everything up to the first '>' a comment */
-    while (s < end && *s != '>')
-	s++;
-
-    if (*s == '>') {
+    s = skip_until_gt(s, end);
+    if (s < end) {
 	token_pos_t token;
 	token.beg = beg + 2;
 	token.end = s;
@@ -1127,7 +1125,9 @@ DECL_FAIL:
 	report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
 	return s;
     }
-    return 0;
+    else {
+	return beg;
+    }
 }
 
 

@@ -33,7 +33,6 @@ MSIE bug compatibility
                        first looks for "-->".  If it hits
                        EOF before it finds it it goes back
                        and looks for ">" instead.
- - <! "<>" >         - quoted text for declarations
  - <script><!-- ... '</script>' ... --></script>
                      - similar to the behaviour for end
                        tags, MSIE apparently has some kind
