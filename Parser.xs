@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.22 1999/11/15 13:08:42 gisle Exp $
+/* $Id: Parser.xs,v 2.23 1999/11/15 14:21:37 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -613,7 +613,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       s++;
       if (s < end && *s == '-') {
 	s++;
-	while (s < end && isSPACE(*s))
+	while (isHSPACE(*s))
 	  s++;
 	if (s < end && *s == '>') {
 	  s++;
@@ -667,14 +667,14 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     AV* tokens = newAV();
     s++;
     /* declaration */
-    while (s < end && isHALNUM(*s))
+    while (s < end && isHNAME_CHAR(*s))
       s++;
     /* first word available */
     av_push(tokens, newSVpv(beg+2, s - beg));
 
-    while (s < end && isSPACE(*s)) {
+    while (s < end && isHSPACE(*s)) {
       s++;
-      while (s < end && isSPACE(*s))
+      while (s < end && isHSPACE(*s))
 	s++;
 
       if (s == end)
@@ -719,7 +719,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	/* plain word */
 	char *word_beg = s;
 	s++;
-	while (s < end && !isSPACE(*s) && *s != '>')
+	while (s < end && isHNOT_SPACE_GT(*s))
 	  s++;
 	if (s == end)
 	  goto PREMATURE;
@@ -762,24 +762,43 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   SV* attr;
   int empty_tag = 0;  /* XML feature */
 
-  assert(beg[0] == '<' && isHALPHA(beg[1]) && end - beg > 2);
+  hctype_t tag_name_first, tag_name_char;
+  hctype_t attr_name_first, attr_name_char;
+
+  if (p_state->strict_names) {
+    tag_name_first = attr_name_first = HCTYPE_NAME_FIRST;
+    tag_name_char  = attr_name_char  = HCTYPE_NAME_CHAR;
+  }
+  else if (p_state->xml_mode) {
+    tag_name_first = tag_name_char = HCTYPE_NOT_SPACE_SLASH_GT;
+    attr_name_first = HCTYPE_NOT_SPACE_SLASH_GT;
+    attr_name_char  = HCTYPE_NOT_SPACE_EQ_SLASH_GT;
+  }
+  else {
+    tag_name_first = tag_name_char = HCTYPE_NOT_SPACE_GT;
+    attr_name_first = HCTYPE_NOT_SPACE_GT;
+    attr_name_char  = HCTYPE_NOT_SPACE_EQ_GT;
+  }
+
+
+  assert(beg[0] == '<' && isHNAME_FIRST(beg[1]) && end - beg > 2);
   s += 2;
 
-  while (s < end && isHALNUM(*s))
+  while (s < end && isHCTYPE(*s, tag_name_char))
     s++;
   tag_end = s;
-  while (s < end && isSPACE(*s))
+  while (isHSPACE(*s))
     s++;
   if (s == end)
     goto PREMATURE;
 
   tokens = newAV();
 
-  while (isHALPHA(*s)) {
+  while (isHCTYPE(*s, attr_name_first)) {
     /* attribute */
     char *attr_beg = s;
     s++;
-    while (s < end && isHALNUM(*s))
+    while (s < end && isHCTYPE(*s, attr_name_char))
       s++;
     if (s == end)
       goto PREMATURE;
@@ -789,7 +808,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       sv_lower(attr);
     av_push(tokens, attr);
 
-    while (s < end && isSPACE(*s))
+    while (isHSPACE(*s))
       s++;
     if (s == end)
       goto PREMATURE;
@@ -797,7 +816,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     if (*s == '=') {
       /* with a value */
       s++;
-      while (s < end && isSPACE(*s))
+      while (isHSPACE(*s))
 	s++;
       if (s == end)
 	goto PREMATURE;
@@ -819,7 +838,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       }
       else {
 	char *word_start = s;
-	while (s < end && !isSPACE(*s) && *s != '>') {
+	while (s < end && isHNOT_SPACE_GT(*s)) {
 	  if (p_state->xml_mode && *s == '/')
 	    break;
 	  s++;
@@ -830,7 +849,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 					entity2char));
       }
 
-      while (s < end && isSPACE(*s))
+      while (isHSPACE(*s))
 	s++;
       if (s == end)
 	goto PREMATURE;
@@ -900,15 +919,24 @@ static char*
 html_parse_end(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg+2;
+  hctype_t name_first, name_char;
 
-  if (isHALPHA(*s)) {
+  if (p_state->strict_names) {
+    name_first = HCTYPE_NAME_FIRST;
+    name_char  = HCTYPE_NAME_CHAR;
+  }
+  else {
+    name_first = name_char = HCTYPE_NOT_SPACE_GT;
+  }
+
+  if (isHCTYPE(*s, name_first)) {
     char *tag_start = s;
     char *tag_end;
     s++;
-    while (s < end && isHALNUM(*s))
+    while (s < end && isHCTYPE(*s, name_char))
       s++;
     tag_end = s;
-    while (s < end && isSPACE(*s))
+    while (isHSPACE(*s))
       s++;
     if (s < end) {
       if (*s == '>') {
@@ -1032,7 +1060,7 @@ html_parse(PSTATE* p_state,
 	if (!*l) {
 	  /* matched it all */
 	  char *end_tag = s;
-	  while (isSPACE(*s))
+	  while (isHSPACE(*s))
 	    s++;
 	  if (*s == '>') {
 	    s++;
@@ -1056,16 +1084,16 @@ html_parse(PSTATE* p_state,
       }
       else {
 	s--;
-	if (isSPACE(*s)) {
+	if (isHSPACE(*s)) {
 	  /* wait with white space at end */
-	  while (s >= t && isSPACE(*s))
+	  while (s >= t && isHSPACE(*s))
 	    s--;
 	}
 	else {
 	  /* might be a chopped up entities/words */
-	  while (s >= t && !isSPACE(*s))
+	  while (s >= t && !isHSPACE(*s))
 	    s--;
-	  while (s >= t && isSPACE(*s))
+	  while (s >= t && isHSPACE(*s))
 	    s--;
 	}
 	s++;
