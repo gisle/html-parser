@@ -1,9 +1,18 @@
-/* $Id: Parser.xs,v 1.17 1999/11/05 12:47:24 gisle Exp $
+/* $Id: Parser.xs,v 1.18 1999/11/05 12:49:16 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
+ */
+
+/* TODO:
+ *   - direct method calls
+ *   - accum flags
+ *   - specify which value boolean attributes takes
+ *   - embed entity encode/decode
+ *   - <plaintext> should not end with </plaintext>
+ *   - marked sections?
  */
 
 #ifdef __cplusplus
