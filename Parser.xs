@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.129 2004/11/29 11:02:41 gisle Exp $
+/* $Id: Parser.xs,v 2.130 2005/01/06 08:42:46 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -262,6 +262,7 @@ parse(self, chunk)
 	        count = perl_call_sv(generator, G_SCALAR|G_EVAL);
 		SPAGAIN;
 		chunk = count ? POPs : 0;
+	        PUTBACK;
 
 	        if (SvTRUE(ERRSV)) {
 		    p_state->parsing = 0;
