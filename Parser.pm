@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_15;  # $Date: 1999/11/30 06:26:54 $
+$VERSION = 2.99_15;  # $Date: 1999/11/30 20:02:39 $
 
 require HTML::Entities;
 
@@ -22,37 +22,47 @@ sub new
     my $class = shift;
     my $self = bless {}, $class;
     _alloc_pstate($self);
-    if (@_) {
+    if (@_ > 1) {
 	my %cfg = @_;
 
 	if (my $h = delete $cfg{handlers}) {
 	    $h = {@$h} if ref($h) eq "ARRAY";
 	    while (my($event, $cb) = each %$h) {
-		$self->callback($event => $cb);
+		$self->handler($event => $cb);
 	    }
 	}
 
 	# In the end we try to assume plain attribute or callback
 	for (keys %cfg) {
-	    if (/^(\w+)_cb$/) {
-		$self->callback($1 => $cfg{$_});
+	    if (/^(\w+)_h$/) {
+		$self->handler($1 => $cfg{$_});
 	    }
 	    else {
 		$self->$_($cfg{$_});
 	    }
 	}
     }
-    else {
+    elsif (!$_[0] || $_[0] < 3) {
 	# Set up method callbacks for compatibility with HTML-Parser-2.xx
-	$self->pass_self(1);    # get back $self as first argument
-	$self->v2_compat(1);    # fix start parameters
+	$self->handler(text        => "self,origtext,cdata_flag",    "text");
+	$self->handler(end         => "self,tagname,origtext",        "end");
+	$self->handler(process     => "self,token1,origtext",     "process");
+	$self->handler(start       => "self,tagname,attr,attrseq,origtext",
+			                                            "start");
 
-	$self->callback(text        => sub { shift->text(@_)});
-	$self->callback(end         => sub { shift->end(@_)});
-	$self->callback(comment     => sub { shift->comment(@_)});
-	$self->callback(declaration => sub { shift->declaration(@_)});
-	$self->callback(process     => sub { shift->process(@_)});
-	$self->callback(start       => sub { shift->start(@_)});
+	$self->handler(comment => "self,tokens",
+		       sub {
+			   my($self, $tokens) = @_;
+			   for (@$tokens) {
+			       $self->comment($_);
+			   }
+		       });
+
+	$self->handler(declaration => "self,origtext",
+		       sub {
+			   my $self = shift;
+			   $self->declaration(substr($_[0], 2, -1));
+		       });
     }
     $self;
 }
