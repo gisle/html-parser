@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.11 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.12 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -120,31 +120,12 @@ sub parse
     if ($@) {
         print $@ if $DEBUG;
 	$self->{'_buf'} = '';  # flush rest of buffer
+	$self->{parse_file_stop}++;  # signal to $self->parse_file()
 	return '';
     }
     $self;
 }
 
-# more code duplication than I would like, but we need to treat the
-# return value from $self->parse as a signal to stop parsing.
-sub parse_file
-{
-    my($self, $file) = @_;
-    my $opened;
-    if (!ref($file) && ref(\$file) ne "GLOB") {
-        # Assume $file is a filename
-        local(*F);
-        open(F, $file) || return undef;
-        $opened++;
-        $file = *F;
-    }
-    my $chunk = '';
-    while(read($file, $chunk, 512)) {
-        $self->parse($chunk) || last;
-    }
-    close($file) if $opened;
-    return $self;
-}
 
 =item $hp->header;
 
