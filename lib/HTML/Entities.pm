@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.15 1999/11/11 09:12:20 gisle Exp $
+# $Id: Entities.pm,v 1.16 2000/08/29 11:55:13 gisle Exp $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ HTML::Entities - Encode or decode strings with HTML entities
 =head1 DESCRIPTION
 
 This module deals with encoding and decoding of strings with HTML
-character entites.  The module provides the following functions:
+character entities.  The module provides the following functions:
 
 =over 4
 
@@ -27,7 +27,7 @@ This routine replaces HTML entities found in the $string with the
 corresponding ISO-8859/1 character.  Unrecognized entities are left
 alone.
 
-=item endode_entities($string, [$unsafe_chars])
+=item encode_entities($string, [$unsafe_chars])
 
 This routine replaces unsafe characters in $string with their entity
 representation.  A second argument can be given to specify which
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.15 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
