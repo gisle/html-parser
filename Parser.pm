@@ -4,7 +4,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.24";  # $Date: 1999/11/05 09:05:51 $
+$VERSION = "2.25";  # $Date: 1999/11/05 09:09:21 $
 
 
 sub new
