@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.62 2001/03/27 20:29:35 gisle Exp $
+/* $Id: hparser.c,v 2.63 2001/03/27 20:46:50 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -329,7 +329,7 @@ report_event(PSTATE* p_state,
 	    if (num_tokens >= 1) {
 		arg = sv_2mortal(newSVpvn(tokens[0].beg,
 					  tokens[0].end - tokens[0].beg));
-		if (!p_state->xml_mode && argcode != ARG_TAGNAME)
+		if (!p_state->xml_mode && argcode != ARG_TOKEN0)
 		    sv_lower(aTHX_ arg);
 		if (argcode == ARG_TAG && event != E_START) {
 		    char *e_type = "!##/#?#";
