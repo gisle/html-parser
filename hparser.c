@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.55 2001/03/13 02:26:53 gisle Exp $
+/* $Id: hparser.c,v 2.56 2001/03/13 05:38:02 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -162,6 +162,59 @@ report_event(PSTATE* p_state,
     if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
 	/* FALSE scalar ('' or 0) means IGNORE this event */
 	return;
+    }
+
+    /* tag filters */
+    if (p_state->ignore_tags || p_state->report_tags || p_state->ignore_elements) {
+
+	if (event == E_START || event == E_END) {
+	    SV* tagname;
+	    U32 hash;
+
+	    assert(num_tokens >= 1);
+	    tagname = newSVpvn(tokens[0].beg, tokens[0].end - tokens[0].beg);
+	    if (!p_state->xml_mode)
+		sv_lower(aTHX_ tagname);
+
+	    if (p_state->ignoring_element) {
+		if (sv_eq(p_state->ignoring_element, tagname)) {
+		    if (event == E_START)
+			p_state->ignore_depth++;
+		    else if (--p_state->ignore_depth == 0) {
+			SvREFCNT_dec(p_state->ignoring_element);
+			p_state->ignoring_element = 0;
+		    }
+		}
+		SvREFCNT_dec(tagname);
+		return;
+	    }
+
+	    PERL_HASH(hash, SvPVX(tagname), SvCUR(tagname));
+
+	    if (p_state->ignore_elements &&
+		hv_fetch_ent(p_state->ignore_elements, tagname, 0, hash))
+	    {
+		p_state->ignoring_element = tagname;
+		p_state->ignore_depth = 1;
+		return;
+	    }
+
+	    if (p_state->ignore_tags &&
+		hv_fetch_ent(p_state->ignore_tags, tagname, 0, hash))
+	    {
+		SvREFCNT_dec(tagname);
+		return;
+	    }
+	    if (p_state->report_tags &&
+		!hv_fetch_ent(p_state->report_tags, tagname, 0, hash))
+	    {
+		SvREFCNT_dec(tagname);
+		return;
+	    }
+	}
+	else if (p_state->ignoring_element) {
+	    return;
+	}
     }
 
     if (p_state->unbroken_text && event == E_TEXT) {

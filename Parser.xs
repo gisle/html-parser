@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.101 2001/03/13 01:00:11 gisle Exp $
+/* $Id: Parser.xs,v 2.102 2001/03/13 05:38:02 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -154,6 +154,12 @@ free_pstate(PSTATE* pstate)
 	SvREFCNT_dec(pstate->handlers[i].cb);
 	SvREFCNT_dec(pstate->handlers[i].argspec);
     }
+
+    SvREFCNT_dec(pstate->report_tags);
+    SvREFCNT_dec(pstate->ignore_tags);
+    SvREFCNT_dec(pstate->ignore_elements);
+    SvREFCNT_dec(pstate->ignoring_element);
+
     pstate->signature = 0;
     Safefree(pstate);
 }
@@ -282,6 +288,37 @@ boolean_attribute_value(pstate,...)
         }
     OUTPUT:
 	RETVAL
+
+void
+ignore_tags(pstate,...)
+	PSTATE* pstate
+    ALIAS:
+	HTML::Parser::report_tags = 1
+	HTML::Parser::ignore_tags = 2
+	HTML::Parser::ignore_elements = 3
+    PREINIT:
+	HV** attr;
+	int i;
+    CODE:
+	switch (ix) {
+	case  1: attr = &pstate->report_tags;       break;
+	case  2: attr = &pstate->ignore_tags;       break;
+	case  3: attr = &pstate->ignore_elements;   break;
+	default:
+	    croak("Unknown tag-list attribute (%d)", ix);
+	}
+	if (GIMME_V != G_VOID)
+	    croak("Can't report tag lists yet");
+
+	items--;  /* pstate */
+	if (*attr)
+	    hv_clear(*attr);
+	else
+	    *attr = newHV();
+
+	for (i = 0; i < items; i++) {
+	    hv_store_ent(*attr, ST(i+1), newSViv(0), 0);
+	}
 
 SV*
 handler(pstate, eventname,...)

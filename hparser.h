@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.13 2001/03/10 04:25:57 gisle Exp $
+/* $Id: hparser.h,v 2.14 2001/03/13 05:38:02 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -89,6 +89,15 @@ struct p_state {
     /* other configuration stuff */
     SV* bool_attr_val;
     struct p_handler handlers[EVENT_COUNT];
+
+    /* filters */
+    HV* report_tags;
+    HV* ignore_tags;
+    HV* ignore_elements;
+
+    /* these are set when we are currently inside an element we want to ignore */
+    SV* ignoring_element;
+    int ignore_depth;
 
     /* cache */
     HV* entity2char;            /* %HTML::Entities::entity2char */

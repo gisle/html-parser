@@ -4,8 +4,6 @@ TODO
  - implement backslash escapes in literal argspec string
  - report 'line'
  - <![%app1;[...]]> (parameter entities)
- - $p->ignore_element("script", "style");
- - $p->ignore_tag("font", "big", "small");
  - limit the length of markup elements that never end.   Perhaps by
    configurable limits on the length that markup can have and still
    be recongnized.
