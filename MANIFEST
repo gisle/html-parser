@@ -29,6 +29,7 @@ t/api_version.t         Test api_version constructor option
 t/argspec.t		Test argspec
 t/argspec2.t		Test new argspecs @attr, @{...}
 t/argspec-bad.t         Test various bad argspec arguments
+t/callback.t		Use callback to get data
 t/cases.t		Test various interesting cases
 t/comment.t             Test comment parsing
 t/crashme.t             Parse random data

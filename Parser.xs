@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.108 2001/04/10 20:10:58 gisle Exp $
+/* $Id: Parser.xs,v 2.109 2001/05/04 20:47:22 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -67,6 +67,13 @@ newSVpvn(char *s, STRLEN len)
 #ifndef INT2PTR
    #define INT2PTR(any,d)  (any)(d)
    #define PTR2IV(p)       (IV)(p)
+#endif
+
+
+#if PATCHLEVEL > 5
+   #define RETHROW	   croak(Nullch)
+#else
+   #define RETHROW    { STRLEN my_na; croak("%s", SvPV(ERRSV, my_na)); }
 #endif
 
 /*
@@ -226,7 +233,36 @@ parse(self, chunk)
 	if (p_state->parsing)
     	    croak("Parse loop not allowed");
         p_state->parsing = 1;
-	parse(aTHX_ p_state, chunk, self);
+	if (SvROK(chunk) && SvTYPE(SvRV(chunk)) == SVt_PVCV) {
+	    SV* generator = chunk;
+	    STRLEN len;
+	    do {
+		dSP;
+                int count;
+		PUSHMARK(SP);
+	        count = perl_call_sv(generator, G_SCALAR|G_EVAL);
+		SPAGAIN;
+		chunk = POPs;
+
+	        if (SvTRUE(ERRSV)) {
+		    p_state->parsing = 0;
+		    p_state->eof = 0;
+		    RETHROW;
+                }
+
+		if (SvOK(chunk)) {
+		    (void)SvPV(chunk, len);  /* get length */
+		}
+		else {
+		    len = 0;
+                }
+		parse(aTHX_ p_state, len ? chunk : 0, self);
+
+            } while (len && !p_state->eof);
+        }
+	else {
+	    parse(aTHX_ p_state, chunk, self);
+        }
         p_state->parsing = 0;
 	if (p_state->eof) {
 	    p_state->eof = 0;

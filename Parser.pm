@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.23';  # $Date: 2001/05/02 04:15:08 $
+$VERSION = '3.23';  # $Date: 2001/05/04 20:47:22 $
 
 require HTML::Entities;
 
@@ -276,6 +276,15 @@ $p->parse returns.
 If an invoked event handler aborts parsing by calling $p->eof, then
 $p->parse() will return a FALSE value.
 
+=item $p->parse( $code_ref )
+
+If a code reference is passed in as the argument to parse then the
+chunks to parse is obtained by invoking this function repeatedly.
+Parsing continues until the function returns an empty (or undefined)
+result.
+
+Parsing will also abort if one of the event handlers call $p->eof.
+
 =item $p->parse_file( $file )
 
 Parse text directly from a file.  The $file argument can be a
@@ -294,7 +303,8 @@ then $p->parse_file() may not have read the entire file.
 
 On systems with multi-byte line terminators, the values passed for the
 offset and length argspecs may be too low if parse_file is called with
-a file handle that is not in binary mode.
+a file handle that is not in binary mode.  If a filename is passed in,
+then the file will be opened in binary mode.
 
 =item $p->eof
 
