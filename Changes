@@ -1,10 +1,33 @@
+1999-12-05   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_92
+
+    More documentation patches from Michael
+
+    Renamed 'token1' as 'token0' as suggested by Michael
+
+    For artificial end tags we now report 'tokens', but not 'tokenpos'.
+
+    Boolean attribute values show up as (0, 0) in 'tokenpos' now.
+
+    If $p->bool_attr_value is set it will influence 'tokens'
+
+    Fix for core dump when parsing <a "> when $p->strict_names(0).
+    Based on fix by Michael.
+
+    Will av_extend() the tokens/tokenspos arrays.
+
+    New test suite script by Michael: t/attrspec.t
+
+
+
 1999-12-04   Gisle Aas <gisle@aas.no>
 
     Release 2.99_91
 
     Implemented attrspec 'offset'
 
-    Documentation from by Michael
+    Documentation patch from Michael
 
     Some more cleanup/updated TODO
 
