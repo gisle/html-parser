@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_93;  # $Date: 1999/12/07 00:54:40 $
+$VERSION = 2.99_93;  # $Date: 1999/12/07 01:05:08 $
 
 require HTML::Entities;
 
@@ -152,8 +152,8 @@ HTML::Parser - HTML tokenizer
 
 This is the new XS based HTML::Parser.  It should be completely
 backwards compatible with HTML::Parser version 2.2x, but has many new
-features.  This is currently an beta release.  The interface to the
-new features should now be fairly stable.
+features.  This is currently an beta release.  The interface should be
+fairly stable now.
 
 =head1 DESCRIPTION
 
@@ -189,7 +189,8 @@ any options and don't want to fall back to v2 compatible mode.
 
 Examples:
 
-   $p = HTML::Parser->new(text_h => [ sub {...}, "dtext" ]);
+   $p = HTML::Parser->new(api_version => 3,
+                          text_h => [ sub {...}, "dtext" ]);
 
 This creates a new parser object with a text event handler subroutine
 that receives the original text with general entities decoded.
@@ -620,6 +621,13 @@ Strip out comments:
 [XXX I want this to be an HTML::Parser cookbook.  Also show how we
 simplify the HTML recipes found in the "Perl Cookbook" with the new
 features provided.]
+
+=head1 BUGS
+
+HTML::Parser will leave <plaintext> mode when it sees </plaintext>
+
+<style> and <script> sections does not end with the first "</", but
+need the complete corresponding end tag.
 
 =head1 SEE ALSO
 
