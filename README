@@ -2,10 +2,10 @@ HTML-Parser
 -----------
 
 This is a collection of modules that parse and extract information
-from HTML documents.  Bug reports and discussions about these modules
-can be sent to the <libwww@perl.org> mailing list.  Remember to also
-look at the HTML-Tree package that creates and extracts information from
-HTML syntax trees.
+from HTML documents.  Bug reports and issues for discussion about
+these modules can be sent to the <libwww@perl.org> mailing list.
+Remember to also look at the HTML-Tree package that build on
+HTML::Parser to create and extract information from HTML syntax trees.
 
 The modules present in this collection are:
 
@@ -24,15 +24,12 @@ The modules present in this collection are:
   HTML::LinkExtor - An HTML::Parser subclass that extracts links from
         an HTML document.
 
-  HTML::TokeParser - An alternative interface to the basic parser
-        that does not require event driven programming.  Most simple
+  HTML::PullParser - An alternative interface to the basic parser
+        that does not require event driven programming.
+
+  HTML::TokeParser - An HTML::PullParser subclass with fixed
+        token setup and methods for extracting text.  Many simple
         parsing needs are probably best attacked with this module.
-
-Depreciated modules:
-
-  HTML::Filter - An HTML::Parser subclass that filters HTML text. You
-        will need to make a subclass if you want it to do more than
-        cat(1).
 
 
 
