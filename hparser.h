@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.9 2000/01/21 21:59:07 gisle Exp $
+/* $Id: hparser.h,v 2.10 2000/02/05 10:50:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -20,7 +20,7 @@ enum marked_section_t {
   MS_INCLUDE,
   MS_RCDATA,
   MS_CDATA,
-  MS_IGNORE,
+  MS_IGNORE
 };
 
 #endif /* MARKED_SECTION */
@@ -37,7 +37,7 @@ enum event_id {
   E_PROCESS,
   E_DEFAULT,
   /**/
-  EVENT_COUNT,
+  EVENT_COUNT
 };
 typedef enum event_id event_id_t;
 

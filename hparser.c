@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.38 2000/01/21 23:56:09 gisle Exp $
+/* $Id: hparser.c,v 2.39 2000/02/05 10:50:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -44,7 +44,7 @@ enum argcode {
   ARG_LENGTH,
   ARG_EVENT,
   ARG_UNDEF,
-  ARG_LITERAL, /* Always keep last */
+  ARG_LITERAL /* Always keep last */
 };
 
 char *argname[] = {
