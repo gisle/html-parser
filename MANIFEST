@@ -20,6 +20,7 @@ t/entities.t
 t/filter.t
 t/headparser.t
 t/headparser-http.t
+t/largetags.t
 t/linkextor-base.t
 t/linkextor-rel.t
 t/marked-sect.t
