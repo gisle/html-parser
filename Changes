@@ -37,7 +37,7 @@
     Backed out 3.03-patch that checked for legal handler and attribute
     names in the HTML::Parser constructor.
 
-    Documentation typo fixed by Micheal.
+    Documentation typo fixed by Michael.
 
 
 
