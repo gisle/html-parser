@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.76 1999/12/08 13:58:44 gisle Exp $
+/* $Id: Parser.xs,v 2.77 1999/12/08 14:20:56 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -76,81 +76,17 @@ HV* entity2char;            /* %HTML::Entities::entity2char */
  */
 
 static SV*
-check_handler(char* name, SV* cb, SV* argspec, SV* self)
+check_handler(SV* h)
 {
-  SV *sv;
-  int type = SvTYPE(cb);
-  STRLEN my_na;
-
-  if (SvROK(cb)) {
-    sv = SvRV(cb);
-    type = SvTYPE(sv);
+  if (SvROK(h)) {
+    SV* ref = SvRV(h);
+    if (SvTYPE(ref) == SVt_PVCV)
+      return newSVsv(h);
+    if (SvTYPE(ref) == SVt_PVAV)
+      return SvREFCNT_inc(ref);
+    croak("Only code or array references allowed as handler destination");
   }
-  else
-    sv = cb;
-
-  switch (type) {
-  case SVt_NULL: /* undef */
-    {
-      sv = 0;
-    }
-    break;
-  case SVt_PVAV: /* Array */
-    {
-      /* use as is */
-      sv = SvREFCNT_inc(sv);
-    }
-    break;
-  case SVt_PVCV: /* Code Reference */
-    {
-      /* use original SV */
-      sv = SvREFCNT_inc(cb);
-    }
-    break;
-  case SVt_PV: /* String */
-    {
-      /* use original SV, see if it's a method in the current object */
-      char *arg_str = SvPV(argspec, my_na);
-      char *method = SvPV(sv, my_na);
-      sv = SvREFCNT_inc(sv);
-      if (*arg_str == 's') {
-	int i;
-	SV *val;
-	dSP;
-	ENTER;
-	SAVETMPS;
-	PUSHMARK(SP);
-	XPUSHs(self);
-	XPUSHs(sv);
-	PUTBACK;
-	i = perl_call_method("can", G_SCALAR);
-	SPAGAIN;
-	if (i)
-	  val = POPs;
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-	if (0) {
-	  printf(", $self->can(%s) return(%d,%d)", name, i, SvOK(val));
-	}
-	if (0) { /* MAC: the can() call isn't working for some reason */
-	if (!i || !SvOK(val))
-	  croak("Method '%s' not found for %s handler (%i)", method, name, i);
-	}
-	if (0) {
-	  printf(", saving Method name '%s'\n", method);
-	}
-      }
-    }
-    break;
-  default:
-    { /* Didn't match */
-      croak("Handler (%s) for %d is not a method, subroutine, or array ref",
-	    name, type);
-    }
-  }
-
-  return sv;
+  return SvOK(h) ? newSVsv(h) : 0;
 }
 
 
@@ -327,7 +263,7 @@ handler(pstate, name_sv,...)
 	  svp = av_fetch(av, 0, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->cb);
-	    h->cb = check_handler(name, *svp, h->argspec, self);
+	    h->cb = check_handler(*svp);
 	  }
 	}
         else if (items > 2) {
@@ -337,7 +273,7 @@ handler(pstate, name_sv,...)
 	  }
 
 	  SvREFCNT_dec(h->cb);
-	  h->cb = check_handler(name, ST(2), h->argspec, self);
+	  h->cb = check_handler(ST(2));
 	}
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
