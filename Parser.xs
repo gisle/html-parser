@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.12 1999/11/09 19:41:39 gisle Exp $
+/* $Id: Parser.xs,v 2.13 1999/11/09 20:52:51 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -242,7 +242,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     av_push(av, text);
     if (cdata)
       av_push(av, newSVsv(&PL_sv_yes));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
     return;
   }
 
@@ -285,7 +285,7 @@ html_end(PSTATE* p_state,
     av_push(av, newSVpv("E", 1));
     av_push(av, tag);
     av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
     return;
   }
 
@@ -334,7 +334,7 @@ html_start(PSTATE* p_state,
     av_push(av, tag);
     av_push(av, SvREFCNT_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
   }
   else if (cb) {
     SV *sv;
@@ -375,7 +375,7 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
     AV* av = newAV();
     av_push(av, newSVpv("PI", 2));
     av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
     return;
   }
 
@@ -409,7 +409,7 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     AV* av = newAV();
     av_push(av, newSVpv("C", 1));
     av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
     return;
   }
 
@@ -444,7 +444,7 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
     av_push(av, newSVpv("D", 1));
     av_push(av, SvREFCNT_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
-    av_push(accum, (SV*)av);
+    av_push(accum, newRV_noinc((SV*)av));
     return;
   }
 
@@ -1220,7 +1220,7 @@ callback(pstate, name_sv, cb)
 	    *svp = SvREFCNT_inc(cb);
 	}
 	else
-	    croak("Can't set %s callback", name);
+	    croak("Can't access %s callback", name);
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
