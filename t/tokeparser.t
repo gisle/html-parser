@@ -26,6 +26,8 @@ print F <<'EOT';  close(F);
 
     And this is a link to the <a href="http://www.perl.com"><img src="camel.gif" alt="Perl">&nbsp;<!--nice isn't it-->Institute</a>
 
+   <? process instruction >
+
 </body>
 </html>
 
@@ -52,9 +54,11 @@ $p = HTML::TokeParser->new(\*F);
 my $scount = 0;
 my $ecount = 0;
 my $tcount = 0;
+my $pcount = 0;
 while (my $token = $p->get_token) {
     $scount++ if $token->[0] eq "S";
     $ecount++ if $token->[0] eq "E";
+    $pcount++ if $token->[0] eq "PI";
 }
 undef($p);
 close F;
@@ -71,8 +75,11 @@ $p = HTML::TokeParser->new($file) || die;
 $tcount++ while $p->get_tag;
 undef($p);
 
-#print "Number of tokens found: $tcount/2 = $scount + $ecount\n";
-print "not " unless $tcount == 32 && $scount == 9 && $ecount == 7;
+print "Number of tokens found: $tcount/2 = $scount + $ecount\n";
+print "Number of process instruction found: $pcount\n";
+print "not " unless $tcount == 32 &&
+                    $scount == 9 && $ecount == 7 &&
+                    $pcount == 1;
 print "ok 2\n";
 
 print "not " if HTML::TokeParser->new("/noT/thEre/$$");
