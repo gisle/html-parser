@@ -54,6 +54,8 @@ HTML
 
     sub DESTROY
     {
+	my $self = shift;
+	eval { $self->SUPER::DESTROY; };
 	$COUNT--;
     }
 
@@ -178,7 +180,7 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 	$bad++;
     }
 
-    print "not " if $bad;
+    print "\nnot " if $bad;
     print "ok $testno\n";
     $testno++;
 
