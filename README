@@ -1,7 +1,68 @@
-This is an XS implementation of HTML::Parser.  This speeds up things
-about 4 times if you use the direct callbacks instead of method
-callbacks.  For method callbacks we currently have a speedup of about
-30%.
+HTML-Parser-XS
+--------------
+
+This is currently an alpha release of a new XS based implementation of
+HTML::Parser.  This new implementation speeds up things about 4 times
+if you use the direct callbacks instead of method callbacks.  For
+method callbacks we currently have a speedup of about 30%.
+
+
+
+
+HTML-Parser
+-----------
+
+This is a collection of modules that parse HTML text documents. These
+modules used to be part of the libwww-perl distribution, but are now
+unbundled in order to facilitate a separate development track.  Bug
+reports and discussions about these modules can still be sent to the
+<libwww@perl.org> mailing list.  Remember to also take a look at the
+HTML-Tree module collection that create and extract information from
+HTML syntax trees.
+
+The modules present in this collection are:
+
+  HTML::Parser - The parser base class.  It receives arbitrary sized
+        chunks of the HTML text and will tokenize it by calling
+        appropriate methods on itself.
+
+  HTML::Entities - Provides functions to encode and decode text with
+        embedded HTML &lt;entities&gt;.
+
+  HTML::Filter - An HTML::Parser subclass that filters HTML text. You
+        will need to make a subclass if you want it to do more than
+        cat(1).
+
+  HTML::HeadParser - A lightweight HTML::Parser subclass that extract
+        information from the <HEAD> section of an HTML document.
+
+  HTML::LinkExtor - An HTML::Parser subclass that extract links from
+        an HTML document.
+
+  HTML::TokeParser - An alternative interface to the basic parser
+        that does not require subclassing.  Most simple parsing needs
+        are probably best attacked with this module.
+
+
+
+PREREQUISITES
+
+In order to install and use this package you will need Perl version
+5.004 or better.  If you intend to use the HTML::HeadParser you need to
+have the libwww-perl distribution installed.
+
+
+
+INSTALLATION
+
+Just follow the usual procedure:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+
 
 COPYRIGHT
 
