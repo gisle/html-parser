@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.33 1999/11/18 07:21:11 gisle Exp $
+/* $Id: Parser.xs,v 2.34 1999/11/18 08:14:06 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -995,12 +995,15 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
 
 static SV*
-attr_val(PSTATE* p_state, char *tag_beg, char *attr_beg,
-	 char *val_beg, char *val_end, bool quote)
+attr_val(PSTATE* p_state, char *tag_beg,
+         char *prev_end, char *attr_beg,
+	 char *val_beg, char *val_end,
+         bool quote)
 {
   if (p_state->attr_pos) {
     AV* av = newAV();
-    av_extend(av, 2);
+    av_extend(av, 3);
+    av_push(av, newSViv(prev_end - tag_beg));
     av_push(av, newSViv(attr_beg - tag_beg));
     if (val_beg)
       av_push(av, newSViv(val_beg - tag_beg));
@@ -1029,6 +1032,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   char *s = beg;
   char *tag_end;
+  char *prev_end;
   AV* tokens = 0;
   SV* attr;
   int empty_tag = 0;  /* XML feature */
@@ -1058,6 +1062,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   while (s < end && isHCTYPE(*s, tag_name_char))
     s++;
   tag_end = s;
+  prev_end = tag_end;
   while (isHSPACE(*s))
     s++;
   if (s == end)
@@ -1093,7 +1098,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	goto PREMATURE;
       if (*s == '>') {
 	/* parse it similar to ="" */
-	av_push(tokens, attr_val(p_state, beg, attr_beg, s, s, 0));
+	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, s, s, 0));
 	break;
       }
       if (*s == '"' || *s == '\'') {
@@ -1104,7 +1109,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	if (s == end)
 	  goto PREMATURE;
 	s++;
-	av_push(tokens, attr_val(p_state, beg, attr_beg, str_beg, s, 1));
+	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, str_beg, s, 1));
       }
       else {
 	char *word_start = s;
@@ -1115,17 +1120,19 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	}
 	if (s == end)
 	  goto PREMATURE;
-	av_push(tokens, attr_val(p_state, beg, attr_beg, word_start, s, 0));
+	av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg, word_start, s, 0));
       }
-
+      prev_end = s;
       while (isHSPACE(*s))
 	s++;
       if (s == end)
 	goto PREMATURE;
     }
     else {
-      av_push(tokens, attr_val(p_state, beg, attr_beg,
-			       0, attr_beg + SvCUR(attr), 0));
+      char *attr_end = attr_beg + SvCUR(attr);
+      av_push(tokens, attr_val(p_state, beg, prev_end, attr_beg,
+			       0, attr_end, 0));
+      prev_end = attr_end;
     }
   }
 
