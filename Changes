@@ -1,3 +1,19 @@
+1999-12-07   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_93
+
+    Documentation update
+
+    $p->bool_attr_value renamed as $p->boolean_attribute_value
+
+    Internal renaming: attrspec --> argspec
+
+    Introduced internal 'enum argcode' in hparser.c
+
+    Added eg/hrefsub
+
+
+
 1999-12-05   Gisle Aas <gisle@aas.no>
 
     Release 2.99_92
