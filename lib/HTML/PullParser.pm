@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.3 2001/03/26 07:32:17 gisle Exp $
+# $Id: PullParser.pm,v 2.4 2001/03/27 19:02:41 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.4 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -121,8 +121,8 @@ HTML::PullParser - Alternative HTML::Parser interface
  use HTML::PullParser;
 
  $p = HTML::PullParser->new(file => "index.html",
-                            start => "event, tag",
-                            end   => "event, tag",
+                            start => "event, tagname",
+                            end   => "event, tagname",
                             ignore_elements => [qw(script style)],
                            ) || die "Can't open: $!";
  while (my $token = $p->get_token) {
