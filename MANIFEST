@@ -66,6 +66,7 @@ t/textarea.t	        Test handling of <textarea>
 t/tokeparser.t		Test HTML::TokeParser
 t/uentities.t           Test encoding/decoding of Unicode entities
 t/unbroken-text.t       Test unbroken_text option
+t/unicode.t		Test parsing of Unicode text
 t/xml-mode.t		Test parsing in XML mode
 tokenpos.h		Dynamically sized token_pos arrays
 typemap			Convert between HTML::Parser and 'struct p_state'
