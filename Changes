@@ -1,3 +1,18 @@
+1999-12-21   Gisle Aas <gisle@aas.no>
+
+    Release 3.02
+
+    Hide ~-magic by an additional reference.  This allow copying of
+    the internal _hparser_xs_state element, and allow HTML-Tree-0.61
+    to work again.
+
+    Introduced $p->init() which might be useful for subclasses that
+    only want the initialization part of the constructor.
+
+    Filled out DIAGNOSTICS section of the HTML::Parser POD.
+
+
+
 1999-12-19   Gisle Aas <gisle@aas.no>
 
     Release 3.01
