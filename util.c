@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.26 2004/12/02 11:14:59 gisle Exp $
+/* $Id: util.c,v 2.27 2004/12/02 11:48:44 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -225,7 +225,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 		STRLEN before_gap_len = t - SvPVX(sv);
 		char *before_gap = (char*)bytes_to_utf8((U8*)SvPVX(sv), &before_gap_len);
 		STRLEN after_gap_len = end - s;
-		char *after_gap = (char*)bytes_to_utf8((U8*)*s, &after_gap_len);
+		char *after_gap = (char*)bytes_to_utf8((U8*)s, &after_gap_len);
 
 		sv_setpvn(sv, before_gap, before_gap_len);
 		sv_catpvn(sv, after_gap, after_gap_len);
