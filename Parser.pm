@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_11';  # $Date: 1999/11/17 19:57:01 $
+$VERSION = '2.99_12';  # $Date: 1999/11/18 08:21:53 $
 
 require HTML::Entities;
 
@@ -33,15 +33,11 @@ sub new
 
 	# In the end we try to assume plain attribute or callback
 	for (keys %cfg) {
-	    local $@;
-	    eval { $self->callback($_ => $cfg{$_}) };
-	    if ($@) {
-		if (my $m = $self->can($_)) {
-		    &$m($self, $cfg{$_});
-		}
-		else {
-		    warn "Unknown configuration key $_" if $^W;
-		}
+	    if (/^(\w+)_cb$/) {
+		$self->callback($1 => $cfg{$_});
+	    }
+	    else {
+		$self->$_($cfg{$_});
 	    }
 	}
     }
