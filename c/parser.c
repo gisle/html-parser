@@ -52,6 +52,36 @@ void html_end(struct p_state* p_state,
   printf("]\n");
 }
 
+void html_start(struct p_state* p_state,
+		char *tag_beg, char *tag_end,
+		AV* tokens,
+		char *beg, char *end)
+{
+  int i, len;
+  printf(">> start: [");
+  while (tag_beg < tag_end) {
+    int l = toLOWER(*tag_beg);
+    putchar(l);
+    tag_beg++;
+  }
+  printf("] [");
+  while (beg < end)
+    putchar(*beg++);
+  printf("]\n");
+  printf("  tokens:");
+  len = av_len(tokens);
+  for (i = 0; i <= len; i++) {
+    SV** svp = av_fetch(tokens, i, 0);
+    STRLEN len;
+    char *s = SvPV(*svp, len);
+    printf(" [");
+    while (len--)
+      putchar(*s++);
+    putchar(']');
+  }
+  putchar('\n');
+}
+
 void html_process(struct p_state* p_state, char*beg, char *end)
 {
   printf(">> process: [");
@@ -222,6 +252,88 @@ char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
   return 0;
 }
 
+char* html_parse_start(struct p_state* p_state, char *beg, char *end)
+{
+  char *s = beg;
+  char *tag_end;
+  AV* tokens = 0;
+
+  assert(beg[0] == '<' && isALPHA(beg[1]) && end - beg > 2);
+  s += 2;
+
+  while (s < end && isHALNUM(*s))
+    s++;
+  tag_end = s;
+  while (s < end && isSPACE(*s))
+    s++;
+  if (s == end)
+    return beg;
+
+  tokens = newAV();
+
+  while (isALPHA(*s)) {
+    /* attribute */
+    char *attr_beg = s;
+    s++;
+    while (s < end && isHALNUM(*s))
+      s++;
+    av_push(tokens, newSVpv(attr_beg, s - attr_beg));
+
+    while (s < end && isSPACE(*s))
+      s++;
+    if (s == end)
+      return beg;
+
+    if (*s == '=') {
+      /* with a value */
+      s++;
+      while (s < end && isSPACE(*s))
+	s++;
+      if (s == end)
+	return beg;
+      if (*s == '>') {
+	/* parse it similar to ="" */
+	av_push(tokens, newSVpvn("", 0));
+	break;
+      }
+      if (*s == '"' || *s == '\'') {
+	char *str_beg = s;
+	s++;
+	while (s < end && *s != *str_beg)
+	  s++;
+	if (s == end)
+	  return beg;
+	s++;
+	av_push(tokens, newSVpvn(str_beg+1, s - str_beg - 2));
+      }
+      else {
+	char *word_start = s;
+	while (s < end && !isSPACE(*s) && *s != '>')
+	  s++;
+	if (s == end)
+	  return beg;
+	av_push(tokens, newSVpv(word_start, s - word_start));
+      }
+
+      while (s < end && isSPACE(*s))
+	s++;
+      if (s == end)
+	return beg;
+    }
+    else {
+      av_push(tokens, newSVpv("*", 1));
+    }
+  }
+
+  if (*s == '>') {
+    s++;
+    /* done */
+    html_start(p_state, beg+1, tag_end, tokens, beg, s);
+    return s;
+  }
+  return 0;
+}
+
 void html_parse(struct p_state* p_state,
 	       SV* chunk)
 {
@@ -312,6 +424,11 @@ void html_parse(struct p_state* p_state,
 
     if (isALPHA(*s)) {
       /* start tag */
+      char *new_pos = html_parse_start(p_state, s-1, end);
+      if (new_pos == s-1)
+	break;
+      else if (new_pos)
+	t = s = new_pos;
     }
     else if (*s == '/') {
       /* end tag */
@@ -412,7 +529,7 @@ int main(int argc, char** argv, char** env)
 
   memset(&p, 0, sizeof(p));
   sv1 = newSVpv("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\nbar <a href='foo'>foo</a>   <!--foo", 0);
-  sv2 = newSVpv("<font size=+3> -> --- --><a href=\"", 0);
+  sv2 = newSVpv("--><FONT size=+3> -><a href=\"", 0);
   sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
   
