@@ -1,3 +1,19 @@
+1999-10-29   Gisle Aas <gisle@aas.no>
+
+   Release 2.24
+
+   $p->parse_file() will not close a handle passed to it any more.
+   If passed a filename that can't be opened it will return undef
+   instead of raising an exception.
+
+   HTML::LinkExtor knowns about background attribute of <tables>.
+   Patch by Clinton Wong <clintdw@netcom.com>
+
+   HTML::TokeParser will parse large inline strings much faster now.
+   The string holding the document must not be changed during parsing.
+
+
+
 1999-06-09   Gisle Aas <gisle@aas.no>
 
    Release 2.23
