@@ -2,3 +2,4 @@ MANIFEST
 Makefile.PL
 Parser.pm
 Parser.xs
+typemap
