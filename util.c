@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.14 2001/02/25 04:41:55 gisle Exp $
+/* $Id: util.c,v 2.15 2001/03/26 22:27:48 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -134,7 +134,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		    repl_utf8 = 0;
 		}
 		else {
-		    char *tmp = uv_to_utf8(buf, num);
+		    char *tmp = uvuni_to_utf8(buf, num);
 		    repl = buf;
 		    repl_len = tmp - buf;
 		    repl_utf8 = 1;
