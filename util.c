@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.22 2004/11/16 17:57:47 gisle Exp $
+/* $Id: util.c,v 2.23 2004/11/17 12:35:36 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -73,7 +73,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 
     char *repl;
     STRLEN repl_len;
-#ifdef UNICODE_ENTITIES
+#ifdef UNICODE_HTML_PARSER
     char buf[UTF8_MAXLEN];
     int repl_utf8;
     int high_surrogate = 0;
@@ -81,7 +81,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     char buf[1];
 #endif
 
-#if defined(__GNUC__) && defined(UNICODE_ENTITIES)
+#if defined(__GNUC__) && defined(UNICODE_HTML_PARSER)
     /* gcc -Wall reports this variable as possibly used uninitialized */
     repl_utf8 = 0;
 #endif
@@ -131,7 +131,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		}
 	    }
 	    if (ok) {
-#ifdef UNICODE_ENTITIES
+#ifdef UNICODE_HTML_PARSER
 		if (!SvUTF8(sv) && num <= 255) {
 		    buf[0] = (char) num;
 		    repl = buf;
@@ -187,12 +187,12 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		SV** svp = hv_fetch(entity2char, ent_name, s - ent_name, 0);
 		if (svp) {
 		    repl = SvPV(*svp, repl_len);
-#ifdef UNICODE_ENTITIES
+#ifdef UNICODE_HTML_PARSER
 		    repl_utf8 = SvUTF8(*svp);
 #endif
 		}
 	    }
-#ifdef UNICODE_ENTITIES
+#ifdef UNICODE_HTML_PARSER
 	    high_surrogate = 0;
 #endif
 	}
@@ -203,7 +203,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		s++;
 	    t--;  /* '&' already copied, undo it */
 
-#ifdef UNICODE_ENTITIES
+#ifdef UNICODE_HTML_PARSER
 	    if (*s != '&') {
 		high_surrogate = 0;
 	    }

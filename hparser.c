@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.101 2004/11/17 09:47:22 gisle Exp $
+/* $Id: hparser.c,v 2.102 2004/11/17 12:35:36 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -277,6 +277,7 @@ report_event(PSTATE* p_state,
 	    if (!utf8)
 		SvUTF8_off(p_state->pend_text);
 	}
+#ifdef UNICODE_HTML_PARSER
 	if (utf8 && !SvUTF8(p_state->pend_text))
 	    sv_utf8_upgrade(p_state->pend_text);
 	if (utf8 || !SvUTF8(p_state->pend_text)) {
@@ -286,6 +287,9 @@ report_event(PSTATE* p_state,
 	    SV *tmp = NULL;
 	    sv_catpvn_utf8_upgrade(p_state->pend_text, beg, end - beg, tmp);
 	}
+#else
+	sv_catpvn(p_state->pend_text, beg, end - beg);
+#endif
 	return;
     }
     else if (p_state->pend_text && SvOK(p_state->pend_text)) {
@@ -597,15 +601,19 @@ IGNORE_EVENT:
     if (p_state->skipped_text) {
 	if (event != E_TEXT && p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
+#ifdef UNICODE_HTML_PARSER
 	if (utf8 && !SvUTF8(p_state->skipped_text))
 	    sv_utf8_upgrade(p_state->skipped_text);
 	if (utf8 || !SvUTF8(p_state->skipped_text)) {
+#endif
 	    sv_catpvn(p_state->skipped_text, beg, end - beg);
+#ifdef UNICODE_HTML_PARSER
 	}
 	else {
 	    SV *tmp = NULL;
 	    sv_catpvn_utf8_upgrade(p_state->skipped_text, beg, end - beg, tmp);
 	}
+#endif
     }
     return;
 }
