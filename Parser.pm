@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_92;  # $Date: 1999/12/04 23:09:04 $
+$VERSION = 2.99_92;  # $Date: 1999/12/05 20:49:53 $
 
 require HTML::Entities;
 
@@ -135,6 +135,8 @@ HTML::Parser - HTML tokenizer
 
  require HTML::Parser;
  $p = HTML::Parser->new( %options );
+
+ # Parse text chunks
  $p->parse($chunk1);
  $p->parse($chunk2);
  #...
@@ -168,13 +170,13 @@ The document to be parsed may be supplied in arbitrary chunks.
 =item $p = HTML::Parser->new( %options_and_handlers )
 
 The object constructor creates a new C<HTML::Parser> object and
-returns it.  The constructor takes key/value arguments that can set up
+returns it.  Key/value pair arguments may provided to set up
 event handlers or set parser options.
 See L</PARSER OPTIONS> and L</HANDLERS>.
 
 Multiple handlers may be assigned with the 'handlers => [handlers]' option.
-If the key ends with the suffix "_h" then it sets up an event
-handler, otherwise it sets a parser option.
+If a top level key is in the form "<event>_h" (e.g., "text_h"}
+then it assigns a handler to that event, otherwise it sets a parser option.
 
 If new() is called without any arguments,
 it will create a parser that uses callback methods compatible with Version 2.
@@ -187,14 +189,21 @@ Examples:
 
    $p = HTML::Parser->new(text_h => [ sub {...}, "dtext" ]);
 
-This creates a new parser object with a text handler that receives
-the original text with general entities decoded.
+This creates a new parser object with a text event handler subroutine
+that receives the original text with general entities decoded.
 
-  $p = HTML::Parser->new(handlers => { text => [sub {...}, "argspecs"],
-                                       comment => [sub {...}, "argspecs"],
+   $p = HTML::Parser->new(start_h => [ 'my_start', "self,tokens" ]);
+
+This creates a new parser object with a start event handler method
+that receives the $p and the tokens array.
+
+  $p = HTML::Parser->new(handlers => { text => [\@array, "event,text"],
+                                       comment => [\@array, "event,text"],
                                      });
 
-This creates a new parser object with handlers for text and comment events.
+This creates a new parser object that stores
+the event type and the original text in @array
+for text and comment events.
 
 =item $p->parse( $string )
 
@@ -232,7 +241,7 @@ with a TRUE argument and disabled with a FALSE argument.  The
 attribute value is left unchanged if no argument is given.  The return
 value from each method is the old attribute value.
 
-The methods that can be used to get and/or set the options are:
+Methods that can be used to get and/or set parser options are:
 
 =over
 
@@ -260,8 +269,8 @@ part of the ALT value as was clearly intended.  This is also what
 Netscape sees.
 
 The official behaviour is enabled by enabling this attribute.  If
-enabled, it will the tag above to be parsed as text
-since "LIST]" is not a legal name.
+enabled, it will cause the tag above to be reported as text
+since "LIST]" is not a legal attribute name.
 
 =item $p->bool_attr_value( $val )
 
@@ -443,7 +452,7 @@ Text causes the original event text (including delimiters) to be passed.
 
 =item dtext
 
-Dtext causes the original text (including delimiters) to be passed.
+Dtext causes the original text to be passed.
 
 This passes undef except for C<text> events.
 
@@ -464,7 +473,7 @@ processed further.
 
 =item offset
 
-The byte position of the C<text> withing the HTML document.
+The byte position of the C<text> in the HTML document.
 
 =item event
 
@@ -536,6 +545,10 @@ DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
 This event is triggered when a markup comment is recognized.
 
+Example:
+
+  <!-- This is a comment -- -- So is this -->
+
 =item process
 
 This event is triggered when a processing instructions element is recognized.
@@ -544,6 +557,11 @@ The format and content of processing instructions is
 system and application dependent.
 More information about processing instructions may be found at
 C<http://www.sgml.u-net.com/book/sgml-8.htm>.
+
+Examples:
+
+  <? HTML processing instructions >
+  <? XML processing instructions ?>
 
 =item default
 
