@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.25 2004/11/29 10:53:15 gisle Exp $
+/* $Id: util.c,v 2.26 2004/12/02 11:14:59 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -165,7 +165,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 			}
 		    }
 
-		    tmp = uvuni_to_utf8(buf, num);
+		    tmp = (char*)uvuni_to_utf8((U8*)buf, num);
 		    repl = buf;
 		    repl_len = tmp - buf;
 		    repl_utf8 = 1;
@@ -223,9 +223,9 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 	    if (!SvUTF8(sv) && repl_utf8) {
 		/* need to upgrade sv before we continue */
 		STRLEN before_gap_len = t - SvPVX(sv);
-		char *before_gap = bytes_to_utf8(SvPVX(sv), &before_gap_len);
+		char *before_gap = (char*)bytes_to_utf8((U8*)SvPVX(sv), &before_gap_len);
 		STRLEN after_gap_len = end - s;
-		char *after_gap = bytes_to_utf8(s, &after_gap_len);
+		char *after_gap = (char*)bytes_to_utf8((U8*)*s, &after_gap_len);
 
 		sv_setpvn(sv, before_gap, before_gap_len);
 		sv_catpvn(sv, after_gap, after_gap_len);
@@ -238,7 +238,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 		end = SvPVX(sv) + before_gap_len + after_gap_len;
 	    }
 	    else if (SvUTF8(sv) && !repl_utf8) {
-		repl = bytes_to_utf8(repl, &repl_len);
+		repl = (char*)bytes_to_utf8((U8*)repl, &repl_len);
 		repl_allocated = repl;
 	    }
 #endif
@@ -301,6 +301,6 @@ probably_utf8_chunk(pTHX_ char *s, STRLEN len)
     if (!has_hibit(s, e))
 	return 0;
 
-    return is_utf8_string(s, e - s);
+    return is_utf8_string((U8*)s, e - s);
 }
 #endif
