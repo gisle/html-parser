@@ -29,10 +29,6 @@ MINOR "BUGS" (alias FEATURES)
 
 
 MSIE bug compatibility
- - <!-- ... >        - comments that end with ">".  MSIE
-                       first looks for "-->".  If it hits
-                       EOF before it finds it it goes back
-                       and looks for ">" instead.
  - <script><!-- ... '</script>' ... --></script>
                      - similar to the behaviour for end
                        tags, MSIE apparently has some kind

@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.25 2003/08/15 00:39:11 gisle Exp $
+/* $Id: hparser.h,v 2.26 2003/08/15 05:31:49 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -76,6 +76,7 @@ struct p_state {
     /* special parsing modes */
     char* literal_mode;
     bool  is_cdata;
+    bool  no_dash_dash_comment_end;
 
     /* unbroken_text option needs a buffer of pending text */
     SV*    pend_text;

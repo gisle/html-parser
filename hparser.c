@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.89 2003/08/15 00:39:11 gisle Exp $
+/* $Id: hparser.c,v 2.90 2003/08/15 05:31:49 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -796,15 +796,31 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	    }
 	}
     }
-
+    else if (p_state->no_dash_dash_comment_end) {
+	token_pos_t token;
+        token.beg = beg;
+        /* a lone '>' signals end-of-comment */
+	while (s < end && *s != '>')
+	    s++;
+	token.end = s;
+	if (s < end) {
+	    assert(*s == '>');
+	    s++;
+	    report_event(p_state, E_COMMENT, beg-4, s, &token, 1, self);
+	    return s;
+	}
+	else {
+	    return beg;
+	}
+    }
     else { /* non-strict comment */
-	token_pos_t token_pos;
-	token_pos.beg = beg;
+	token_pos_t token;
+	token.beg = beg;
 	/* try to locate /--\s*>/ which signals end-of-comment */
     LOCATE_END:
 	while (s < end && *s != '-')
 	    s++;
-	token_pos.end = s;
+	token.end = s;
 	if (s < end) {
 	    s++;
 	    if (*s == '-') {
@@ -814,13 +830,12 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 		if (*s == '>') {
 		    s++;
 		    /* yup */
-		    report_event(p_state, E_COMMENT, beg-4, s, &token_pos, 1,
-				 self);
+		    report_event(p_state, E_COMMENT, beg-4, s, &token, 1, self);
 		    return s;
 		}
 	    }
 	    if (s < end) {
-		s = token_pos.end + 1;
+		s = token.end + 1;
 		goto LOCATE_END;
 	    }
 	}
@@ -1384,63 +1399,12 @@ parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 #include "pfunc.h"                   /* declares the parsefunc[] */
 #endif /* USE_PFUNC */
 
-EXTERN void
-parse(pTHX_
-      PSTATE* p_state,
-      SV* chunk,
-      SV* self)
+static char*
+parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 {
-    char *s, *t, *beg, *end, *new_pos;
-    STRLEN len;
-
-    if (!chunk) {
-	/* eof */
-	char empty[1];
-	if (p_state->buf && SvOK(p_state->buf)) {
-	    /* flush it */
-	    STRLEN len;
-	    char *s = SvPV(p_state->buf, len);
-	    assert(len);
-	    report_event(p_state, E_TEXT, s, s+len, 0, 0, self);
-	    SvREFCNT_dec(p_state->buf);
-	    p_state->buf = 0;
-	}
-	if (p_state->pend_text && SvOK(p_state->pend_text))
-	    flush_pending_text(p_state, self);
-
-	if (p_state->ignoring_element) {
-	    /* document not balanced */
-	    SvREFCNT_dec(p_state->ignoring_element);
-	    p_state->ignoring_element = 0;
-	}
-	report_event(p_state, E_END_DOCUMENT, empty, empty, 0, 0, self);
-
-	/* reset state */
-	p_state->offset = 0;
-	if (p_state->line)
-	    p_state->line = 1;
-	p_state->column = 0;
-	p_state->literal_mode = 0;
-	p_state->is_cdata = 0;
-	return;
-    }
-
-    if (p_state->buf && SvOK(p_state->buf)) {
-	sv_catsv(p_state->buf, chunk);
-	beg = SvPV(p_state->buf, len);
-    }
-    else {
-	beg = SvPV(chunk, len);
-	if (p_state->offset == 0)
-	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, self);
-    }
-
-    if (!len)
-	return; /* nothing to do */
-
-    s = beg;
-    t = beg;
-    end = s + len;
+    char *s = beg;
+    char *t = beg;
+    char *new_pos;
 
     while (!p_state->eof) {
 	/*
@@ -1612,6 +1576,87 @@ parse(pTHX_
     }
 
 DONE:
+    return s;
+
+}
+
+EXTERN void
+parse(pTHX_
+      PSTATE* p_state,
+      SV* chunk,
+      SV* self)
+{
+    char *s, *beg, *end;
+    STRLEN len;
+
+    if (!chunk) {
+	/* eof */
+	char empty[1];
+	if (p_state->buf && SvOK(p_state->buf)) {
+	    /* flush it */
+	    s = SvPV(p_state->buf, len);
+	    end = s + len;
+	    assert(len);
+	    if (!p_state->strict_comment && !p_state->is_cdata) {
+		if (*s == '<') {
+		    /* try to parse with comments terminated with a plain '>' first */
+		    p_state->no_dash_dash_comment_end = 1;
+		    s = parse_buf(aTHX_ p_state, s, end, self);
+		}
+		if (*s == '<') {
+		    /* some kind of unterminated markup.  Report rest as as comment */
+		    token_pos_t token;
+		    token.beg = s + 1;
+		    token.end = end;
+		    report_event(p_state, E_COMMENT, s, end, &token, 1, self);
+		}
+		else {
+		    goto REST_IS_TEXT;
+		}
+	    }
+	    else  {
+		/* report rest as text */
+	    REST_IS_TEXT:
+		report_event(p_state, E_TEXT, s, end, 0, 0, self);
+		SvREFCNT_dec(p_state->buf);
+		p_state->buf = 0;
+	    }
+	}
+	if (p_state->pend_text && SvOK(p_state->pend_text))
+	    flush_pending_text(p_state, self);
+
+	if (p_state->ignoring_element) {
+	    /* document not balanced */
+	    SvREFCNT_dec(p_state->ignoring_element);
+	    p_state->ignoring_element = 0;
+	}
+	report_event(p_state, E_END_DOCUMENT, empty, empty, 0, 0, self);
+
+	/* reset state */
+	p_state->offset = 0;
+	if (p_state->line)
+	    p_state->line = 1;
+	p_state->column = 0;
+	p_state->literal_mode = 0;
+	p_state->is_cdata = 0;
+	return;
+    }
+
+    if (p_state->buf && SvOK(p_state->buf)) {
+	sv_catsv(p_state->buf, chunk);
+	beg = SvPV(p_state->buf, len);
+    }
+    else {
+	beg = SvPV(chunk, len);
+	if (p_state->offset == 0)
+	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, self);
+    }
+
+    if (!len)
+	return; /* nothing to do */
+
+    end = beg + len;
+    s = parse_buf(aTHX_ p_state, beg, end, self);
 
     if (s == end || p_state->eof) {
 	if (p_state->buf) {
