@@ -7,8 +7,6 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
-  - enum argspec_op
-
 
 ISSUES
 
