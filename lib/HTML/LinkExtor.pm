@@ -25,27 +25,36 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
 
-# Elements that might contain links and the name of the link attribute
+# Elements that might contain links and the name of the link attribute(s)
 %LINK_ELEMENT =
 (
- body   => 'background',
- base   => 'href',
- a      => 'href',
- img    => [qw(src lowsrc usemap)],   # 'lowsrc' is a Netscape invention
- form   => 'action',
- input  => 'src',
-'link'  => 'href',          # need quoting since link is a perl builtin
- frame  => 'src',
- applet => [qw(codebase code)],
- area   => 'href',
- frame  => 'src',   # Netscape 2.0 extention
- embed  => 'src',   # used in Netscape 2.0 for Shockwave and things like that
- table  => 'background',   # used in IE, Netscape
+ a       => 'href',
+ applet  => [qw(archive codebase code)],
+ area    => 'href',
+ base    => 'href',
+ bgsound => 'src',
+ body    => 'background',
+ embed   => [qw(pluginspage src)],
+ form    => 'action',
+ frame   => 'src',
+ iframe  => 'src',
+ ilayer  => 'background',
+ img     => [qw(src lowsrc usemap)],
+ input   => 'src',
+ isindex => 'action',
+ layer   => [qw(background src)],
+'link'   => 'href',
+ object  => [qw(classid codebase data usemap)],
+ script  => 'src',
+ table   => 'background',
+ td      => 'background',
+ th      => 'background',
+ xmp     => 'href',
 );
 
 =over 4
