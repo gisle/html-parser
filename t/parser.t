@@ -111,7 +111,8 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 
     if ($chunksize =~ /^file/) {
 	# First we must create the file
-	my $file = "tmp-$$.html";
+	my $tmpfile = "tmp-$$.html";
+	my $file = $tmpfile;
 	die "$file already exists" if -e $file;
 	open(FILE, ">$file") or die "Can't create $file: $!";
         print FILE $HTML;
@@ -125,7 +126,7 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 
         # then we can parse it.
         $p->parse_file($file);
-        unlink($file);
+        unlink($tmpfile) || warn "Can't unlink: $tmpfile";;
     } else {
 	my $copy = $HTML;
 	while (length $copy) {
