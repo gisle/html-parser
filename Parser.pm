@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_13;  # $Date: 1999/11/19 13:04:35 $
+$VERSION = 2.99_13;  # $Date: 1999/11/22 14:17:38 $
 
 require HTML::Entities;
 
@@ -99,11 +99,11 @@ sub netscape_buggy_comment  # legacy
 
 # set up method stubs
 sub text { }
-*declaration = \&text;
-*process     = \&text;
-*comment     = \&text;
 *start       = \&text;
 *end         = \&text;
+*comment     = \&text;
+*declaration = \&text;
+*process     = \&text;
 
 1;
 
@@ -131,9 +131,10 @@ HTML::Parser - HTML tokenizer
 
 =head1 NOTE
 
-This is the new experimental XS based HTML::Parser.  It should be
-completely backwards compatible with HTML::Parser version 2.2x, but
-has many new features.
+This is the new and still experimental XS based HTML::Parser.  It
+should be completely backwards compatible with HTML::Parser version
+2.2x, but has many new features.  This is currently an alpha release.
+The interface to the new features might still change.
 
 =head1 DESCRIPTION
 
@@ -150,15 +151,30 @@ document to be parsed can be supplied in arbitrary chunks.
 
 =item $p = HTML::Parser->new( %options_and_callbacks )
 
-The object constructor creates a HTML::Parser object
-and may assign callback subroutines for various events.
+The object constructor creates a new C<HTML::Parser> object and
+returns it.  The constructor take key/value arguments that can set up
+event handlers or configure various options.
 
-[XXX describe how %options_and_callbacks maps to the callback method
-and the various boolean options.]
+If the key ends with the suffix "_cb" then it sets up a callback
+handler, otherwise it simply assigns some plain attribute.  Example:
 
-For compatibility with HTML::Parser version 2 the constructor will set
-up method callbacks and turn on the $p->v2_compat option if no
-%options_and_callbacks are given.
+   $p = HTML::Parser->new(text_cb => sub { ...},
+                          decode_text_entities => 1,
+                         );
+
+This will create a new parser object, set up an text handler, and
+enable automatic decoding of text entities.  As an alternative you can
+assign handlers like this:
+
+  $p = HTML::Parser->new(handlers => { text => sub {...},
+                                       comment => sub {...},
+                                     },
+                         decode_text_entities => 1,
+                        );
+
+If the constructor is called without any arguments (empty
+%options_and_callbacks), then it will create an parser that enters
+version 2 compatibility mode.  See L</VERSION 2 COMPATIBILITY>.
 
 =item $p->parse( $string )
 
@@ -179,25 +195,19 @@ a reference to such a handle).
 
 If $file is a plain filename and the file can't be opened, then the
 method will return an undefined value and $! will tell you why it
-failed.  In all other cases the return value will be a reference to
-the parser object.
+failed.  Otherwise the return value will be a reference to the parser
+object.
 
-If a filehandle is passed in, then the file will be read until EOF,
-but not otherwise affected.
+If a filehandle is passed in as the $file argument, then the file will
+be read until EOF, but not closed.
 
 =item $p->callback( event => \&subroutine )
 
 This method assigns a subroutine (which may be an anonymous
 subroutine) as a callback for an event.  Event is one of C<text>,
 C<start>, C<end>, C<declaration>, C<comment>, C<process> or
-C<default>.  Look at L</HANDLERS> for details on arguments passed to
-the callbacks.
-
-=item $p->bool_attr_value( $val )
-
-This method sets up the value reported for boolean attributes inside
-HTML start tags.  By default the name of the attribute is also used as
-its value.
+C<default>.  Look at L</HANDLERS> for details on when handlers are
+triggered and the arguments passed to them.
 
 =item $p->accum( $array_ref )
 
@@ -206,18 +216,25 @@ entries to the array given as tokens are recognized.
 
 [XXX Describe how tokens are reported (similar to HTML::TokeParser)]
 
+  ["S",  $tag, \@attr, $origtext]
+  ["E",  $tag, $origtext]
+  ["T",  $text, $cdata]
+  ["C",  $text]
+  ["D",  $tokens, $origtext]
+  ["PI", $text, $origtext]
+
 =back
 
 
 =head1 PARSER OPTIONS
 
-Parser options are represented by boolean parser attributes.  Each
-attribute is enabled by calling the corresponding method with a TRUE
-argument and disabled with a FALSE argument.  The attribute value is
-left unchanged if no argument is given.  The return value from each
-method is the old attribute value.
+Most parser options are represented by boolean parser attributes.
+Each boolean attribute is enabled by calling the corresponding method
+with a TRUE argument and disabled with a FALSE argument.  The
+attribute value is left unchanged if no argument is given.  The return
+value from each method is the old attribute value.
 
-The boolean parser option methods are:
+The methods that can be used to get and/or set the options are:
 
 =over
 
@@ -226,7 +243,9 @@ The boolean parser option methods are:
 By default, comments are terminated by the first occurrence of "-->".
 This is the behaviour of most popular browsers (like Netscape and
 MSIE), but it is not correct according to the "official" HTML
-standards.
+standards.  Officially you need an even number of "--" tokens before
+the closing ">" is recognized (and there can't be anything but
+whitespace between an even and a odd "--")
 
 The official behaviour is enabled by enabling this attribute.
 
@@ -238,13 +257,25 @@ some broken tags with invalid values in the attr values like:
 
    <IMG SRC=newprevlstGr.gif ALT=[PREV LIST] BORDER=0>
 
-The official behaviour is enabled by enabling this attribute.  This
-will make a tag like the one above be parsed as text instead.
+(This will parse "LIST]" as the name of a boolean attribute, not as
+part of the ALT value as was clearly intended.  This is also what
+Netscape sees.)
+
+The official behaviour is enabled by enabling this attribute.  If
+enabled it will make a tag like the one above be parsed as text
+instead (since "LIST]" is not a legal name).
+
+=item $p->bool_attr_value( $val )
+
+This method sets up the value reported for boolean attributes inside
+HTML start tags.  By default the name of the attribute is also used as
+its value.  The setting of $p>bool_attr_value has no effect when
+$p->attr_pos is enabled.
 
 =item $p->decode_text_entities( [$bool] )
 
-When this attribute is enabled, HTML entities (&amp;, &#255;, ...) are
-automatically decoded in the text reported.
+When this attribute is enabled, HTML entity references (&amp;, &#255;,
+...) are automatically decoded in the text reported.
 
 =item $p->keep_case( [$bool] )
 
@@ -256,14 +287,17 @@ value remain FALSE.
 
 =item $p->xml_mode( [$bool] )
 
-Enabling this attribute changes the parser to allow some XML tags.  It
+Enabling this attribute changes the parser to allow some XML
+constructs; empty element tags and XML processing instructions.  It
 also disables forcing tag and attr names to lower case.
 
-Empty element tags are like start tags, but ends with the characters
-"/>".  When recognized by HTML::Parser these will causes an artificial
-end tag to be generated in addition to the start tag.
+Empty element tags look like start tags, but ends with the character
+sequence "/>".  When recognized by HTML::Parser these will causes an
+artificial end tag to be generated in addition to the start tag.  The
+$origtext of this generated end tag will be empty.
 
-Processing instructions are terminated by "?>" instead of simply ">".
+XML processing instructions are terminated by "?>" instead of a simple
+">" as is the case for HTML.
 
 =item $p->v2_compat( [$bool] )
 
@@ -273,39 +307,42 @@ COMPATIBILITY>.
 
 =item $p->pass_self( [$bool] )
 
-Enabling this attribute causes $self to be the first argument to
-callback subroutines.  Useful if the callback wants to access
-attributes of the parser object or call methods on it.
+Enabling this attribute causes $self to be passed as the first
+argument to callback subroutines.  Useful if the callback wants to
+access attributes of the parser object or call methods on it.
 
-(If register closures with references to the parser as handlers, then
-you effectively create circular sturctures that prevent the parser
-from being garbarge collected.)
+(If you register a closure with references to the parser as a handler,
+then you effectively create a circular structure that prevent the
+parser from being garbage collected.  The parser have a keep an
+reference to the callback closure and the closure keeps an reference
+to the parser.)
 
 XXX Should this be implied by v2_compat?
 
 =item $p->unbroken_text( [$bool] )
 
-By default, blocks of text may be returned in one or more pieces
-which may be of any length, but won't end inside a word.
-When this attribute is enabled
-blocks of text are always returned in one piece.
-
-Text in cdata sections may still be broken up.  [XXX Wrong!]
+By default, blocks of text are given to the text handler as soon as
+possible.  This might create arbitrary breaks that make it hard to do
+transformations on the text. When this attribute is enabled blocks of
+text are always returned in one piece.  This will delay the text
+callback until the following (non-text) token has been recognized by
+the parser.
 
 =item $p->attr_pos( [$bool] )
 
-By default, attrs in a start tag are reported by passing
-a reference to an array of attr names and a reference to
-a hash of array names and values.
-When this attribute is enabled a reference to an array
-is substituted for the attr value.
+By default start tag attributes are reported as key/value pairs in an
+array passed to the C<start> handler.  When this attribute is enabled
+a reference to an array of positions is substituted for the attr
+value.
 
-The array elements are the offsets in the tag text of
+The array elements are the offsets from the beginning of the tag text
+of:
 
- (0) the end of the previous attr value or name,
+ (0) the end of the previous attr
+     or the end of the tag name if this is the first attribute,
  (1) the start of the attr name,
  (2) the start of the attr value (undef if no value), and
- (3) the end of the attr value (name if no value).
+ (3) the end of the attr
 
 Examples of use:
 
@@ -324,29 +361,28 @@ Examples of use:
 
 =item $p->marked_section( [$bool] )
 
-B<Note:> This attribute is only available
-if the Marked Section option was selected at compile time.
+B<Note:> Access to this attribute will croak unless the I<Marked
+Section option> was selected during module installation.
 
 By default section markings like <![CDATA[...]]> are treated like
 ordinary text.  When this attribute is enabled section markings are
-honored.
+honoured.
 
-XXX I don't really know what this is about.
-
+More information about marked sections can be read at
 http://www.sgml.u-net.com/book/sgml-8.htm
 
 =back
 
 
-
 =head1 HANDLERS
 
-Callback subroutines may be assigned to events as arguments to
-the constructor or by calling $p->callback.
-Assigned callbacks override the corresponding subclass methods.
+Callback subroutines may be assigned to events.  The association can
+be made either by providing *_cb arguments to the constructor or with
+the $p->callback method.
 
 If $p->pass_self is enabled, $p will be passed ahead of the other
-arguments.
+arguments to the handlers.  If $p->accum has been set, then handler
+callbacks will not be invoked.
 
 =over
 
@@ -357,44 +393,87 @@ The text might contain multiple lines.  A sequence of text in the HTML
 document may be broken between several invocations of the text handler
 unless $p->unbroken_text is enabled.
 
-The parser will make sure that it does not break a word or
-a sequence of spaces between two events.
+The parser will make sure that it does not break a word or a sequence
+of spaces between two invocations of the text handler.
 
-The $cdata_flag is TRUE if $text might contain entity references that
-should be expanded.  If $p->decode_text_entities is enabled, then the
-$cdata_flag will always be TRUE.  If $p->decode_text_entities is
-disabled, then this flag will only be true for text found inside CDATA
+The $cdata_flag is FALSE if $text might contain entity references that
+has not yet been expanded.  If $p->decode_text_entities is enabled,
+then the $cdata_flag will always be TRUE.  If $p->decode_text_entities
+is disabled, then this flag will be true for text found inside CDATA
 elements, like <script>, <style>, <xmp> and for CDATA marked sections.
 
 When $cdata_flag is FALSE (or missing) then you might want to call
 HTML::Entities::decode($text) before you process the text any further.
 
-
-=item start( $tag, $attr, $origtext )
+=item start( $tag, \@attr, $origtext )
 
 This event is triggered when a complete start tag has been recognized.
-The first argument is the tag name (in lower case) and the second
-argument is a reference to an array that contain all attributes found
-within the start tag.  Attributes are prepresented by key/value pairs.
-The attribute keys are converted to lower case.  Any entities found in
-the attribute values are already expanded.
+The first argument is the tag name (in lower case unless $p->keep_case has been enabled)
+
+The second argument is a reference to an array that contain all
+attributes found within the start tag.  Attributes are represented by
+key/value pairs.  The attribute keys are converted to lower case.  Any
+entities found in the attribute values are already expanded.
 
 The third argument is the original HTML text.
 
+Example: The tag "<IMG src='smile.gif' IsMap>" will normally be passed
+to the start handlers as:
+
+  start("img",
+        [src => "simle.gif", ismap => IsMap],
+        "<IMG src='smile.gif' IsMap>",
+       );
+
+If the $p->bool_attr_value("1") has been set up it will be passed as:
+
+  start("img",
+        [src => "simle.gif", ismap => 1],
+        "<IMG src='smile.gif' IsMap>",
+       );
+
+If the $p->attr_pos option has been enabled it will be passed as:
+
+  start("img",
+        [src   => [4, 5, 9, 19],
+         ismap => [19, 21, undef, 26],
+        ],
+        "<IMG src='smile.gif' IsMap>",
+       );
+
 =item end( $tag, $origtext )
 
-This event is triggered when an end tag has been recognized.
-The first argument is the lower case tag name, the second the original
-HTML text of the tag.
+This event is triggered when an end tag has been recognized.  The
+first argument is the lower case tag name, the second the original
+HTML text of the tag.  The tag name will not be lower cased if
+$p->keep_case has been enabled.
 
 
-=item declaration( $tokens, $origtext )
+=item declaration( \@tokens, $origtext )
 
 This event is triggered when a I<markup declaration> has been recognized.
 
 For typical HTML documents, the only declaration you are
 likely to find is <!DOCTYPE ...>.
 
+Example:
+
+  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+  "http://www.w3.org/TR/html40/strict.dtd">
+
+Will be passed as:
+
+  declaration(['DOCTYPE', 'HTML', 'PUBLIC',
+               '"-//W3C//DTD HTML 4.01//EN"',
+               '"http://www.w3.org/TR/html40/strict.dtd"',
+              ],
+              '"<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+              "http://www.w3.org/TR/html40/strict.dtd">',
+             );
+
+Comments are also passed as separate tokens.
+
+DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
 =item comment( $comment )
 
@@ -405,7 +484,8 @@ from the comment text.
 [XXX: Should there be an $origtext?  One problem is that if you turn
 on $p->strict_comment, then a comment like this one <!-- foo -- -- bar
 --> will be reported as two comments, and then $origtext does not make
-sense.]
+sense.  This might be fixed by reporting this as one comment " foo --
+-- bar ".  ]
 
 
 =item process( $content, $origtext )
@@ -449,9 +529,9 @@ reported as a hash and an additional \@attr_seq argument is inserted]
 
 =head1 EXAMPLES
 
-[XXX I want this to be a HTML::Parser cookbook.  Also show how we
-simplify all the HTML recipes found in the "Perl Cookbook" with the
-new features.]
+[XXX I want this to be an HTML::Parser cookbook.  Also show how we
+simplify the HTML recipes found in the "Perl Cookbook" with the new
+features provided.]
 
 =head1 SEE ALSO
 
