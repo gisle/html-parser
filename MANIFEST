@@ -23,6 +23,7 @@ t/argspec.t
 t/cases.t
 t/default.t
 t/entities.t
+t/exit-via-next.t
 t/filter.t
 t/headparser.t
 t/headparser-http.t
