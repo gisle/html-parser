@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.26 1999/11/17 13:52:19 gisle Exp $
+/* $Id: Parser.xs,v 2.27 1999/11/17 14:05:21 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -11,7 +11,7 @@
  *   - accum flags (filter out what enters @accum)
  *   - option that prevents text broken between callbacks
  *   - return partial text from literal mode
- *   - marked sections?
+ *   - marked IGNORE/INCLUDE sections?
  *   - unicode support (whatever that means)
  *   - unicode character entities
  *   - count chars, line numbers
@@ -23,6 +23,8 @@
  *   - <plaintext> should not end with </plaintext>
  *   - xml_mode should demand ";" at end of entity references
  */
+
+#define MARKED_SECTION /**/
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +63,7 @@ newSVpvn(char *s, STRLEN len)
 
 #include "hctype.h" /* isH...() macros */
 
+#ifdef MARKED_SECTION
 enum marked_section_t {
   MS_NONE = 0,
   MS_INCLUDE,
@@ -68,6 +71,7 @@ enum marked_section_t {
   MS_CDATA,
   MS_IGNORE,
 };
+#endif
 
 struct p_state {
   SV* buf;
@@ -82,9 +86,11 @@ struct p_state {
   bool v2_compat;
   bool pass_cbdata;
 
+#ifdef MARKED_SECTION
   /* marked section support */
   enum marked_section_t ms;
   AV* ms_stack;
+#endif
 
   /* various */
   SV* bool_attr_val;
@@ -653,6 +659,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   return 0;
 }
 
+#ifdef MARKED_SECTION
 
 static void
 marked_section_update(PSTATE* p_state)
@@ -695,7 +702,7 @@ marked_section_update(PSTATE* p_state)
       }
     }
   }
-  printf("MS %d\n", p_state->ms);
+  /* printf("MS %d\n", p_state->ms); */
   return;
 }
 
@@ -772,6 +779,7 @@ html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   SvREFCNT_dec(tokens);
   return beg;
 }
+#endif
 
 static char*
 html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
@@ -796,6 +804,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     return (tmp == s) ? beg : tmp;
   }
 
+#ifdef MARKED_SECTION
   if (*s == '[') {
     /* marked section */
     char *tmp;
@@ -803,6 +812,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     tmp = html_parse_marked_section(p_state, s, end, cbdata);
     return (tmp == s) ? beg : tmp;
   }
+#endif
 
   if (*s == '>') {
     /* make <!> into empty comment <SGML Handbook 36:32> */
@@ -1225,6 +1235,7 @@ html_parse(PSTATE* p_state,
       }
     }
 
+#ifdef MARKED_SECTION
     while (p_state->ms == MS_CDATA || p_state->ms == MS_RCDATA) {
       while (s < end && *s != ']')
 	s++;
@@ -1248,10 +1259,24 @@ html_parse(PSTATE* p_state,
 	goto DONE;
       }
     }
+#endif
 
     /* first we try to match as much text as possible */
-    while (s < end && *s != '<')
+    while (s < end && *s != '<') {
+#ifdef MARKED_SECTION
+      if (p_state->ms && *s == ']') {
+	char *end_text = s;
+	s++;
+	if (*s == ']') {
+	  s++;
+	  if (*s == '>') {
+	    s++;
+	  }
+	}
+      }
+#endif
       s++;
+    }
     if (s != t) {
       if (*s == '<') {
 	html_text(p_state, t, s, 0, cbdata);
@@ -1370,7 +1395,9 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	SvREFCNT_dec(pstate->buf);
+#ifdef MARKED_SECTION
         SvREFCNT_dec(pstate->ms_stack);
+#endif
         SvREFCNT_dec(pstate->bool_attr_val);
         SvREFCNT_dec(pstate->accum);
 	SvREFCNT_dec(pstate->text_cb);
