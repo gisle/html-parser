@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.109 2004/11/23 10:26:58 gisle Exp $
+/* $Id: hparser.c,v 2.110 2004/11/23 10:56:33 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1760,29 +1760,32 @@ parse(pTHX_
 
 	    /* Print warnings if we find unexpected Unicode BOM forms */
 #ifdef UNICODE_HTML_PARSER
-	    if ((!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
+	    if (DOWARN &&
+                (!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
 		(utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6))
 	       )
 	    {
 		if (p_state->argspec_entity_decode)
 		    warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
 	    }
-	    if (utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
+	    if (DOWARN && utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
 		warn("Parsing string decoded with wrong endianess");
 	    }
 #endif
-	    if (!utf8 && len >= 4 &&
-		(strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
-		 strnEQ(beg, "\xFE\xFF\x00\x00", 4))
-	       )
-	    {
-		warn("Parsing of undecoded UTF-32");
-	    }
-	    else if (!utf8 && len >= 2 &&
-		     (strnEQ(beg, "\xFE\xFF", 2) || strnEQ(beg, "\xFF\xFE", 2))
+	    if (DOWARN) {
+		if (!utf8 && len >= 4 &&
+		    (strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
+		     strnEQ(beg, "\xFE\xFF\x00\x00", 4))
 		    )
-	    {
-		warn("Parsing of undecoded UTF-16");
+		{
+		    warn("Parsing of undecoded UTF-32");
+		}
+		else if (!utf8 && len >= 2 &&
+			 (strnEQ(beg, "\xFE\xFF", 2) || strnEQ(beg, "\xFF\xFE", 2))
+		    )
+		{
+		    warn("Parsing of undecoded UTF-16");
+		}
 	    }
 	}
     }

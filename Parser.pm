@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3990';  # $Date: 2004/11/17 20:36:04 $
+$VERSION = '3.3990';  # $Date: 2004/11/23 10:56:32 $
 
 require HTML::Entities;
 
@@ -982,9 +982,8 @@ the http://search.cpan.org/~gaas/HTML-Parser/ page.
 =head1 BUGS
 
 The <style> and <script> sections do not end with the first "</", but
-need the complete corresponding end tag.  MSIE avoids terminating a
-<script> section if the </script> occurs inside quotes.  HTML::Parser
-is not that "smart".
+need the complete corresponding end tag.  The standard behaviour is
+not really practical.
 
 When the I<strict_comment> option is enabled, we still recognize
 comments where there is something other than whitespace between even
@@ -1096,6 +1095,39 @@ are allowed in argspecs.
 =item Missing comma separator in argspec
 
 (F) Identifiers in an argspec must be separated with ",".
+
+=item Parsing of undecoded UTF-8 will give garbage when decoding entities
+
+(W) The first 3 bytes of the document is "\xEF\xBB\xBF" and one or
+more argspecs that decode entities are used for the callback handlers.
+The sequence "\xEF\xBB\xBF" is the UTF-8 encoded Unicode BOM
+character.
+
+The result of parsing will be a mix of encoded and decoded characters
+for any entities that expand to characters with code above 127.
+
+The solution is to use the Encode::encode_utf8() on the data before
+feeding it to the $p->parse().  For $p->parse_file() pass a file that
+has been opened in ":utf8" mode.
+
+The parser can process raw undecoded UTF-8 sanely if you avoid using
+the "attr", "@attr" or "dtext" argspecs.
+
+=item Parsing string decoded with wrong endianess
+
+(W) The first character in the document is U+FFFE.  This is not a
+legal Unicode character but a byte swapped BOM.  The result of parsing
+will likely be garbage.
+
+=item Parsing of undecoded UTF-32
+
+(W) The parser found the Unicode UTF-32 BOM signature at the start
+of the document.  The result of parsing will likely be garbage.
+
+=item Parsing of undecoded UTF-16
+
+(W) The parser found the Unicode UTF-16 BOM signature at the start of
+the document.  The result of parsing will likely be garbage.
 
 =back
 

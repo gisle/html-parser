@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.124 2004/11/17 12:35:36 gisle Exp $
+/* $Id: Parser.xs,v 2.125 2004/11/23 10:56:33 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -91,6 +91,12 @@ newSVpvn(char *s, STRLEN len)
    #define SvUTF8_off(sv)  0
 #else
    #define UNICODE_HTML_PARSER
+#endif
+
+#ifdef G_WARN_ON
+   #define DOWARN (PL_dowarn & G_WARN_ON)
+#else
+   #define DOWARN PL_dowarn
 #endif
 
 /*
