@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.23 1999/12/08 17:25:59 gisle Exp $
+/* $Id: hparser.c,v 2.24 1999/12/09 07:02:45 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -395,7 +395,7 @@ argspec_compile(SV* src)
 	/* literal */
 	int len = s - string_beg - 1;
 	if (len > 255)
-	  croak("Can't have literal strings longer than 255 chars in argspec");
+	  croak("Literal string is longer than 255 chars in argspec");
 	sv_catpvf(argspec, "%c%c", ARG_LITERAL, len);
 	sv_catpvn(argspec, string_beg+1, len);
 	s++;
