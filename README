@@ -3,8 +3,8 @@ HTML-Parser-XS
 
 This is a beta release of a new XS based implementation of
 HTML::Parser.  It should be completely compatible with the old
-HTML-Parser-2.xx, but improves parsing speed as well as adding several
-new options that control how parsing takes place.
+HTML-Parser-2.xx, but improves parsing speed (4-40x) and adds
+several new features.
 
 
 
@@ -12,26 +12,26 @@ new options that control how parsing takes place.
 HTML-Parser
 -----------
 
-This is a collection of modules that parse HTML text documents. These
-modules used to be part of the libwww-perl distribution, but are now
-unbundled in order to facilitate a separate development track.  Bug
-reports and discussions about these modules can still be sent to the
-<libwww@perl.org> mailing list.  Remember to also take a look at the
-HTML-Tree module collection that create and extract information from
+This is a collection of modules that parse and extract information
+from HTML documents.  Bug reports and discussions about these modules
+can be sent to the <libwww@perl.org> mailing list.  Remember to take a
+look at the HTML-Tree package that create and extract information from
 HTML syntax trees.
 
 The modules present in this collection are:
 
   HTML::Parser - The parser base class.  It receives arbitrary sized
-        chunks of the HTML text and will tokenize it by calling
-        appropriate methods on itself.
+        chunks of the HTML text and will recognize markup and
+        separate it from the plain text.  As different kinds of markup
+        and text are recognized, the corresponding event handlers are
+        invoked.
 
   HTML::Entities - Provides functions to encode and decode text with
         embedded HTML &lt;entities&gt;.
 
   HTML::Filter - An HTML::Parser subclass that filters HTML text. You
         will need to make a subclass if you want it to do more than
-        cat(1).
+        cat(1).  HTML::Filter is depreciated.
 
   HTML::HeadParser - A lightweight HTML::Parser subclass that extract
         information from the <HEAD> section of an HTML document.
@@ -40,8 +40,8 @@ The modules present in this collection are:
         an HTML document.
 
   HTML::TokeParser - An alternative interface to the basic parser
-        that does not require subclassing.  Most simple parsing needs
-        are probably best attacked with this module.
+        that does not require event driven programming.  Most simple
+        parsing needs are probably best attacked with this module.
 
 
 
@@ -67,6 +67,7 @@ Just follow the usual procedure:
 COPYRIGHT
 
   © 1995-1999 Gisle Aas. All rights reserved.
+  © 1999 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
