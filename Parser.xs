@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.86 2000/03/06 13:30:13 gisle Exp $
+/* $Id: Parser.xs,v 2.87 2000/03/06 13:33:01 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -141,8 +141,12 @@ free_pstate(PSTATE* pstate)
 }
 
 
+#ifndef pTHX_
+#define pTHX_
+#endif
+
 static int
-magic_free_pstate(SV *sv, MAGIC *mg)
+magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
   free_pstate(get_pstate_iv(sv));
   return 0;
