@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -282,10 +282,6 @@ Copyright 1996-1998 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
-=head1 AUTHOR
-
-Gisle Aas E<lt>aas@sn.no>
 
 =cut
 
