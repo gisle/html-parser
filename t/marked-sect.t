@@ -29,7 +29,7 @@ print "not " unless $text eq "foobar";
 print "ok 2\n";
 
 $p->parse("<![ INCLUDE -- IGNORE -- [foo<![IGNORE[bar]]>]]>\n<br>");
-print "not " unless $text eq "foobarfoo";
+print "not " unless $text eq "foobarfoo\n";
 print "ok 3\n";
 
 $text = "";
