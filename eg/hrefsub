@@ -41,29 +41,24 @@ $p->handler(default => sub { print @_ }, "text");
 $p->handler(start => sub {
 		my($tagname, $pos, $text) = @_;
 		if (my $link_attr = $link_attr{$tagname}) {
-		    shift2($pos);  # tagname
-		    my $offset = 0;
-		    while (@$pos) {
-			my($k_offset, $k_len) = shift2($pos);
-			$k_offset += $offset;
+		    while (4 <= @$pos) {
+			# use attribute sets from right to left
+			# to avoid invalidating the offsets
+			# when replacing the values
+			my($k_offset, $k_len, $v_offset, $v_len) =
+			    splice(@$pos, -4);
 			my $attrname = lc(substr($text, $k_offset, $k_len));
 			next unless $link_attr->{$attrname};
-			my($v_offset, $v_len) = shift2($pos);
-			next unless $v_offset;
-			$v_offset += $offset;
+			next unless $v_offset; # 0 v_offset means no value
 			my $v = substr($text, $v_offset, $v_len);
-			chop($v) if $v =~ s/^[\'\"]//;
+			$v =~ s/^([\'\"])(.*)\1$/$2/;
 			my $new_v = edit($v, $attrname, $tagname);
 			next if $new_v eq $v;
-			$new_v = qq("$new_v");
-			substr($text, $v_offset, $v_len) = $new_v;
-			$offset += length($new_v) - $v_len;
+			substr($text, $v_offset, $v_len) = qq("$new_v");
 		    }
 		}
 		print $text;
 	    },
 	    "tagname, tokenpos, text");
+
 $p->parse_file($file) || die "Can't open file: $!";
-
-sub shift2 { return shift(@{$_[0]}), shift(@{$_[0]}); }
-
