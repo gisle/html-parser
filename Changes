@@ -1,3 +1,14 @@
+2001-03-27   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_93
+
+     Shorten 'report_only_tags' to 'report_tags'.
+     I think it reads better.
+
+     Bleadperl portability fixes.
+
+
+
 2001-03-25   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.19_92
