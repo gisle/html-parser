@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.23';  # $Date: 2001/05/08 01:53:45 $
+$VERSION = '3.24';  # $Date: 2001/05/09 07:12:06 $
 
 require HTML::Entities;
 
@@ -281,9 +281,22 @@ $p->parse() will return a FALSE value.
 If a code reference is passed in as the argument to parse then the
 chunks to parse is obtained by invoking this function repeatedly.
 Parsing continues until the function returns an empty (or undefined)
-result.
+result.  When this happens $p->eof is automatically signalled.
 
 Parsing will also abort if one of the event handlers call $p->eof.
+
+The effect of this is the same as:
+
+ while (1) {
+    my $chunk = &$code_ref();
+    if (!defined($chunk) || !length($chunk)) {
+        $p->eof;
+        return $p;
+    }
+    $p->parse($chunk) || return undef;
+ }
+
+But it is more efficient as this loop runs internally in XS code.
 
 =item $p->parse_file( $file )
 
@@ -302,9 +315,11 @@ If an invoked event handler aborts parsing by calling $p->eof,
 then $p->parse_file() may not have read the entire file.
 
 On systems with multi-byte line terminators, the values passed for the
-offset and length argspecs may be too low if parse_file is called with
-a file handle that is not in binary mode.  If a filename is passed in,
-then the file will be opened in binary mode.
+offset and length argspecs may be too low if parse_file() is called on
+a file handle that is not in binary mode.
+
+If a filename is passed in, then parse_file() will open the file in
+binary mode.
 
 =item $p->eof
 
@@ -316,7 +331,10 @@ Calling $p->eof inside a handler will terminate parsing at that point
 and cause $p->parse to return a FALSE value.  This also terminates
 parsing by $p->parse_file().
 
-The return value is a reference to the parser object.
+After $p->eof has been called, the parse() and parse_file() methods
+can be invoked to feed new documents with the parser object.
+
+The return value from eof() is a reference to the parser object.
 
 =back
 
@@ -406,8 +424,8 @@ By default, section markings like <![CDATA[...]]> are treated like
 ordinary text.  When this attribute is enabled section markings are
 honoured.
 
-There are currently no events associated with marked section
-elements.
+There are currently no events associated with the marked section
+markup, but the text can be returned as C<skipped_text>.
 
 =back
 
@@ -431,7 +449,7 @@ method is used to set up handlers for different events:
 This method assigns a subroutine, method, or array to handle an event.
 
 Event is one of C<text>, C<start>, C<end>, C<declaration>, C<comment>,
-C<process> or C<default>.
+C<process>, C<start_document>, C<end_document> or C<default>.
 
 I<Subroutine> is a reference to a subroutine which is called to handle
 the event.
@@ -453,10 +471,11 @@ is left unchanged since last update.
 The return value from $p->handle is the old callback routine or a
 reference to the accumulator array.
 
-Return values from handler callback routines/methods are always
+Any return values from handler callback routines/methods are always
 ignored.  A handler callback can request parsing to be aborted by
 invoking the $p->eof method.  A handler callback is not allowed to
-invoke $p->parse() or $p->parse_file().
+invoke the $p->parse() or $p->parse_file() method.  An exception will
+be raised if it tries.
 
 Examples:
 
@@ -478,8 +497,10 @@ The array elements will be ['S', \%attr, \@attr_seq, $text].
    $p->handler(start => "");
 
 This causes 'start' events to be ignored.  It also supresses
-invokations of any default handler for start events.  It is equivalent
-to $p->handler(start => sub {}), but is more efficient.
+invokations of any default handler for start events.  It is in most
+cases equivalent to $p->handler(start => sub {}), but is more
+efficient.  It is different from the empty-sub-handler in that
+C<skipped_text> is not reset by it.
 
    $p->handler(start => undef);
 
@@ -490,8 +511,8 @@ If there is a default handler it will be invoked.
 
 Filters based on tags can be set up to limit the number of events
 reported.  The main bottleneck during parsing is often the huge number
-of callbacks made.  Applying filters can improve performance
-significantly.
+of callbacks made from the parser.  Applying filters can improve
+performance significantly.
 
 The following methods control filters:
 
@@ -515,6 +536,11 @@ contain nested occurences of itself.  Example:
 
    $p->ignore_elements(qw(script style));
 
+The C<script> and C<style> tags will always nest properly since their
+content is parsed in CDATA mode.  For most other tags
+C<ignore_elements> must be used with caution since HTML is often not
+I<well formed>.
+
 =back
 
 =head2 Argspec
@@ -529,6 +555,12 @@ identifier names can be used:
 
 Self causes the current object to be passed to the handler.  If the
 handler is a method, this must be the first element in the argspec.
+
+An alternative to passing self as an argspec is to register closures
+that capture $self by themselves as handlers.  Unfortunately this
+creates a circular references which prevents the HTML::Parser object
+from being garbage collected.  Using the C<self> argspec avoids this
+problem.
 
 =item C<tokens>
 
@@ -548,11 +580,10 @@ be either the value set by $p->boolean_attribute_value or the
 attribute name if no value has been set by
 $p->boolean_attribute_value.
 
-For C<end> events, this contains the original tag name (one token
-only).
+For C<end> events, this contains the original tag name (always one token).
 
-For C<process> events, this contains the process instructions (one
-token only).
+For C<process> events, this contains the process instructions (always one
+token).
 
 This passes C<undef> for C<text> events.
 
@@ -663,7 +694,7 @@ was between literal start and end tags (C<script>, C<style>, C<xmp>,
 and C<plaintext>).
 
 The Unicode character set is assumed for entity decoding.  With perl
-version < 5.7 only the Latin1 range is supported, and entities for
+version < 5.7.1 only the Latin1 range is supported, and entities for
 characters outside the 0..255 range is left unchanged.
 
 This passes undef except for C<text> events.
@@ -680,8 +711,16 @@ processed further.
 
 =item C<skipped_text>
 
-Skipped_text returns all text of the document that has been skipped
-since the last time an event was reported.
+Skipped_text returns the concatenated text of all the events that has
+been skipped since the last time an event was reported.  Events might
+be skipped because no handler is registered for them or because some
+filter applies.  Skipped text also include marked section markup,
+since there is no events that can catch them.
+
+If an C<"">-handler is registered for an event, then the text for this
+event is not included in C<skipped_text>.  Skipped text both before
+and after the C<"">-event is included in the next reported
+C<skipped_text>.
 
 =item C<offset>
 
@@ -693,18 +732,23 @@ the event to be passed.  The first byte in the document is 0.
 Length causes the number of bytes of the source text of the event to
 be passed.
 
+=item C<offset_end>
+
+Offset_end causes the byte position in the HTML document of the end of
+the event to be passed.  This is the same as C<offset> + C<length>.
+
 =item C<event>
 
 Event causes the event name to be passed.
 
 The event name is one of C<text>, C<start>, C<end>, C<declaration>,
-C<comment>, C<process> or C<default>.
+C<comment>, C<process>, C<start_document>, C<end_document> or C<default>.
 
 =item C<line>
 
 Line causes the line number of the start of the event to be passed.
 The first line in the document is 1.  Line counting doesn't start
-until at least one handler requests this value.
+until at least one handler requests this value to be reported.
 
 =item C<column>
 
@@ -718,13 +762,23 @@ in single (') or double (") quotes is passed as entered.
 
 =item C<undef>
 
-Pass an undefined value.  Useful as padding.
+Pass an undefined value.  Useful as padding where the same handler
+routine is registered for multiple events.
 
 =back
 
 The whole argspec string can be wrapped up in C<'@{...}'> to signal
 that resulting event array should be flatten.  This only makes a
 difference if an array reference is used as the handler target.
+Consider this example:
+
+   $p->handler(text => [], 'text');
+   $p->handler(text => [], '@{text}']);
+
+With two text events; C<"foo">, C<"bar">; then the first one will end
+up with [["foo"], ["bar"]] and the second one with ["foo", "bar"] in
+the handler target array.
+
 
 =head2 Events
 
@@ -734,9 +788,9 @@ Handlers for the following events can be registered:
 
 =item C<text>
 
-This event is triggered when plain text is recognized.  The text may
-contain multiple lines.  A sequence of text may be broken between
-several text events unless $p->unbroken_text is enabled.
+This event is triggered when plain text (characters) is recognized.
+The text may contain multiple lines.  A sequence of text may be broken
+between several text events unless $p->unbroken_text is enabled.
 
 The parser will make sure that it does not break a word or a sequence
 of whitespace between two text events.
@@ -794,12 +848,14 @@ Examples:
 
 =item C<start_document>
 
-This event is triggered first.  A handler for it can be set up to do
-various initializations.
+This event is triggered before any other events for a new document.  A
+handler for it can be used to initialize stuff.  There is no document
+text associated with this event.
 
 =item C<end_document>
 
-This event is triggered after $p->eof called.
+This event is triggered when $p->eof called and after any remaining
+text is flushed.  There is no document text associated with this event.
 
 =item C<default>
 
@@ -852,6 +908,17 @@ does nothing and a default handler that will print out anything else:
   HTML::Parser->new(default_h => [sub { print shift }, 'text'],
                     comment_h => [""],
                    )->parse_file(shift || die) || die $!;
+
+An alternative implementation is:
+
+  use HTML::Parser;
+  HTML::Parser->new(end_document_h => [sub { print shift },
+                                       'skipped_text'],
+                    comment_h      => [""],
+                   )->parse_file(shift || die) || die $!;
+
+This will in most cases be much more efficient since only a sigle
+callback will be made.
 
 The next example prints out the text that is inside the <title>
 element of an HTML document.  Here we start by setting up a start
