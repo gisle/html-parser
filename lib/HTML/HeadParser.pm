@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.18 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.19 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new
 
@@ -204,6 +204,7 @@ sub end
 sub text
 {
     my($self, $text) = @_;
+    $text =~ s/\x{FEFF}//;  # drop Unicode BOM if found
     print "TEXT[$text]\n" if $DEBUG;
     my $tag = $self->{tag};
     if (!$tag && $text =~ /\S/) {

@@ -1,8 +1,8 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok);
-plan tests => 4;
+use Test qw(plan ok skip);
+plan tests => 6;
 
 { package H;
   sub new { bless {}, shift; }
@@ -12,7 +12,7 @@ plan tests => 4;
      my $key  = uc(shift);
      my $old = $self->{$key};
      if (@_) { $self->{$key} = shift; }
-     $old;     
+     $old;
   }
 
   sub push_header {
@@ -142,11 +142,23 @@ open(FILE, ">$file") or die "Can't create $file: $!";
 print FILE "Foo";
 close(FILE);
 
+print "\n\n#### BOM\n";
 $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
 unlink($file) or warn "Can't unlink $file: $!";
 
 ok(!$p->as_string);
 
+if ($] < 5.008) {
+    for (1..2) {
+	skip("Need Unicode support", 1);
+    }
+}
+else {
+    # Test that the Unicode BOM does not confuse us?
+    $p = HTML::HeadParser->new(H->new);
+    ok($p->parse("\x{FEFF}\n<title>Hi <foo></title>"));
+    $p->eof;
 
-
+    ok($p->header("title"), "Hi <foo>");
+}
