@@ -1,3 +1,25 @@
+2004-11-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.39_90
+
+     The <title> elements are now parsed in literal mode, which
+     means that other tags are not recognized until </title> has
+     been seen.
+
+     Unicode support for perl-5.8 and better.
+
+        Decoding Unicode entities always enabled; no longer a compile
+        time option.
+
+        Propagation of UTF8 state on strings.
+        Patch contributed by John Gardiner Myers <jgmyers@proofpoint.com>.
+
+        Calculate offsets and lengths in chars for Unicode strings.
+
+     Fixed link typo in the HTML::TokeParser documentation.
+
+
+
 2004-11-11   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.38
