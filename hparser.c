@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.82 2002/03/17 20:07:57 gisle Exp $
+/* $Id: hparser.c,v 2.83 2003/04/17 03:44:58 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -956,7 +956,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	    return beg;
 
 	if (*s != '-')
-	    return 0;  /* nope, illegal */
+	    goto DECL_FAIL;  /* nope, illegal */
 
 	/* yes, two dashes seen */
 	s++;
@@ -971,6 +971,8 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	char *tmp;
 	s++;
 	tmp = parse_marked_section(p_state, s, end, self);
+	if (!tmp)
+	    goto DECL_FAIL;
 	return (tmp == s) ? beg : tmp;
     }
 #endif
@@ -1079,12 +1081,29 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 
     FAIL:
 	FREE_TOKENS;
-	return 0;
+	goto DECL_FAIL;
 
     PREMATURE:
 	FREE_TOKENS;
 	return beg;
 
+    }
+
+DECL_FAIL:
+    if (p_state->strict_comment)
+	return 0;
+
+    /* consider everything up to the first '>' a comment */
+    while (s < end && *s != '>')
+	s++;
+
+    if (*s == '>') {
+	token_pos_t empty;
+	empty.beg = beg + 2;
+	empty.end = s;
+	s++;
+	report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+	return s;
     }
     return 0;
 }
