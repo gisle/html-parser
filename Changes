@@ -1,3 +1,26 @@
+2004-11-10   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.37
+
+     Improved handling of HTML encoded surrogate pairs and illegally
+     endoded Unicode; <http://rt.cpan.org/Ticket/Display.html?id=7785>.
+     Patch by John Gardiner Myers <jgmyers@proofpoint.com>.
+
+     Avoid generating bad UTF8 strings when decoding entities
+     representing chars beyond #255 in 8-bit strings.  Such bad
+     UTF8 sometimes made perl-5.8.5 and older segfault.
+
+     Undocument v2 style subclassing in synopsis section.
+
+     Internal cleanup:
+
+        Make 'gcc -Wall' happier.
+
+        Avoid modification of PVs during parsing of attrspec.
+        Another patch by John Gardiner Myers.
+
+
+
 2004-04-01   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.36
