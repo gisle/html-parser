@@ -1,6 +1,6 @@
-/* $Id: Parser.xs,v 2.100 2001/03/10 04:25:57 gisle Exp $
+/* $Id: Parser.xs,v 2.101 2001/03/13 01:00:11 gisle Exp $
  *
- * Copyright 1999-2000, Gisle Aas.
+ * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
  *
  * This library is free software; you can redistribute it and/or

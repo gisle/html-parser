@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.19';  # $Date: 2001/03/10 04:25:57 $
+$VERSION = '3.19';  # $Date: 2001/03/13 01:00:10 $
 
 require HTML::Entities;
 
@@ -587,6 +587,20 @@ This passes undef except for C<start> events.
 
 Unless C<xml_mode> is enabled, the attribute names are forced to lower
 case.
+
+=item C<@attr>
+
+Basically same as C<attr>, but keys and values are passed as
+individual arguments and the original sequence of the attributes is
+kept.  The parameters passed will be the same as the @attr calculated
+here:
+
+   @attr = map { $_ => $attr->{$_} } @$attrseq;
+
+assuming $attr and $attrseq here are the hash and array passed as the
+result of C<attr> and C<attrseq> argspecs.
+
+This pass no values for events besides C<start>.
 
 =item C<text>
 

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.53 2001/03/10 04:25:57 gisle Exp $
+/* $Id: hparser.c,v 2.54 2001/03/13 01:00:11 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -36,6 +36,7 @@ enum argcode {
     ARG_TOKEN0,
     ARG_TAGNAME,
     ARG_ATTR,
+    ARG_ATTRARR,
     ARG_ATTRSEQ,
     ARG_TEXT,
     ARG_DTEXT,
@@ -55,6 +56,7 @@ char *argname[] = {
     "token0",   /* ARG_TOKEN0 */
     "tagname",  /* ARG_TAGNAME */
     "attr",     /* ARG_ATTR */
+    "@attr",    /* ARG_ATTRARR */
     "attrseq",  /* ARG_ATTRSEQ */
     "text",     /* ARG_TEXT */
     "dtext",    /* ARG_DTEXT */
@@ -201,6 +203,7 @@ report_event(PSTATE* p_state,
 
     for (s = argspec; *s; s++) {
 	SV* arg = 0;
+	int push_arg = 1;
 	enum argcode argcode = (enum argcode)*s;
 
 	switch( argcode ) {
@@ -262,9 +265,15 @@ report_event(PSTATE* p_state,
 	    break;
 
 	case ARG_ATTR:
+	case ARG_ATTRARR:
 	    if (event == E_START) {
-		HV* hv = newHV();
+		HV* hv;
 		int i;
+		if (argcode == ARG_ATTR)
+		    hv = newHV();
+		else
+		    push_arg = 0;  /* deal with argument pushing here */
+
 		for (i = 1; i < num_tokens; i += 2) {
 		    SV* attrname = newSVpvn(tokens[i].beg,
 					    tokens[i].end-tokens[i].beg);
@@ -289,15 +298,32 @@ report_event(PSTATE* p_state,
 
 		    if (!p_state->xml_mode)
 			sv_lower(aTHX_ attrname);
-		    if (!hv_store_ent(hv, attrname, attrval, 0)) {
-			SvREFCNT_dec(attrval);
+
+		    if (argcode == ARG_ATTR) {
+			if (!hv_store_ent(hv, attrname, attrval, 0)) {
+			    SvREFCNT_dec(attrval);
+			}
+			SvREFCNT_dec(attrname);
 		    }
-		    SvREFCNT_dec(attrname);
+		    else { /* ARG_ATTRARR */
+			if (array) {
+			    av_push(array, attrname);
+			    av_push(array, attrval);
+			}
+			else {
+			    XPUSHs(sv_2mortal(attrname));
+			    XPUSHs(sv_2mortal(attrval));
+			}
+		    }
 		}
-		arg = sv_2mortal(newRV_noinc((SV*)hv));
+		if (argcode == ARG_ATTR)
+		    arg = sv_2mortal(newRV_noinc((SV*)hv));
+	    }
+	    else if (argcode == ARG_ATTRARR) {
+		push_arg = 0;
 	    }
 	    break;
-      
+
 	case ARG_ATTRSEQ:       /* (v2 compatibility stuff) */
 	    if (event == E_START) {
 		AV* av = newAV();
@@ -361,17 +387,19 @@ report_event(PSTATE* p_state,
 	    break;
 	}
 
-	if (!arg)
-	    arg = sv_mortalcopy(&PL_sv_undef);
+	if (push_arg) {
+	    if (!arg)
+		arg = sv_mortalcopy(&PL_sv_undef);
 
-	if (array) {
-	    /* have to fix mortality here or add mortality to
-             * XPUSHs after removing it from the switch cases.
-             */
-	    av_push(array, SvREFCNT_inc(arg));
-	}
-	else {
-	    XPUSHs(arg);
+	    if (array) {
+		/* have to fix mortality here or add mortality to
+		 * XPUSHs after removing it from the switch cases.
+		 */
+		av_push(array, SvREFCNT_inc(arg));
+	    }
+	    else {
+		XPUSHs(arg);
+	    }
 	}
     }
 
@@ -407,7 +435,7 @@ argspec_compile(SV* src)
     while (isHSPACE(*s))
 	s++;
     while (s < end) {
-	if (isHNAME_FIRST(*s)) {
+	if (isHNAME_FIRST(*s) || *s == '@') {
 	    char *name = s;
 	    int a = ARG_SELF;
 	    char temp;
