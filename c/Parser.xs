@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.3 1999/11/03 13:20:39 gisle Exp $ */
+/* $Id: Parser.xs,v 1.4 1999/11/03 13:56:45 gisle Exp $ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,32 +17,53 @@ struct p_state {
 
   int strict_comment;
 
-  CV* text_cb;
-  CV* start_cb;
-  CV* end_cb;
-  CV* decl_cb;
-  CV* com_cb;
+  SV* text_cb;
+  SV* start_cb;
+  SV* end_cb;
+  SV* decl_cb;
+  SV* com_cb;
 };
 
 typedef struct p_state PSTATE;
 
 
-int isHALNUM(int c)
+int
+isHALNUM(int c)
 {
   return isALNUM(c) || c == '.' || c == '-';
 }
 
+static SV*
+sv_lower(SV* sv)
+{
+   STRLEN len;
+   char *s = SvPV_force(sv, len);
+   for (; len--; s++)
+	*s = toLOWER(*s);
+   return sv;
+}
 
 static void
 html_text(struct p_state* p_state, char* beg, char *end)
 {
+  SV *cb;
   if (beg == end)
     return;
-  printf(">> text: [");
-  while (beg < end)
-    putchar(*beg++);
-  putchar(']');
-  putchar('\n');
+  cb = p_state->text_cb;
+  if (cb) {
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
+  }
+
 }
 
 static void
@@ -50,16 +71,22 @@ html_end(struct p_state* p_state,
 	 char *tag_beg, char *tag_end,
 	 char *beg, char *end)
 {
-  printf(">> end: [");
-  while (tag_beg < tag_end) {
-    int l = toLOWER(*tag_beg);
-    putchar(l);
-    tag_beg++;
+  SV *cb = p_state->end_cb;
+  if (cb) {
+      SV tagsv;
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+      XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
   }
-  printf("] [");
-  while (beg < end)
-    putchar(*beg++);
-  printf("]\n");
 }
 
 static void
@@ -602,7 +629,14 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	/* printf("Safefree %p\n", pstate); */
+	SvREFCNT_dec(pstate->buf);
+	SvREFCNT_dec(pstate->text_cb);
+	SvREFCNT_dec(pstate->start_cb);
+	SvREFCNT_dec(pstate->end_cb);
+	SvREFCNT_dec(pstate->decl_cb);
+	SvREFCNT_dec(pstate->com_cb);
 	Safefree(pstate);
+
 
 void
 parse(pstate, chunk)
@@ -610,3 +644,39 @@ parse(pstate, chunk)
 	SV* chunk
     CODE:
 	html_parse(pstate, chunk);
+
+void
+callback(pstate, name_sv, cb)
+	PSTATE* pstate
+	SV* name_sv
+	SV* cb
+    PREINIT:
+	STRLEN name_len;
+	char *name = SvPV(name_sv, name_len);
+	SV** svp = 0;
+    CODE:
+	switch (name_len) {
+	case 3:
+	    if (strEQ(name, "end"))
+		svp = &pstate->end_cb;
+	case 4:
+	    if (strEQ(name, "text"))
+		svp = &pstate->text_cb;
+	case 5:
+	    if (strEQ(name, "start"))
+		svp = &pstate->start_cb;
+	case 7:
+	    if (strEQ(name, "comment"))
+		svp = &pstate->com_cb;
+	case 11:
+	    if (strEQ(name, "declaration"))
+		svp = &pstate->decl_cb;
+	}
+
+	if (svp) {
+	    SvREFCNT_dec(*svp);
+	    *svp = SvREFCNT_inc(cb);
+	}
+	else
+	    croak("Can't set %s callback", name);
+
