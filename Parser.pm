@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/08 20:56:44 $
+$VERSION = 2.99_94;  # $Date: 1999/12/08 21:23:45 $
 
 require HTML::Entities;
 
@@ -389,6 +389,8 @@ method is used to set up handlers for different events:
 
 =item $p->handler( event => \@accum, argspec )
 
+=item $p->handler( event );
+
 This method assigns a subroutine, method, or array to handle an event.
 
 Event is one of C<text>, C<start>, C<end>, C<declaration>, C<comment>,
@@ -405,7 +407,11 @@ sub-arrays.
 
 I<Argspec> is a string that describes the information to be reported
 from the event.  Any requested information that does not apply to an
-specific event is passed as C<undef>.
+specific event is passed as C<undef>.  If argspec is omitted, then it
+is left unchanged since last update.
+
+The return value from $p->handle is the old callback routine or a
+reference to the accumulator array.
 
 Examples:
 
