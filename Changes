@@ -1,3 +1,37 @@
+1999-11-10   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_08
+
+   Make Parser.xs compile on perl5.004_05 too.
+
+   New callback called 'default'.  This will be called for any
+   document text no other callback show interest in.
+
+   Patch by Michael A. Chase <mchase@ix.netcom.com> that should
+   help clean up files for the test suite on Win32.
+
+   Can now set up various attributes with key/value pairs passed to
+   the constructor.
+
+   $p->parse_file() will open the file in binmode()
+
+   Pass complete processing instruction tag as second argument
+   to process callback.
+
+   New boolean attribute v2_compat.  This influence how attributes
+   are reported for start tags.
+
+   HTML::Filter filters process instructions too now.
+
+   Faster HTML::LinkExtor by taking advantage of new
+   callback interface.  The module now also use URI.pm (instead
+   of the old URI::URL) to do URI-absolutations.
+
+   Faster HTML::TokeParser by taking advantage of new
+   accum interface.
+
+
+
 1999-11-09   Gisle Aas <gisle@aas.no>
 
    Release 2.99_07
