@@ -9,6 +9,7 @@ TODO			Ideas and things still left to do
 eg/hrefsub		Do substitutions on link attributes
 eg/hstrip		Stip away certains tags/elements and attributes
 eg/htext		Leave only the text
+eg/htextsub	        Do substitutions only on the text content
 eg/htitle               Extract document title
 hints/solaris.pl	Avoid compiler bug
 hparser.h		Parser implementation (data structures)
