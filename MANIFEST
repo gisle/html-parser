@@ -1,8 +1,11 @@
 Changes
 MANIFEST
+README
 Makefile.PL
 Parser.pm
-README
+Parser.xs
+typemap
+hints/solaris.pl
 lib/HTML/Entities.pm
 lib/HTML/Filter.pm
 lib/HTML/HeadParser.pm
