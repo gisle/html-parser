@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.1 1999/12/03 12:43:00 gisle Exp $
+/* $Id: hparser.h,v 2.2 1999/12/03 20:26:32 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -91,17 +91,3 @@ struct p_state {
 };
 typedef struct p_state PSTATE;
 
-
-static
-struct literal_tag {
-  int len;
-  char* str;
-}
-literal_mode_elem[] =
-{
-  {6, "script"},
-  {5, "style"},
-  {3, "xmp"},
-  {9, "plaintext"},
-  {0, 0}
-};
