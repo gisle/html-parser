@@ -4,4 +4,6 @@ Parser.c
 Parser.bs
 Makefile
 tar
-
+hctype.h
+pfunc.h
+*test*
