@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_95;  # $Date: 1999/12/09 19:07:33 $
+$VERSION = 2.99_95;  # $Date: 1999/12/09 19:31:33 $
 
 require HTML::Entities;
 
@@ -723,23 +723,42 @@ prefix.
 
 =head1 EXAMPLES
 
-Strip out <font> tags:
+The first simple example shows how you might strip out comments from
+an HTML document.  We achieve this by setting up a comment handler that
+does nothing and a default handler that will print out anything else:
 
-  sub ignore_font { print pop unless shift eq "font" }
-  HTML::Parser->new(default_h => [sub { print shift }, 'text'],
-                    start_h => [\&ignore_font, 'tagname,text'],
-                    end_h => [\&ignore_font, 'tagname,text'],
-		    marked_sections => 0,
-		    )->parse_file(shift);
-
-Strip out comments:
-
+  use HTML::Parser;
   HTML::Parser->new(default_h => [sub { print shift }, 'text'],
                     comment_h => [sub { }, ''],
-                   )->parse_file(shift);
+                   )->parse_file(shift || die) || die $!;
+
+The next example prints out the text that is inside the <title>
+element of an HTML document.  Here we start by setting up a start
+handler.  When it sees the title start tag it enables a text handler
+that prints any text found and an end handler that will terminate
+parsing as soon as the title end tag is seen:
+
+  use HTML::Parser ();
+
+  sub start_handler
+  {
+    return if shift ne "title";
+    my $self = shift;
+    $self->handler(text => sub { print shift }, "dtext");
+    $self->handler(end  => sub { shift->eof if shift eq "title"; },
+		           "tagname,self");
+  }
+
+  my $p = HTML::Parser->new(api_version => 3,
+			  start_h => [\&start_handler, "tagname,self"]);
+  $p->parse_file(shift || die) || die $!;
+  print "\n";
 
 More examples are found in the "eg/" directory of the C<HTML-Parser>
-distribution.
+distribution; the program C<hrefsub> shows how you can edit all links
+found in a document; the program C<hstrip> shows how you can strip out
+certain tags/elements and/or attributes; and the program C<htext> show
+how to obtain the plain text, but not any script/style content.
 
 =head1 BUGS
 
