@@ -2,7 +2,7 @@
 
      Release 3.39_90
 
-     The <title> elements are now parsed in literal mode, which
+     The <title> element is now parsed in literal mode, which
      means that other tags are not recognized until </title> has
      been seen.
 
