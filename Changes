@@ -1,3 +1,16 @@
+1998-11-13   Gisle Aas <aas@sn.no>
+
+   Release 2.21
+
+   HTML::TokeParser can now parse strings directly and does the
+   right thing if you pass it a GLOB.  Based on patch by
+   Sami Itkonen <si@iki.fi>.
+
+   HTML::Parser now allow space before and after "--" in Netscape
+   comments.  Patch by Peter Orbaek <poe@daimi.au.dk>.
+
+
+
 1998-07-08   Gisle Aas <aas@sn.no>
 
    Release 2.20
