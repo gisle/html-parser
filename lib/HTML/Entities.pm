@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.14 1999/11/08 13:27:15 gisle Exp $
+# $Id: Entities.pm,v 1.15 1999/11/11 09:12:20 gisle Exp $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ HTML::Entities - Encode or decode strings with HTML entities
 =head1 DESCRIPTION
 
 This module deals with encoding and decoding of strings with HTML
-character entites.  The module provide the following functions:
+character entites.  The module provides the following functions:
 
 =over 4
 
@@ -33,12 +33,12 @@ This routine replaces unsafe characters in $string with their entity
 representation.  A second argument can be given to specify which
 characters to concider as unsafe.  The default set of characters to
 expand are control chars, high-bit chars and the '<', '&', '>' and '"'
-character.
+characters.
 
 =back
 
-Both routines modify the string passed in as the first argument if
-called in void context.  In scalar and array context the encoded or
+Both routines modify the string passed as the first argument if
+called in a void context.  In scalar and array contexts the encoded or
 decoded string is returned (and the argument string is left
 unchanged).
 
@@ -50,7 +50,7 @@ call them as:
   $decoded = HTML::Entities::decode($a);
 
 The module can also export the %char2entity and the %entity2char
-hashes which contains the mapping from all characters to the
+hashes which contain the mapping from all characters to the
 corresponding entities.
 
 =head1 COPYRIGHT
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.14 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.15 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

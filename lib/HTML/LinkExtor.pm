@@ -16,7 +16,7 @@ HTML::LinkExtor - Extract links from an HTML document
 
 =head1 DESCRIPTION
 
-The I<HTML::LinkExtor> is an HTML parser that extract links from an
+I<HTML::LinkExtor> is an HTML parser that extracts links from an
 HTML document.  The I<HTML::LinkExtor> is a subclass of
 I<HTML::Parser>. This means that the document should be given to the
 parser by calling the $p->parse() or $p->parse_file() methods.
@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -52,12 +52,12 @@ use vars qw(%LINK_ELEMENT);
 
 =item $p = HTML::LinkExtor->new([$callback[, $base]])
 
-The constructor takes two optional argument. The first is a reference
+The constructor takes two optional arguments. The first is a reference
 to a callback routine. It will be called as links are found. If a
 callback is not provided, then links are just accumulated internally
 and can be retrieved by calling the $p->links() method.
 
-The $base is an optional base URL used to absolutize all URLs found.
+The $base argument is an optional base URL used to absolutize all URLs found.
 You need to have the I<URI> module installed if you provide $base.
 
 The callback is called with the lowercase tag name as first argument,
@@ -120,8 +120,8 @@ values will be anonymous arrays with the follwing elements:
   [$tag, $attr => $url1, $attr2 => $url2,...]
 
 The $p->links method will also truncate the internal link list.  This
-means that if the method is called twice without any parsing in
-between then the second call will return an empty list.
+means that if the method is called twice without any parsing
+between them the second call will return an empty list.
 
 Also note that $p->links will always be empty if a callback routine
 was provided when the I<HTML::LinkExtor> was created.
@@ -135,7 +135,7 @@ sub links
 }
 
 # We override the parse_file() method so that we can clear the links
-# before we start with a new file.
+# before we start a new file.
 sub parse_file
 {
     my $self = shift;

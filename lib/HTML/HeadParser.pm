@@ -43,7 +43,7 @@ element.
 
 The I<Isindex> header will be added if there is a E<lt>isindex>
 element in the E<lt>head>.  The header value is initialized from the
-I<prompt> attribute if it is present.  If not I<prompt> attribute is
+I<prompt> attribute if it is present.  If no I<prompt> attribute is
 given it will have '?' as the value.
 
 =item X-Meta-Foo:
@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.12 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -105,7 +105,7 @@ sub new
 
 =item $hp->parse( $text )
 
-Parses some HTML text (see HTML::Parser->parse()) but will return
+Parses some HTML text (see HTML::Parser->parse()).  Returns
 FALSE as soon as parsing should end.
 
 =cut

@@ -5,7 +5,7 @@
    Make Parser.xs compile on perl5.004_05 too.
 
    New callback called 'default'.  This will be called for any
-   document text no other callback show interest in.
+   document text no other callback shows interest in.
 
    Patch by Michael A. Chase <mchase@ix.netcom.com> that should
    help clean up files for the test suite on Win32.
@@ -18,13 +18,13 @@
    Pass complete processing instruction tag as second argument
    to process callback.
 
-   New boolean attribute v2_compat.  This influence how attributes
+   New boolean attribute v2_compat.  This influences how attributes
    are reported for start tags.
 
-   HTML::Filter filters process instructions too now.
+   HTML::Filter filters now process instructions too.
 
-   Faster HTML::LinkExtor by taking advantage of new
-   callback interface.  The module now also use URI.pm (instead
+   Faster HTML::LinkExtor by taking advantage of the new
+   callback interface.  The module now also uses URI.pm (instead
    of the old URI::URL) to do URI-absolutations.
 
    Faster HTML::TokeParser by taking advantage of new
@@ -65,8 +65,8 @@
    Release 2.99_06
 
    Internal fast decode_entities().   By using it we are able to make
-   the HTML::Entities::decode funtion 6 times faster than the old one
-   implemented in pure perl.
+   the HTML::Entities::decode function 6 times faster than the old one
+   implemented in pure Perl.
 
    $p->bool_attr_value() can be set to influence the value that
    boolean attributes will be assigned.  The default is to assign
@@ -74,12 +74,12 @@
 
    Process instructions are reported as "PI" in @accum
    
-   $p->xml_mode(1) modify how processing instructions are terminated
-   and allow "/>" in the end of start tags.
+   $p->xml_mode(1) modifies how processing instructions are terminated
+   and allows "/>" at the end of start tags.
 
-   Turn off optimizations when compiling with gcc on Solaris.  Avoid
+   Turn off optimizations when compiling with gcc on Solaris.  Avoids
    what we believe to be a compiler bug.  Should probably figure out
-   which version of gcc have this bug.
+   which versions of gcc have this bug.
 
 
 
@@ -110,7 +110,7 @@
    Allow ":" in tag and attribute names
 
    Include rest of the HTML::* files from the old HTML::Parser
-   packages.  This should make testing easier.
+   package.  This should make testing easier.
 
 
 
@@ -122,7 +122,7 @@
    we don't lowercase tag and attribute names.
 
    Implemented accum() that takes an array reference.  Tokens are
-   pushed onto this array instead of callbacks.
+   pushed onto this array instead of sent to callbacks.
 
    Implemented strict_comment().
 
@@ -143,8 +143,8 @@
    Allow ":" in attribute names as a workaround for Microsoft Excel
    2000 which generates such files.
 
-   Make depreciate warning if netscape_buggy_comment() method is
-   used.  The method to use in strict_comment().
+   Make deprecate warning if netscape_buggy_comment() method is
+   used.  The method is used in strict_comment().
 
    Avoid duplication of parse_file() method in HTML::HeadParser.
 
@@ -191,7 +191,7 @@
    right thing if you pass it a GLOB.  Based on patch by
    Sami Itkonen <si@iki.fi>.
 
-   HTML::Parser now allow space before and after "--" in Netscape
+   HTML::Parser now allows space before and after "--" in Netscape
    comments.  Patch by Peter Orbaek <poe@daimi.au.dk>.
 
 
