@@ -126,7 +126,7 @@ print "ok 6\n";
 
 $p = HTML::TokeParser->new(\<<'EOT');
 <H1>This is a heading</H1>
-This is some text.
+This is s<b>o</b>me<hr>text.
 <br />
 This is some more text.
 <p>
@@ -167,7 +167,6 @@ print "ok 10\n";
 $p->get_tag;
 
 $t = $p->get_phrase;
-print "'$t'\n";
 print "not " unless $t eq "This is some italic text. This is some more text.";
 print "ok 11\n";
 

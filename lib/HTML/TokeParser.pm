@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.27 2003/10/14 09:55:48 gisle Exp $
+# $Id: TokeParser.pm,v 2.28 2003/10/14 10:11:05 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.27 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.28 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -101,6 +101,8 @@ sub get_text
 		 $self->unget_token($token);
 		 last;
 	    }
+	    push(@text, " ")
+		if $tag eq "br" || !$HTML::Tagset::isPhraseMarkup{$token->[1]};
 	}
     }
     join("", @text);
