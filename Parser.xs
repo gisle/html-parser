@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.115 2003/08/15 00:39:11 gisle Exp $
+/* $Id: Parser.xs,v 2.116 2003/08/15 15:06:17 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -224,7 +224,7 @@ _alloc_pstate(self)
 
 	hv_store(hv, "_hparser_xs_state", 17, newRV_noinc(sv), 0);
 
-SV*
+void
 parse(self, chunk)
 	SV* self;
 	SV* chunk
@@ -270,7 +270,7 @@ parse(self, chunk)
             ST(0) = sv_newmortal();
         }
 
-SV*
+void
 eof(self)
 	SV* self;
     PREINIT:
@@ -283,6 +283,7 @@ eof(self)
 	    parse(aTHX_ p_state, 0, self); /* flush */
 	    p_state->parsing = 0;
 	}
+	/* ST(0) = yes, xsubpp we want to return a value */
 
 SV*
 strict_comment(pstate,...)
@@ -391,7 +392,7 @@ ignore_tags(pstate,...)
             *attr = 0;
 	}
 
-SV*
+void
 handler(pstate, eventname,...)
 	PSTATE* pstate
 	SV* eventname
