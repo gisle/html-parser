@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 
 use strict;
-my $code = shift;
-my $code = 'sub edit_print { local $_ = shift; ' . $code . '; print }';
+my $code = shift || usage();
+$code = 'sub edit_print { local $_ = shift; ' . $code . '; print }';
 #print $code;
 eval $code;
 die $@ if $@;
