@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.25';  # $Date: 2002/03/08 03:49:23 $
+$VERSION = '3.25';  # $Date: 2002/03/08 04:02:21 $
 
 require HTML::Entities;
 
@@ -429,13 +429,14 @@ markup, but the text can be returned as C<skipped_text>.
 
 =item $p->attr_encoded( [$bool] )
 
-By default, attr and @attr decode general enitites for attribute values.
-This turns off that behavior.
+By default, the C<attr> and C<@attr> argspecs will have general
+entities for attribute values decoded.  Enabling this attribute leaves
+entities alone.
 
 =item $p->case_sensititve( [$bool] )
 
-By default, attr and @attr downcase attribute names. This turns off
-that behavior.
+By default, tagnames and attribute names are down-cased.  Enabling this
+attribute leave them as found in the HTML source document.
 
 =back
 
@@ -635,8 +636,9 @@ This is the element name (or I<generic identifier> in SGML jargon) for
 start and end tags.  Since HTML is case insensitive this name is
 forced to lower case to ease string matching.
 
-Since XML is case sensitive, the tagname case is not
-changed when C<xml_mode> is enabled.
+Since XML is case sensitive, the tagname case is not changed when
+C<xml_mode> is enabled.  Same happens if the C<case_sensitive> attribute
+is set.
 
 The declaration type of declaration elements is also passed as a tagname,
 even if that is a bit strange.
@@ -660,8 +662,8 @@ set by $p->boolean_attribute_value.
 
 This passes undef except for C<start> events.
 
-Unless C<xml_mode> is enabled, the attribute names are forced to
-lower case.
+Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
+names are forced to lower case.
 
 General entities are decoded in the attribute values and
 one layer of matching quotes enclosing the attribute values are removed.
@@ -674,8 +676,8 @@ the original sequence.
 
 This passes undef except for C<start> events.
 
-Unless C<xml_mode> is enabled, the attribute names are forced to lower
-case.
+Unless C<xml_mode> or C<case_sensitive> is enabled, the attribute
+names are forced to lower case.
 
 =item C<@attr>
 
