@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_08';  # $Date: 1999/11/09 22:46:49 $
+$VERSION = '2.99_08';  # $Date: 1999/11/10 11:59:16 $
 
 require HTML::Entities;
 
@@ -34,8 +34,14 @@ sub new
 	# In the end we try to assume plain attribute or callback
 	for (keys %cfg) {
 	    eval { $self->callback($_ => $cfg{$_}) };
-	    eval { $self->$_($cfg{$_})} if $@;
-	    warn "Unknown configuration key $_" if $@ && $^W;
+	    if ($@) {
+		if (my $m = $self->can($_)) {
+		    &$m($self, $cfg{$_});
+		}
+		else {
+		    warn "Unknown configuration key $_" if $^W;
+		}
+	    }
 	}
     }
     else {
@@ -68,6 +74,7 @@ sub parse_file
         # Assume $file is a filename
         local(*F);
         open(F, $file) || return undef;
+	binmode(F);  # should we? good for byte counts
         $opened++;
         $file = *F;
     }
