@@ -54,7 +54,7 @@ print "not " unless decode_entities("&#0009999999999999999999999999999;") eq
 print "ok 9\n";
 
 my $err;
-for ([32, 48], [120, 169], [240, 250], [250, 260], [3000, 3005]) {
+for ([32, 48], [120, 169], [240, 250], [250, 260], [965, 975], [3000, 3005]) {
     my $a = join("", map chr, $_->[0] .. $_->[1]);
 
     #print join(", ", unpack("U*", $a)), "\n";
@@ -68,6 +68,7 @@ for ([32, 48], [120, 169], [240, 250], [250, 260], [3000, 3005]) {
 
     unless ($d eq $a) {
 	print "Wrong decoding in range $_->[0] .. $_->[1]\n";
+	# use Devel::Peek; Dump($a); Dump($d);
 	$err++;
     }
 }
