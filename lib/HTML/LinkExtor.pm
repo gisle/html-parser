@@ -1,5 +1,11 @@
 package HTML::LinkExtor;
 
+# $Id: LinkExtor.pm,v 1.33 2003/10/10 10:20:56 gisle Exp $
+
+require HTML::Parser;
+@ISA = qw(HTML::Parser);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.33 $ =~ /(\d+)\.(\d+)/);
+
 =head1 NAME
 
 HTML::LinkExtor - Extract links from an HTML document
@@ -22,10 +28,6 @@ I<HTML::Parser>. This means that the document should be given to the
 parser by calling the $p->parse() or $p->parse_file() methods.
 
 =cut
-
-require HTML::Parser;
-@ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.32 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use HTML::Tagset ();
