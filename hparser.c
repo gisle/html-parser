@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.96 2004/09/14 13:47:16 gisle Exp $
+/* $Id: hparser.c,v 2.97 2004/11/08 14:33:01 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -606,7 +606,6 @@ argspec_compile(SV* src, PSTATE* p_state)
 	if (isHNAME_FIRST(*s) || *s == '@') {
 	    char *name = s;
 	    int a = ARG_SELF;
-	    char temp;
 	    char **arg_name;
 
 	    s++;
@@ -614,10 +613,9 @@ argspec_compile(SV* src, PSTATE* p_state)
 		s++;
 
 	    /* check identifier */
-	    temp = *s;
-	    *s = '\0';
 	    for ( arg_name = argname; a < ARG_LITERAL ; ++a, ++arg_name ) {
-		if (strEQ(*arg_name, name))
+		if (strnEQ(*arg_name, name, s - name) &&
+		    (*arg_name)[s - name] == '\0')
 		    break;
 	    }
 	    if (a < ARG_LITERAL) {
@@ -635,9 +633,8 @@ argspec_compile(SV* src, PSTATE* p_state)
                 }
 	    }
 	    else {
-		croak("Unrecognized identifier %s in argspec", name);
+		croak("Unrecognized identifier %.*s in argspec", s - name, name);
 	    }
-	    *s = temp;
 	}
 	else if (*s == '"' || *s == '\'') {
 	    char *string_beg = s;
