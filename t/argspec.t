@@ -1,29 +1,29 @@
 
+use strict;
 require HTML::Parser;
 
-$decl = '<!ENTITY nbsp   CDATA "&#160;" -- no-break space -->';
-$com1 = '<!-- Comment -->';
-$com2 = '<!-- Comment -- -- Comment -->';
-$start = '<a href="foo">';
-$end = '</a>';
-$empty = "<IMG SRC='foo'/>";
-$proc = '<? something completely different ?>';
+my $decl = '<!ENTITY nbsp   CDATA "&#160;" -- no-break space -->';
+my $com1 = '<!-- Comment -->';
+my $com2 = '<!-- Comment -- -- Comment -->';
+my $start = '<a href="foo">';
+my $end = '</a>';
+my $empty = "<IMG SRC='foo'/>";
+my $proc = '<? something completely different ?>';
 
-my $argspec = join ',',
-    qw( self offset length
-	event tagname token0
-	text
-	is_cdata dtext
-	tokens
-	tokenpos
-	attr
-	attrseq );
+my @argspec = qw( self offset length
+		  event tagname token0
+	          text
+	          is_cdata dtext
+	          tokens
+	          tokenpos
+	          attr
+	          attrseq );
 
 my @result = ();
-my $p = HTML::Parser -> new(default_h => [\@result, $argspec],
+my $p = HTML::Parser -> new(default_h => [\@result, join(',', @argspec)],
 			    strict_comment => 1, xml_mode => 1);
 
-@tests =
+my @tests =
     ( # string, expected results
       $decl  => [[$p, 0, 52, 'declaration', 'ENTITY', 'ENTITY',
 		 '<!ENTITY nbsp   CDATA "&#160;" -- no-break space -->',
@@ -121,11 +121,9 @@ sub string_tag {
 }
 
 my $i = 0;
-
-
 my ($got, $want);
 while (@tests) {
-    ($html, $expected) = splice @tests, 0, 2;
+    my($html, $expected) = splice @tests, 0, 2;
     ++$i;
 
     print "-" x 50, " $i\n";
