@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.14 1999/12/05 21:50:09 gisle Exp $
+/* $Id: hparser.c,v 2.15 1999/12/06 10:27:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -60,7 +60,7 @@ report_event(PSTATE* p_state,
   dSP;
   AV *array;
   STRLEN my_na;
-  char *attrspec;
+  char *argspec;
   char *s;
 
   if (0) {  /* used for debugging at some point */
@@ -120,9 +120,9 @@ report_event(PSTATE* p_state,
     PUSHMARK(SP);
   }
 
-  attrspec = SvPV(h->attrspec, my_na);
+  argspec = SvPV(h->argspec, my_na);
 
-  for (s = attrspec; *s; s++) {
+  for (s = argspec; *s; s++) {
     SV* arg = 0;
     switch(*s) {
     case 's':
@@ -302,7 +302,7 @@ report_event(PSTATE* p_state,
   else {
     PUTBACK;
 
-    if (*attrspec == 's' && !SvROK(h->cb)) {
+    if (*argspec == 's' && !SvROK(h->cb)) {
       char *method = SvPV(h->cb, my_na);
       perl_call_method(method, G_DISCARD | G_VOID);
     }
@@ -317,16 +317,16 @@ report_event(PSTATE* p_state,
 
 
 EXTERN SV*
-attrspec_compile(SV* src)
+argspec_compile(SV* src)
 {
-  SV* attrspec = newSVpvn("", 0);
+  SV* argspec = newSVpvn("", 0);
   STRLEN len;
   char *s = SvPV(src, len);
   char *end = s + len;
 
   static HV* names = 0;
   if (!names) {
-    /* printf("Init attrspec names\n"); */
+    /* printf("Init argspec names\n"); */
     names = newHV();
     hv_store(names, "self", 4,          newSVpvn("s", 1), 0);
     hv_store(names, "tokens", 6,        newSVpvn("t", 1), 0);
@@ -355,11 +355,11 @@ attrspec_compile(SV* src)
       /* check identifier */
       svp = hv_fetch(names, name, s - name, 0);
       if (svp) {
-	sv_catsv(attrspec, *svp);
+	sv_catsv(argspec, *svp);
       }
       else {
 	*s = '\0';
-	croak("Unrecognized identifier %s in attrspec", name);
+	croak("Unrecognized identifier %s in argspec", name);
       }
     }
     else if (*s == '"' || *s == '\'') {
@@ -371,17 +371,17 @@ attrspec_compile(SV* src)
 	/* literal */
 	int len = s - string_beg - 1;
 	if (len > 255)
-	  croak("Can't have literal strings longer than 255 chars in attrspec");
-	sv_catpvf(attrspec, "L%c", len);
-	sv_catpvn(attrspec, string_beg+1, len);
+	  croak("Can't have literal strings longer than 255 chars in argspec");
+	sv_catpvf(argspec, "L%c", len);
+	sv_catpvn(argspec, string_beg+1, len);
 	s++;
       }
       else {
-	croak("Unterminated literal string in attrspec");
+	croak("Unterminated literal string in argspec");
       }
     }
     else {
-      croak("Bad attrspec (%s)", s);
+      croak("Bad argspec (%s)", s);
     }
 
     while (isHSPACE(*s))
@@ -389,13 +389,13 @@ attrspec_compile(SV* src)
     if (s == end)
       break;
     if (*s != ',') {
-      croak("Missing comma separator in attrspec");
+      croak("Missing comma separator in argspec");
     }
     s++;
     while (isHSPACE(*s))
       s++;
   }
-  return attrspec;
+  return argspec;
 }
 
 

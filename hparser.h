@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.4 1999/12/04 13:10:52 gisle Exp $
+/* $Id: hparser.h,v 2.5 1999/12/06 10:27:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -60,7 +60,7 @@ static char* event_id_str[] = {
 
 struct p_handler {
   SV* cb;
-  SV* attrspec;
+  SV* argspec;
 };
 
 struct p_state {

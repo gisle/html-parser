@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.72 1999/12/04 23:46:45 gisle Exp $
+/* $Id: Parser.xs,v 2.73 1999/12/06 10:27:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -76,7 +76,7 @@ HV* entity2char;            /* %HTML::Entities::entity2char */
  */
 
 static SV*
-check_handler(char* name, SV* cb, SV* attrspec, SV* self)
+check_handler(char* name, SV* cb, SV* argspec, SV* self)
 {
   SV *sv;
   int type = SvTYPE(cb);
@@ -110,7 +110,7 @@ check_handler(char* name, SV* cb, SV* attrspec, SV* self)
   case SVt_PV: /* String */
     {
       /* use original SV, see if it's a method in the current object */
-      char *attr_str = SvPV(attrspec, my_na);
+      char *attr_str = SvPV(argspec, my_na);
       char *method = SvPV(sv, my_na);
       sv = SvREFCNT_inc(sv);
       if (*attr_str == 's') {
@@ -222,7 +222,7 @@ DESTROY(pstate)
         SvREFCNT_dec(pstate->bool_attr_val);
         for (i = 0; i < EVENT_COUNT; i++) {
           SvREFCNT_dec(pstate->handlers[i].cb);
-          SvREFCNT_dec(pstate->handlers[i].attrspec);
+          SvREFCNT_dec(pstate->handlers[i].argspec);
         }
 
 	Safefree(pstate);
@@ -320,24 +320,24 @@ handler(pstate, name_sv,...)
 
 	  svp = av_fetch(av, 1, 0);
 	  if (svp) {
-	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(*svp);
+	    SvREFCNT_dec(h->argspec);
+	    h->argspec = argspec_compile(*svp);
 	  }
 
 	  svp = av_fetch(av, 0, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->cb);
-	    h->cb = check_handler(name, *svp, h->attrspec, self);
+	    h->cb = check_handler(name, *svp, h->argspec, self);
 	  }
 	}
         else if (items > 2) {
 	  if (items > 3) {
-	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(ST(3));
+	    SvREFCNT_dec(h->argspec);
+	    h->argspec = argspec_compile(ST(3));
 	  }
 
 	  SvREFCNT_dec(h->cb);
-	  h->cb = check_handler(name, ST(2), h->attrspec, self);
+	  h->cb = check_handler(name, ST(2), h->argspec, self);
 	}
 
         XSRETURN(1);
