@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.60 1999/11/30 21:50:43 gisle Exp $
+/* $Id: Parser.xs,v 2.61 1999/12/01 13:10:25 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -80,6 +80,17 @@ enum event_id {
   EVENT_COUNT,
 };
 typedef enum event_id event_id_t;
+
+/* must match event_id_t */
+static char* event_id_str[] = {
+  "declaration",
+  "comment",
+  "start",
+  "end",
+  "text",
+  "process",
+  "default",
+};
 
 #include "hctype.h" /* isH...() macros */
 #include "tokenpos.h"
@@ -303,7 +314,7 @@ html_handle(PSTATE* p_state,
 #endif
 
   if (!h->cb || !SvOK(h->cb)) {
-    event = E_DEFAULT;
+    /* event = E_DEFAULT; */
     h = &p_state->handlers[E_DEFAULT];
     if (!h->cb || !SvOK(h->cb))
       return;
@@ -429,6 +440,12 @@ html_handle(PSTATE* p_state,
 	}
 	break;
 
+      case 'E':
+	/* event */
+	assert(event >= 0 && event < EVENT_COUNT);
+	arg = sv_2mortal(newSVpv(event_id_str[event], 0));
+	break;
+
       case 'L':
 	/* literal */
 	{
@@ -488,6 +505,7 @@ attrspec_compile(SV* src)
     hv_store(names, "origtext", 8,      newSVpvn("d", 1), 0);
     hv_store(names, "decoded_text", 12, newSVpvn("D", 1), 0);
     hv_store(names, "cdata_flag", 10,   newSVpvn("c", 1), 0);
+    hv_store(names, "event", 5,         newSVpvn("E", 1), 0);
   }
 
   while (isHSPACE(*s))
@@ -1475,35 +1493,16 @@ handler(pstate, name_sv,...)
 	STRLEN name_len;
 	char *name = SvPV(name_sv, name_len);
         int event = -1;
+        int i;
         struct p_handler *h;
     CODE:
-	switch (name_len) {
-	case 3:
-	    if (strEQ(name, "end"))
-	      event = E_END;
+	/* map event name string to event_id */
+	for (i = 0; i < EVENT_COUNT; i++) {
+	  if (strEQ(name, event_id_str[i])) {
+	    event = i;
 	    break;
-	case 4:
-	    if (strEQ(name, "text"))
-	      event = E_TEXT;
-	    break;
-	case 5:
-	    if (strEQ(name, "start"))
-	      event = E_START;
-	    break;
-	case 7:
-	    if (strEQ(name, "comment"))
-	      event = E_COMMENT;
-	    if (strEQ(name, "process"))
-	      event = E_PROCESS;
-	    if (strEQ(name, "default"))
-	      event = E_DEFAULT;
-	    break;
-	case 11:
-	    if (strEQ(name, "declaration"))
-	      event = E_DECLARATION;
-	    break;
+	  }
 	}
-
         if (event < 0)
 	    croak("No %s handler", name);
 
