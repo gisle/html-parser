@@ -20,9 +20,10 @@ use URI;
 
 my %link_attr;
 {
-    # Set up %link_attr by stealing information from HTML::LinkExtor
-    require HTML::LinkExtor;
-    while (my($k,$v) = each %HTML::LinkExtor::LINK_ELEMENT) {
+    # To simplify things we reformat the %HTML::Tagset::linkElements
+    # hash so that it is always a hash of hashes.
+    require HTML::Tagset;
+    while (my($k,$v) = each %HTML::Tagset::linkElements) {
 	if (ref($v)) {
 	    $v = { map {$_ => 1} @$v };
 	}
@@ -31,6 +32,7 @@ my %link_attr;
 	}
 	$link_attr{$k} = $v;
     }
+    #use Data::Dump; Data::Dump::dump(\%link_attr); exit;
 }
 
 my $code = shift;
