@@ -3,9 +3,9 @@
 
 print "1..2\n";
 
+use strict;
 use HTML::Parser ();
 
-$a = 3;
 my $p = HTML::Parser->new(3);
 
 $p->handler("start" =>
