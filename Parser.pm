@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_94;  # $Date: 1999/12/07 13:41:27 $
+$VERSION = 2.99_94;  # $Date: 1999/12/08 12:14:33 $
 
 require HTML::Entities;
 
@@ -484,7 +484,6 @@ C<plaintext>).
 
 This passes undef except for C<text> events.
 
-
 =item C<is_cdata>
 
 Is_cdata causes a TRUE value to be passed
@@ -498,12 +497,13 @@ processed further.
 
 =item C<offset>
 
-Offset causes the byte position of the start of the event to be passed.
+Offset causes the byte position in the document
+of the start of the event to be passed.
 The first byte in the document is 0.
 
 =item C<length>
 
-This returns the number of bytes in C<text>.
+Length causes the byte length of the original text of the event to be passed.
 
 =item C<event>
 
