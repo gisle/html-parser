@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.21 1999/11/05 13:23:39 gisle Exp $
+/* $Id: Parser.xs,v 1.22 1999/11/05 20:01:46 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -42,6 +42,7 @@ extern "C" {
  *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
  */
 
+#define isHALPHA(c) (isALPHA(c) || (c) == '_' || (c) == ':')
 #define isHALNUM(c) (isALNUM(c) || (c) == '.' || (c) == '-' || (c) == ':')
 
 
@@ -563,6 +564,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     s++;
     while (s < end && isHALNUM(*s))
       s++;
+    if (s == end)
+      goto PREMATURE;
 
     sv = newSVpv(attr_beg, s - attr_beg);
     if (!p_state->keep_case)
@@ -611,7 +614,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	goto PREMATURE;
     }
     else {
-      av_push(tokens, &PL_sv_yes);
+      av_push(tokens, &PL_sv_yes);  /* XXX configurable? */
     }
   }
 
