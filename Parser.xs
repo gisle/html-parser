@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.90 2000/09/16 23:36:35 gisle Exp $
+/* $Id: Parser.xs,v 2.91 2000/09/17 01:39:13 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -50,7 +50,7 @@ newSVpvn(char *s, STRLEN len)
 #endif /* not perl5.004_05 */
 #endif /* perl5.004_XX */
 
-#if (PATCHLEVEL >= 6)
+#if 0 /* Makefile.PL option now */ && (PATCHLEVEL >= 6)
 #define UNICODE_ENTITIES /**/
 #endif /* perl-5.6 or better */
 
