@@ -1,0 +1,13 @@
+MANIFEST
+Makefile.PL
+Parser.pm
+README
+lib/HTML/Entities.pm
+lib/HTML/Filter.pm
+lib/HTML/HeadParser.pm
+lib/HTML/LinkExtor.pm
+t/entities.t
+t/filter.t
+t/headparser.t
+t/linkextractor.t
+t/parser.t
