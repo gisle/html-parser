@@ -1,4 +1,10 @@
-/* $Id: Parser.xs,v 1.4 1999/11/03 13:56:45 gisle Exp $ */
+/* $Id: Parser.xs,v 1.5 1999/11/03 14:13:31 gisle Exp $
+ *
+ * Copyright 1999, Gisle Aas.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the same terms as Perl itself.
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,6 +28,7 @@ struct p_state {
   SV* end_cb;
   SV* decl_cb;
   SV* com_cb;
+  SV* proc_cb;
 };
 
 typedef struct p_state PSTATE;
@@ -63,7 +70,6 @@ html_text(struct p_state* p_state, char* beg, char *end)
       FREETMPS;
       LEAVE;
   }
-
 }
 
 static void
@@ -95,69 +101,80 @@ html_start(struct p_state* p_state,
 	   AV* tokens,
 	   char *beg, char *end)
 {
-  int i, len;
-  printf(">> start: [");
-  while (tag_beg < tag_end) {
-    int l = toLOWER(*tag_beg);
-    putchar(l);
-    tag_beg++;
+  SV *cb = p_state->start_cb;
+  if (cb) {
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
   }
-  printf("] [");
-  while (beg < end)
-    putchar(*beg++);
-  printf("]\n");
-  printf("  tokens:");
-  len = av_len(tokens);
-  for (i = 0; i <= len; i++) {
-    SV** svp = av_fetch(tokens, i, 0);
-    STRLEN len;
-    char *s = SvPV(*svp, len);
-    printf(" [");
-    while (len--)
-      putchar(*s++);
-    putchar(']');
-  }
-  putchar('\n');
 }
 
 static void
 html_process(struct p_state* p_state, char*beg, char *end)
 {
-  printf(">> process: [");
-  while (beg < end)
-    putchar(*beg++);
-  printf("]\n");
+  SV *cb = p_state->proc_cb;
+  if (cb) {
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
+  }
 }
 
 static void
 html_comment(struct p_state* p_state, char *beg, char *end)
 {
-  printf(">> comment: [");
-  while (beg < end)
-    putchar(*beg++);
-  printf("]\n");
+  SV *cb = p_state->com_cb;
+  if (cb) {
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
+  }
 }
 
 static void
 html_decl(struct p_state* p_state, AV* tokens, char *beg, char *end)
 {
-  int i, len;
-  printf(">> decl: [");
-  while (beg < end)
-    putchar(*beg++);
-  printf("]\n");
-  printf(" tokens:");
-  len = av_len(tokens);
-  for (i = 0; i <= len; i++) {
-    SV** svp = av_fetch(tokens, i, 0);
-    STRLEN len;
-    char *s = SvPV(*svp, len);
-    printf(" [");
-    while (len--)
-      putchar(*s++);
-    putchar(']');
+  SV *cb = p_state->decl_cb;
+  if (cb) {
+      dSP;
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+      PUTBACK;
+
+      perl_call_sv(cb, G_DISCARD);
+
+      FREETMPS;
+      LEAVE;
   }
-  putchar('\n');
 }
 
 
@@ -635,6 +652,7 @@ DESTROY(pstate)
 	SvREFCNT_dec(pstate->end_cb);
 	SvREFCNT_dec(pstate->decl_cb);
 	SvREFCNT_dec(pstate->com_cb);
+	SvREFCNT_dec(pstate->proc_cb);
 	Safefree(pstate);
 
 
@@ -659,18 +677,25 @@ callback(pstate, name_sv, cb)
 	case 3:
 	    if (strEQ(name, "end"))
 		svp = &pstate->end_cb;
+	    break;
 	case 4:
 	    if (strEQ(name, "text"))
 		svp = &pstate->text_cb;
+	    break;
 	case 5:
 	    if (strEQ(name, "start"))
 		svp = &pstate->start_cb;
+	    break;
 	case 7:
 	    if (strEQ(name, "comment"))
 		svp = &pstate->com_cb;
+	    if (strEQ(name, "process"))
+		svp = &pstate->proc_cb;
+	    break;
 	case 11:
 	    if (strEQ(name, "declaration"))
 		svp = &pstate->decl_cb;
+	    break;
 	}
 
 	if (svp) {
