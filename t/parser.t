@@ -28,6 +28,8 @@ a comment --> and this is not.
 
 <!-- this is the kind of >comment< -- --> that Netscape hates -->
 
+< this > was not a tag. <this is/not either>
+
 </body>
 
 HTML
@@ -160,7 +162,7 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
         }
     }
 
-    print $res if $bad;
+    print $res if $bad || $ENV{PRINT_RESULTS};
 
     # And we check that we get the same result all the time
     $res =~ s/\|//g;  # remove all break marks
