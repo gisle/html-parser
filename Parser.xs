@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.118 2003/08/15 16:56:20 gisle Exp $
+/* $Id: Parser.xs,v 2.119 2003/10/27 21:05:04 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -258,11 +258,13 @@ parse(self, chunk)
 		    len = 0;
                 }
 		parse(aTHX_ p_state, len ? chunk : 0, self);
+	        SPAGAIN;
 
             } while (len && !p_state->eof);
         }
 	else {
 	    parse(aTHX_ p_state, chunk, self);
+            SPAGAIN;
         }
         p_state->parsing = 0;
 	if (p_state->eof) {
