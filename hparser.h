@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.2 1999/12/03 20:26:32 gisle Exp $
+/* $Id: hparser.h,v 2.3 1999/12/04 12:46:22 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -65,15 +65,8 @@ struct p_handler {
 
 struct p_state {
   U32 magic;
-
   SV* buf;
-  SV* pending_text;
-
-  /* various boolean configuration attributes */
-  bool strict_comment;
-  bool strict_names;
-  bool xml_mode;
-  bool unbroken_text;
+  STRLEN offset;
 
   /* special parsing modes */
   char* literal_mode;
@@ -85,7 +78,13 @@ struct p_state {
   bool marked_sections;
 #endif
 
-  /* various */
+  /* various boolean configuration attributes */
+  bool strict_comment;
+  bool strict_names;
+  bool xml_mode;
+  bool unbroken_text;
+
+  /* other configuration stuff */
   SV* bool_attr_val;
   struct p_handler handlers[EVENT_COUNT];
 };
