@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.14 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new( [$header] )
 
@@ -94,7 +94,9 @@ sub new
 	$header = HTTP::Headers->new;
     }
 
-    my $self = $class->SUPER::new;
+    my $self = $class->SUPER::new(api_version => 2,
+				  ignore_elements => [qw(script style)],
+				 );
     $self->{'header'} = $header;
     $self->{'tag'} = '';   # name of active element that takes textual content
     $self->{'text'} = '';  # the accumulated text associated with the element
@@ -130,11 +132,12 @@ sub flush_text   # internal
     my $self = shift;
     my $tag  = $self->{'tag'};
     my $text = $self->{'text'};
-    $text =~ s/^\s+//; 
-    $text =~ s/\s+$//; 
+    $text =~ s/^\s+//;
+    $text =~ s/\s+$//;
     $text =~ s/\s+/ /g;
     print "FLUSH $tag => '$text'\n"  if $DEBUG;
     if ($tag eq 'title') {
+	HTML::Entities::decode($text);
 	$self->{'header'}->header(Title => $text);
     }
     $self->{'tag'} = $self->{'text'} = '';
@@ -206,8 +209,7 @@ sub text
         $self->eof;
 	return;
     }
-    return if $tag ne 'title';  # optimize skipping of <script> and <style>
-    HTML::Entities::decode($text);
+    return if $tag ne 'title';
     $self->{'text'} .= $text;
 }
 
@@ -221,7 +223,7 @@ __END__
  $p = HTML::HeadParser->new($h);
  $p->parse(<<EOT);
  <title>Stupid example</title>
- <base href="http://www.sn.no/libwww-perl/">
+ <base href="http://www.linpro.no/lwp/">
  Normal text starts here.
  EOT
  undef $p;
@@ -236,7 +238,7 @@ package.
 
 =head1 COPYRIGHT
 
-Copyright 1996-1999 Gisle Aas. All rights reserved.
+Copyright 1996-2001 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
