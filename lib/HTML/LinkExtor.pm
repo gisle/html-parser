@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -45,6 +45,7 @@ use vars qw(%LINK_ELEMENT);
  area   => 'href',
  frame  => 'src',   # Netscape 2.0 extention
  embed  => 'src',   # used in Netscape 2.0 for Shockwave and things like that
+ table  => 'background',   # used in IE, Netscape
 );
 
 =over 4
