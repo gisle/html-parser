@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.71 1999/12/04 23:45:05 gisle Exp $
+/* $Id: Parser.xs,v 2.72 1999/12/04 23:46:45 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -321,7 +321,7 @@ handler(pstate, name_sv,...)
 	  svp = av_fetch(av, 1, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(pstate, *svp);
+	    h->attrspec = attrspec_compile(*svp);
 	  }
 
 	  svp = av_fetch(av, 0, 0);
@@ -333,7 +333,7 @@ handler(pstate, name_sv,...)
         else if (items > 2) {
 	  if (items > 3) {
 	    SvREFCNT_dec(h->attrspec);
-	    h->attrspec = attrspec_compile(pstate, ST(3));
+	    h->attrspec = attrspec_compile(ST(3));
 	  }
 
 	  SvREFCNT_dec(h->cb);
