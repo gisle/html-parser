@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.22 1999/12/07 21:08:31 gisle Exp $
+/* $Id: hparser.c,v 2.23 1999/12/08 17:25:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -140,7 +140,7 @@ report_event(PSTATE* p_state,
     PUSHMARK(SP);
   }
 
-  argspec = SvPV(h->argspec, my_na);
+  argspec = h->argspec ? SvPV(h->argspec, my_na) : "";
 
   for (s = argspec; *s; s++) {
     SV* arg = 0;
