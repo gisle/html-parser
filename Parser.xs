@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.68 1999/12/03 12:43:44 gisle Exp $
+/* $Id: Parser.xs,v 2.69 1999/12/03 22:29:18 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -329,7 +329,6 @@ handler(pstate, name_sv,...)
 	  if (svp) {
 	    SvREFCNT_dec(h->cb);
 	    h->cb = check_handler(name, *svp, h->attrspec, self);
-	    /* h->cb = SvREFCNT_inc(*svp); */
 	  }
 	}
         else if (items > 2) {
@@ -340,7 +339,6 @@ handler(pstate, name_sv,...)
 
 	  SvREFCNT_dec(h->cb);
 	  h->cb = check_handler(name, ST(2), h->attrspec, self);
-	  /* h->cb = newSVsv(ST(2)); */
 	}
 
         XSRETURN(1);
