@@ -1,3 +1,14 @@
+2004-12-06   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.43
+
+     The SvUTF8 flag was not propagated correctly when replacing
+     unterminated entities.
+
+     Fixed test failure because of missing binmode on Windows.
+
+
+
 2004-12-04   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.42
