@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.91 2000/09/17 01:39:13 gisle Exp $
+/* $Id: Parser.xs,v 2.92 2000/09/17 01:48:07 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -335,6 +335,18 @@ decode_entities(...)
 	    decode_entities(ST(i), entity2char);
 	}
 	SP += items;
+
+int
+UNICODE_SUPPORT()
+    PROTOTYPE:
+    CODE:
+#ifdef UNICODE_ENTITIES
+       RETVAL = 1;
+#else
+       RETVAL = 0;
+#endif
+    OUTPUT:
+       RETVAL
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Parser
