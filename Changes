@@ -2,7 +2,7 @@
 
     Release 3.04
 
-    Backed out patch that checked for legal handler and attribute
+    Backed out 3.03-patch that checked for legal handler and attribute
     names in the HTML::Parser constructor.
 
     Documentation typo fixed by Micheal.
@@ -26,7 +26,7 @@
 
     Hide ~-magic IV-pointer to 'struct p_state' behind a reference.
     This allow copying of the internal _hparser_xs_state element, and
-    will make HTML-Tree-0.61 to work again.
+    will make HTML-Tree-0.61 work again.
 
     Introduced $p->init() which might be useful for subclasses that
     only want the initialization part of the constructor.
