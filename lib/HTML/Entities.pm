@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.21 2001/02/23 07:07:01 gisle Exp $
+# $Id: Entities.pm,v 1.22 2001/04/11 17:22:45 gisle Exp $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.21 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -85,6 +85,7 @@ require HTML::Parser;  # for fast XS implemented decode_entities
 'gt'    => '>',  # greater than
 'lt'    => '<',  # less than
  quot   => '"',  # double quote
+ apos   => "'",  # single quote
 
  # PUBLIC ISO 8879-1986//ENTITIES Added Latin 1//EN//HTML
  AElig	=> 'Æ',  # capital AE diphthong (ligature)
@@ -188,7 +189,7 @@ require HTML::Parser;  # for fast XS implemented decode_entities
 'times' => '×',    # times is a keyword in perl
  divide => '÷',
 
- ( $] >= 5.006 ? (
+ ( $] > 5.007 ? (
    OElig    => chr(338),
    oelig    => chr(339),
    Scaron   => chr(352),
@@ -349,6 +350,7 @@ require HTML::Parser;  # for fast XS implemented decode_entities
 while (my($entity, $char) = each(%entity2char)) {
     $char2entity{$char} = "&$entity;";
 }
+delete $char2entity{"'"};  # only one-way decoding
 
 # Fill inn missing entities
 for (0 .. 255) {

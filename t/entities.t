@@ -1,6 +1,6 @@
 use HTML::Entities qw(decode_entities encode_entities);
 
-print "1..8\n";
+print "1..9\n";
 
 $a = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -65,6 +65,10 @@ print "not " unless decode_entities("abc&def&ghi&abc;&def;") eq
                                     "abc&def&ghi&abc;&def;";
 print "ok 8\n";
 
+# Decoding of &apos;
+print "not " unless decode_entities("&apos;") eq "'" &&
+                    encode_entities("'", "'") eq "&#39;";
+print "ok 9\n";
 
 
 __END__
