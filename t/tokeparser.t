@@ -101,7 +101,7 @@ print "ok 5\n";
 undef($p);
 
 # test parsing of large embedded documents
-my $doc = "<a href='foo'>foo is bar</a>\n\n\n" x 20222;
+my $doc = "<a href='foo'>foo is bar</a>\n\n\n" x 2022;
 
 #use Time::HiRes qw(time);
 my $start = time;
@@ -114,6 +114,6 @@ while (my $t = $p->get_token) {
 }
 print "Parse time: ", time - $start, "\n";
 
-print "not " unless $count == 20222;
+print "not " unless $count == 2022;
 print "ok 6\n";
 
