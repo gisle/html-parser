@@ -11,7 +11,7 @@ use strict;
 use Test qw(plan ok);
 use HTML::Parser;
 
-plan tests => 75;
+plan tests => 87;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -118,7 +118,7 @@ open(my $fh, ">:utf8", $file) || die;
 print $fh <<EOT;
 \x{FEFF}
 <title>\x{263A} Love! </title>
-<h1>&hearts Love \x{2665}<h1>
+<h1 id=&hearts\x{2665}>&hearts Love \x{2665}<h1>
 EOT
 close($fh) || die;
 
@@ -126,6 +126,8 @@ ok(!@warn);
 @parsed = ();
 $p->parse_file($file);
 ok(@parsed, "11");
+ok($parsed[6][0], "start");
+ok($parsed[6][8]{id}, "\x{2665}\xE2\x99\xA5");
 ok($parsed[7][0], "text");
 ok($parsed[7][1], "&hearts Love \xE2\x99\xA5");
 ok($parsed[7][2], "\x{2665} Love \xE2\x99\xA5");  # expected garbage
@@ -138,10 +140,27 @@ ok($warn[0] =~ /^Parsing of undecoded UTF-8 will give garbage when decoding enti
 open($fh, "<:utf8", $file) || die;
 $p->parse_file($fh);
 ok(@parsed, "11");
+ok($parsed[6][0], "start");
+ok($parsed[6][8]{id}, "\x{2665}\x{2665}");
 ok($parsed[7][0], "text");
 ok($parsed[7][1], "&hearts Love \x{2665}");
 ok($parsed[7][2], "\x{2665} Love \x{2665}");
-ok($parsed[10][3], (-s $file) - 3 * 2);
+ok($parsed[10][3], (-s $file) - 2 * 4);
 ok(@warn, 0);
+
+@warn = ();
+@parsed = ();
+open($fh, "<:raw", $file) || die;
+$p->utf8_mode(1);
+$p->parse_file($fh);
+ok(@parsed, "11");
+ok($parsed[6][0], "start");
+ok($parsed[6][8]{id}, "\x{2665}\x{2665}");
+ok($parsed[7][0], "text");
+ok($parsed[7][1], "&hearts Love \xE2\x99\xA5");
+ok($parsed[7][2], "\x{2665} Love \x{2665}");
+ok($parsed[10][3], -s $file);
+ok(@warn, 0);
+
 
 unlink($file);
