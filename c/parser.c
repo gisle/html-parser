@@ -321,7 +321,7 @@ char* html_parse_start(struct p_state* p_state, char *beg, char *end)
 	return beg;
     }
     else {
-      av_push(tokens, newSVpv("*", 1));
+      av_push(tokens, &PL_sv_yes);
     }
   }
 
@@ -526,10 +526,12 @@ int main(int argc, char** argv, char** env)
   SV* sv2;
   SV* sv3;
   SV* sv4;
+  PerlInterpreter *my_perl = perl_alloc();
+  perl_construct(my_perl);
 
   memset(&p, 0, sizeof(p));
   sv1 = newSVpv("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\nbar <a href='foo'>foo</a>   <!--foo", 0);
-  sv2 = newSVpv("--><FONT size=+3> -><a href=\"", 0);
+  sv2 = newSVpv("--><FONT size=+3 bar foo=> -><a href=\"", 0);
   sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
   
@@ -540,6 +542,9 @@ int main(int argc, char** argv, char** env)
   html_parse(&p, sv4);
   html_parse(&p, 0);
   html_parse(&p, 0);
+
+  perl_destruct(my_perl);
+  perl_free(my_perl);
 
   return 0;
 }
