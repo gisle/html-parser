@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3991';  # $Date: 2004/11/23 17:29:42 $
+$VERSION = '3.3991';  # $Date: 2004/11/23 20:38:21 $
 
 require HTML::Entities;
 
@@ -398,6 +398,14 @@ the correct tag name.
 
 I<XML processing instructions> are terminated by "?>" instead of a
 simple ">" as is the case for HTML.
+
+=item $p->utf8_mode
+
+=item $p->utf8_mode( $bool )
+
+Enable this option when parsing raw undecoded UTF-8.  This will make
+the strings reported for C<attr>, C<@attr> and C<dtext> be properly
+decoded.
 
 =item $p->unbroken_text
 

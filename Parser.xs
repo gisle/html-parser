@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.126 2004/11/23 14:51:49 gisle Exp $
+/* $Id: Parser.xs,v 2.127 2004/11/23 20:38:25 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -321,6 +321,7 @@ strict_comment(pstate,...)
         HTML::Parser::case_sensitive = 7
 	HTML::Parser::strict_end = 8
 	HTML::Parser::closing_plaintext = 9
+        HTML::Parser::utf8_mode = 10
     PREINIT:
 	bool *attr;
     CODE:
@@ -339,6 +340,7 @@ strict_comment(pstate,...)
 	case  7: attr = &pstate->case_sensitive;       break;
 	case  8: attr = &pstate->strict_end;           break;
 	case  9: attr = &pstate->closing_plaintext;    break;
+        case 10: attr = &pstate->utf8_mode;            break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.111 2004/11/23 14:51:49 gisle Exp $
+/* $Id: hparser.c,v 2.112 2004/11/23 20:38:27 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -445,6 +445,10 @@ report_event(PSTATE* p_state,
 			attrval = newSVpvn(beg, len);
 			if (utf8)
 			    SvUTF8_on(attrval);
+			if (p_state->utf8_mode) {
+			    assert(!utf8);
+			    sv_utf8_decode(attrval);
+			}
 			if (!p_state->attr_encoded)
 			    decode_entities(aTHX_ attrval, p_state->entity2char, 0);
 		    }
@@ -510,6 +514,10 @@ report_event(PSTATE* p_state,
 		arg = sv_2mortal(newSVpvn(beg, end - beg));
 		if (utf8)
 		    SvUTF8_on(arg);
+		if (p_state->utf8_mode) {
+		    assert(!utf8);
+		    sv_utf8_decode(arg);
+		}
 		if (!p_state->is_cdata)
 		    decode_entities(aTHX_ arg, p_state->entity2char, 1);
 	    }
@@ -1747,6 +1755,11 @@ parse(pTHX_
 	return;
     }
 
+#ifdef UNICODE_HTML_PARSER
+    if (p_state->utf8_mode)
+	sv_utf8_downgrade(chunk, 0);
+#endif
+
     if (p_state->buf && SvOK(p_state->buf)) {
 	sv_catsv(p_state->buf, chunk);
 	beg = SvPV(p_state->buf, len);
@@ -1765,7 +1778,7 @@ parse(pTHX_
 		(utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6))
 	       )
 	    {
-		if (p_state->argspec_entity_decode)
+		if (p_state->argspec_entity_decode && !p_state->utf8_mode)
 		    warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
 	    }
 	    if (DOWARN && utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
