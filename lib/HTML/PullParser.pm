@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.5 2001/03/27 21:59:12 gisle Exp $
+# $Id: PullParser.pm,v 2.6 2001/04/02 23:26:18 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.5 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -187,6 +187,11 @@ set up during C<HTML::PullParser> construction.
 
 If you find out you have read too many tokens you can push them back,
 so that they are returned again the next time $p->get_token is called.
+
+=head1 EXAMPLES
+
+The 'eg/hform' script shows how we might parse the form section of
+HTML::Documents using HTML::PullParser.
 
 =head1 SEE ALSO
 
