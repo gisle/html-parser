@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.03';  # $Date: 2000/01/15 15:45:35 $
+$VERSION = '3.04';  # $Date: 2000/01/15 15:47:23 $
 
 require HTML::Entities;
 
@@ -266,13 +266,6 @@ that receives the $p and the tokens array.
 
 This creates a new parser object that stores the event type and the
 original text in @array for text and comment events.
-
-=item $obj->init( %options_and_handlers )
-
-This method adds the hash elements required by HTML::Parser to the
-hash referenced by $obj.
-$obj is normally an object of a class that inherits from HTML::Parser.
-See HTML::Parser->new for a description of %options_and_handlers.
 
 =back
 
