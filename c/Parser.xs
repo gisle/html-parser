@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.16 1999/11/05 11:15:55 gisle Exp $
+/* $Id: Parser.xs,v 1.17 1999/11/05 12:47:24 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -31,8 +31,8 @@ extern "C" {
 
 struct p_state {
   SV* buf;
+  char* literal_mode;
 
-  int xmp;
   int strict_comment;
   int keep_case;
   int pass_cbdata;
@@ -47,6 +47,20 @@ struct p_state {
   SV* pi_cb;
 };
 typedef struct p_state PSTATE;
+
+
+struct literal_tag {
+  int len;
+  char* str;
+}
+literal_mode_elem[] =
+{
+  {6, "script"},
+  {5, "style"},
+  {3, "xmp"},
+  {9, "plaintext"},
+  {0, 0}
+};
 
 
 static SV*
@@ -592,11 +606,35 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     if (tokens)
       SvREFCNT_dec(tokens);
 
-    if (tag_end - beg == 4 &&
-	toLOWER(beg[1]) == 'x' &&
-	toLOWER(beg[2]) == 'm' &&
-	toLOWER(beg[3]) == 'p')
-      p_state->xmp++;
+    if (1) {
+      /* find out if this start tag should put us into literal_mode
+       */
+      int i;
+      int tag_len = tag_end - beg - 1;
+
+      for (i = 0; literal_mode_elem[i].len; i++) {
+	if (tag_len == literal_mode_elem[i].len) {
+	  /* try to match it */
+	  char *s = beg + 1;
+	  char *t = literal_mode_elem[i].str;
+	  int len = tag_len;
+	  while (len) {
+	    printf("matching %d %d %c %c\n", i, len, *s, *t);
+	    if (toLOWER(*s) != *t)
+	      break;
+	    s++;
+	    t++;
+	    if (!--len) {
+	      /* found it */
+	      p_state->literal_mode = literal_mode_elem[i].str;
+	      printf("Found %s\n", p_state->literal_mode);
+	      goto END_OF_LITERAL_SEARCH;
+	    }
+	  }
+	}
+      }
+    END_OF_LITERAL_SEARCH:
+    }
 
     return s;
   }
@@ -672,7 +710,8 @@ html_parse(PSTATE* p_state,
      * to where we started and the 's' is advanced as we go.
      */
 
-    while (p_state->xmp) {
+    while (p_state->literal_mode) {
+      char *l = p_state->literal_mode;
       char *end_text;
 
       while (s < end && *s != '<')
@@ -686,24 +725,23 @@ html_parse(PSTATE* p_state,
       /* here we rely on '\0' termination of perl svpv buffers */
       if (*s == '/') {
 	s++;
-	if (toLOWER(*s) == 'x') {
+	while (*l && *s == *l) {
 	  s++;
-	  if (toLOWER(*s) == 'm') {
+	  l++;
+	}
+
+	if (!*l) {
+	  /* matched it all */
+	  char *end_tag = s;
+	  while (isSPACE(*s))
 	    s++;
-	    if (toLOWER(*s) == 'p') {
-	      s++;
-	      while (isSPACE(*s))
-		s++;
-	      if (*s == '>') {
-		/* end */
-		s++;
-		html_text(p_state, t, end_text, 1, cbdata);
-		html_end(p_state, end_text+2, end_text+5,
-			          end_text, s, cbdata);
-		p_state->xmp = 0;
-		t = s;
-	      }
-	    }
+	  if (*s == '>') {
+	    s++;
+	    html_text(p_state, t, end_text, 1, cbdata);
+	    html_end(p_state, end_text+2, end_tag,
+		     end_text, s, cbdata);
+	    p_state->literal_mode = 0;
+	    t = s;
 	  }
 	}
       }
