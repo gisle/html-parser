@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.26 1999/11/08 10:43:41 gisle Exp $
+/* $Id: Parser.xs,v 1.27 1999/11/08 10:50:49 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -14,6 +14,8 @@
  *   - <plaintext> should not end with </plaintext>
  *   - marked sections?
  *   - unicode support
+ *   - no way to clear "bool_attr_val" which gives the name of
+ *     the attribute as value.  Perhaps not really a problem.
  */
 
 #ifdef __cplusplus
@@ -543,7 +545,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   char *s = beg;
   char *tag_end;
   AV* tokens = 0;
-  SV* sv;
+  SV* attr;
   int empty_tag = 0;  /* XML feature */
 
   assert(beg[0] == '<' && isHALPHA(beg[1]) && end - beg > 2);
@@ -568,10 +570,10 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     if (s == end)
       goto PREMATURE;
 
-    sv = newSVpv(attr_beg, s - attr_beg);
+    attr = newSVpv(attr_beg, s - attr_beg);
     if (!p_state->keep_case)
-      sv_lower(sv);
-    av_push(tokens, sv);
+      sv_lower(attr);
+    av_push(tokens, attr);
 
     while (s < end && isSPACE(*s))
       s++;
@@ -620,7 +622,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     else {
       SV* sv = p_state->bool_attr_val;
       if (!sv)
-	sv = &PL_sv_yes;
+	sv = attr;
       av_push(tokens, newSVsv(sv));
     }
   }
@@ -1032,7 +1034,7 @@ xml_mode(pstate,...)
 	RETVAL
 
 SV*
-bool_attr_val(pstate,...)
+bool_attr_value(pstate,...)
         PSTATE* pstate
     CODE:
 	RETVAL = pstate->bool_attr_val ? newSVsv(pstate->bool_attr_val)
