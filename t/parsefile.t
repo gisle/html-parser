@@ -1,4 +1,4 @@
-print "1..5\n";
+print "1..6\n";
 
 my $filename = "file$$.htm";
 die "$filename is already there" if -e $filename;
@@ -35,6 +35,16 @@ my $io = IO::File->new($filename) || die;
 MyParser->new->parse_file($io);
 $io->seek(0, 0) || die;
 MyParser->new->parse_file(*$io);
+
+my $text = '';
+$io->seek(0, 0) || die;
+MyParser->new(
+    start_h => [ sub{ shift->eof; }, "self" ],
+    text_h =>  [ sub{ $text = shift; }, "text" ])->parse_file(*$io);
+print "not " if $text;
+print "ok $testno\n";
+$testno++;
+
 close($io);  # needed because of bug in perl
 undef($io);
 
