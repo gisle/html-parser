@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-use Test qw(plan ok);
+use Test qw(plan ok skip);
 use HTML::Parser;
 
 plan tests => 97;
@@ -36,7 +36,7 @@ ok($parsed[0][0], "start_document");
 
 ok($parsed[1][0], "start");
 ok($parsed[1][1], "<title>");
-ok(utf8::is_utf8($parsed[1][1]));
+skip(!defined(&utf8::is_utf8), sub{utf8::is_utf8($parsed[1][1])});
 ok($parsed[1][3], 0);
 ok($parsed[1][4], 7);
 
@@ -82,7 +82,7 @@ ok($parsed[0][0], "start_document");
 
 ok($parsed[1][0], "start");
 ok($parsed[1][1], "<title>");
-ok(!utf8::is_utf8($parsed[1][1]));
+skip(!defined(&utf8::is_utf8), sub { !utf8::is_utf8($parsed[1][1]) });
 ok($parsed[1][3], 0);
 ok($parsed[1][4], 7);
 
