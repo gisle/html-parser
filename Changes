@@ -1,3 +1,19 @@
+1999-11-17   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_11
+
+   Don't leak $@ modifications from HTML::Parser constructor.
+
+   Included HTML::Parser POD.
+
+   Marked sections almost work.  CDATA and RCDATA should work.
+
+   For tags that takes us into literal_mode; <script>, <style>,
+   <xmp>, we did not recognize the end tag unless it was written
+   in all lower case.
+
+
+
 1999-11-16   Gisle Aas <gisle@aas.no>
 
    Release 2.99_10
