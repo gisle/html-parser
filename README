@@ -80,10 +80,10 @@ SYNOPSIS
 
 DESCRIPTION
     The `HTML::Parser' will tokenize an HTML document when the
-    parse() method is called and invoke various callback methods.
+    parse() method is called by invoking various callback methods.
     The document to be parsed can be supplied in arbitrary chunks.
 
-    The external interface the an HTML::Parser is:
+    The external interface the an *HTML::Parser* is:
 
     $p = HTML::Parser->new
         The object constructor takes no arguments.
@@ -165,8 +165,8 @@ DESCRIPTION
     module as `SGML::Parser'.
 
 EFFICIENCY
-    The parser is fairly inefficient if the chunks passed to $p->
-    parse() are too big. The reason is probably that perl ends up
+    The parser is fairly inefficient if the chunks passed to $p-
+    >parse() are too big. The reason is probably that perl ends up
     with a lot of character copying when tokens are removed from the
     beginning of the strings. A chunck size of about 256-512 bytes
     was optimal in a test I made with some real world HTML
@@ -174,5 +174,8 @@ EFFICIENCY
     size of 20K).
 
 SEE ALSO
-    the HTML::TreeBuilder manpage, the HTML::HeadParser manpage, the
-    HTML::Entities manpage
+    the HTML::Entities manpage, the HTML::Filter manpage, the
+    HTML::HeadParser manpage, the HTML::LinkExtor manpage
+
+    the HTML::TreeBuilder manpage (part of the *HTML-Tree*
+    distribution)
