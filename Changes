@@ -1,3 +1,20 @@
+2000-12-26   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.15
+
+     HTML::TokeParser's get_tag() method now takes multiple
+     tags to match.  Hopefully the documentation is also a bit clearer.
+
+     #define PERL_NO_GET_CONTEXT: Should speed up things for thread
+     enabled versions of perl.
+
+     Quote some more entities that also happens to be perl keywords.
+     This avoids warnings on perl-5.004.
+
+     Unicode entities only triggered for perl-5.7.0 or higher.
+
+
+
 2000-12-03   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.14
