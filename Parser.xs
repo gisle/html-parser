@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.74 1999/12/07 00:54:42 gisle Exp $
+/* $Id: Parser.xs,v 2.75 1999/12/07 12:56:05 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -110,10 +110,10 @@ check_handler(char* name, SV* cb, SV* argspec, SV* self)
   case SVt_PV: /* String */
     {
       /* use original SV, see if it's a method in the current object */
-      char *attr_str = SvPV(argspec, my_na);
+      char *arg_str = SvPV(argspec, my_na);
       char *method = SvPV(sv, my_na);
       sv = SvREFCNT_inc(sv);
-      if (*attr_str == 's') {
+      if (*arg_str == 's') {
 	int i;
 	SV *val;
 	dSP;
