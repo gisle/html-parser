@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.18 1999/11/05 12:49:16 gisle Exp $
+/* $Id: Parser.xs,v 1.19 1999/11/05 13:04:02 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -440,7 +440,7 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	while (1) {
 	  /* try to locate "--" */
 	FIND_DASH_DASH:
-	  // printf("find_dash_dash: [%s]\n", s);
+	  /* printf("find_dash_dash: [%s]\n", s); */
 	  while (s < end && *s != '-' && *s != '>')
 	    s++;
 
@@ -628,7 +628,6 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	  char *t = literal_mode_elem[i].str;
 	  int len = tag_len;
 	  while (len) {
-	    printf("matching %d %d %c %c\n", i, len, *s, *t);
 	    if (toLOWER(*s) != *t)
 	      break;
 	    s++;
@@ -636,7 +635,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	    if (!--len) {
 	      /* found it */
 	      p_state->literal_mode = literal_mode_elem[i].str;
-	      printf("Found %s\n", p_state->literal_mode);
+	      /* printf("Found %s\n", p_state->literal_mode); */
 	      goto END_OF_LITERAL_SEARCH;
 	    }
 	  }
@@ -725,8 +724,11 @@ html_parse(PSTATE* p_state,
 
       while (s < end && *s != '<')
 	s++;
-      if (s == end)
+
+      if (s == end) {
+	s = t;
 	goto DONE;
+      }
 
       end_text = s;
       s++;
