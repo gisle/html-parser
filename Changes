@@ -4,7 +4,10 @@
 
      Some tweaks to get it to compile with "Optimierender Microsoft (R)
      32-Bit C/C++-Compiler, Version 12.00.8168, fuer x86."
-     Patch by Matthias Waldorf <matthias.waldorf@zoom.de>
+     Patch by Matthias Waldorf <matthias.waldorf@zoom.de>.
+
+     HTML::Entities documentation spelling patch by
+     David Dyck <dcd@tc.fluke.com>.
 
 
 
