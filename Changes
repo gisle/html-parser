@@ -1,3 +1,17 @@
+2001-04-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.22
+
+     The <textarea> element is now parsed in literal mode, i.e. no other tags
+     recognized until the </textarea> tag is seen.  Unlike other literal elements,
+     the text content is not 'cdata'.
+
+     The XML &apos; entity is decoded.  It apos-char itself is still encoded as
+     &#39; as &apos; is not really an HTML tag, and not recognized by many HTML
+     browsers.
+
+
+
 2001-04-10   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.21
