@@ -16,21 +16,16 @@ HTML::LinkExtor - Extract links from an HTML document
 
 =head1 DESCRIPTION
 
-The I<HTML::LinkExtor> (link extractor) is an HTML parser that takes a
-callback routine as parameter.  This routine is then called as the
-various link attributes are recognized.
-
-The I<HTML::LinkExtor> is a subclass of I<HTML::Parser>. This means
-that the document should be given to the parser by calling the
-$p->parse() or $p->parse_file() methods.
+The I<HTML::LinkExtor> is an HTML parser that extract links from an
+HTML document.  The I<HTML::LinkExtor> is a subclass of
+I<HTML::Parser>. This means that the document should be given to the
+parser by calling the $p->parse() or $p->parse_file() methods.
 
 =cut
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.16 $ =~ /(\d+)\.(\d+)/);
-
-use URI::URL qw(url);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.17 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -59,8 +54,11 @@ use vars qw(%LINK_ELEMENT);
 The constructor takes two optional argument. The first is a reference
 to a callback routine. It will be called as links are found. If a
 callback is not provided, then links are just accumulated internally
-and can be retrieved by calling the $p->links() method. The $base is
-an optional base URL used to absolutize all URLs found.
+and can be retrieved by calling the $p->links() method.
+
+The $base is an optional base URL used to absolutize all URLs found.
+You need to have the I<URI::URL> module installed if you provide
+$base.
 
 The callback is called with the lowercase tag name as first argument,
 and then all link attributes as separate key/value pairs.  All
@@ -73,7 +71,10 @@ sub new
     my($class, $cb, $base) = @_;
     my $self = $class->SUPER::new;
     $self->{extractlink_cb} = $cb;
-    $self->{extractlink_base} = $base;
+    if ($base) {
+	require URI::URL;
+	$self->{extractlink_base} = URI::URL->new($base);
+    }
     $self;
 }
 
@@ -90,7 +91,8 @@ sub start
     my $a;
     for $a (@$links) {
 	next unless exists $attr->{$a};
-	push(@links, $a, $base ? url($attr->{$a}, $base)->abs : $attr->{$a});
+	push(@links, $a, $base ? URI::URL->new($attr->{$a}, $base)->abs
+                               : $attr->{$a});
     }
     return unless @links;
 
@@ -114,7 +116,7 @@ means that if the method is called twice without any parsing in
 between then the second call will return an empty list.
 
 Also note that $p->links will always be empty if a callback routine
-was provided when the L<HTML::LinkExtor> was created.
+was provided when the I<HTML::LinkExtor> was created.
 
 =cut
 
@@ -137,8 +139,8 @@ sub parse_file
 
 =head1 EXAMPLE
 
-This is an example showing how you can extract links as a document
-is received using LWP:
+This is an example showing how you can extract links from a document
+received using LWP:
 
   use LWP::UserAgent;
   use HTML::LinkExtor;
@@ -172,7 +174,7 @@ is received using LWP:
 
 =head1 SEE ALSO
 
-L<HTML::Parser>
+L<HTML::Parser>, L<LWP>, L<URI::URL>
 
 =head1 COPYRIGHT
 
