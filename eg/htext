@@ -3,7 +3,7 @@
 # Extract all plain text from an HTML file
 
 use strict;
-use HTML::Parser ();
+use HTML::Parser 3.00 ();
 
 my %inside;
 
