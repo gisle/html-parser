@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.13 1999/12/05 21:14:40 gisle Exp $
+/* $Id: hparser.c,v 2.14 1999/12/05 21:50:09 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -133,16 +133,18 @@ report_event(PSTATE* p_state,
       /* tokens arrayref */
       if (num_tokens >= 1) {
 	AV* av = newAV();
+	SV* prev_token;
 	int i;
 	av_extend(av, num_tokens);
 	for (i = 0; i < num_tokens; i++) {
-	  if (tokens[i].beg >= beg && tokens[i].beg < end &&
-	      tokens[i].end >= beg && tokens[i].end < end)
-	  {
-	    av_push(av, newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg));
+	  if (tokens[i].beg) {
+	    prev_token = newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg);
+	    av_push(av, prev_token);
 	  }
-	  else {
-	    av_push(av, newSVpvn("", 0));
+	  else { /* boolean */
+	    av_push(av, p_state->bool_attr_val
+		          ? newSVsv(p_state->bool_attr_val)
+		          : newSVsv(prev_token));
 	  }
 	}
 	arg = sv_2mortal(newRV_noinc((SV*)av));
@@ -151,18 +153,16 @@ report_event(PSTATE* p_state,
 
     case '#':
       /* tokenpos arrayref */
-      if (num_tokens >= 1) {
+      if (num_tokens >= 1 && tokens[0].beg >= beg) {
 	AV* av = newAV();
 	int i;
 	av_extend(av, num_tokens*2);
 	for (i = 0; i < num_tokens; i++) {
-	  if (tokens[i].beg >= beg && tokens[i].beg < end &&
-	      tokens[i].end >= beg && tokens[i].end < end)
-	  {
+	  if (tokens[i].beg) {
 	    av_push(av, newSViv(tokens[i].beg-beg));
 	    av_push(av, newSViv(tokens[i].end-tokens[i].beg));
 	  }
-	  else {
+	  else { /* boolean tag value */
 	    av_push(av, newSViv(0));
 	    av_push(av, newSViv(0));
 	  }
@@ -194,13 +194,7 @@ report_event(PSTATE* p_state,
 				  tokens[i].end-tokens[i].beg);
 	  SV* attrval;
 
-	  if (tokens[i].beg == tokens[i+1].beg) { /* boolean */
-	    if (p_state->bool_attr_val)
-	      attrval = newSVsv(p_state->bool_attr_val);
-	    else
-	      attrval = newSVsv(attrname);
-	  }
-	  else {
+	  if (tokens[i+1].beg) {
 	    char *beg = tokens[i+1].beg;
 	    STRLEN len = tokens[i+1].end - beg;
 	    if (*beg == '"' || *beg == '\'') {
@@ -209,6 +203,12 @@ report_event(PSTATE* p_state,
 	    }
 	    attrval = newSVpvn(beg, len);
 	    decode_entities(attrval, entity2char);
+	  }
+	  else { /* boolean */
+	    if (p_state->bool_attr_val)
+	      attrval = newSVsv(p_state->bool_attr_val);
+	    else
+	      attrval = newSVsv(attrname);
 	  }
 
 	  if (!p_state->xml_mode)
@@ -843,7 +843,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	goto PREMATURE;
     }
     else {
-      PUSH_TOKEN(attr_name_beg, attr_name_end); /* boolean attr value */
+      PUSH_TOKEN(0, 0); /* boolean attr value */
     }
   }
 
