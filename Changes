@@ -2,7 +2,8 @@
 
      Release 3.45
 
-     Stack memory leak caused by missing PUTBACK.
+     Fix stack memory leak caused by missing PUTBACK.  Only
+     code that used $p->parse(\&cb) form was affected.
      Fix provided by Gurusamy Sarathy <gsar@sophos.com>.
 
 
