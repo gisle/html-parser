@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.17 1999/11/10 13:17:03 gisle Exp $
+/* $Id: Parser.xs,v 2.18 1999/11/14 19:36:49 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -68,7 +68,7 @@ newSVpvn(char *s, STRLEN len)
  *  <A HREF="..." ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">
  *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
  *
- *  HTML 4.0.1 now allows this.
+ *  HTML 4.0.1 now allows this too.
  */
 
 #define isHALPHA(c) (isALPHA(c) || (c) == '_' || (c) == ':')
@@ -101,6 +101,7 @@ struct p_state {
 typedef struct p_state PSTATE;
 
 
+static
 struct literal_tag {
   int len;
   char* str;
@@ -919,23 +920,6 @@ html_parse(PSTATE* p_state,
   char *s, *t, *end;
   STRLEN len;
 
-#if 0
-  {
-    STRLEN len;
-    char *s;
-
-    printf("html_parse\n");
-    if (p_state->buf) {
-      s = SvPV(p_state->buf, len);
-      printf("  buf   = [%s]\n", s);
-    }
-    if (chunk && SvOK(chunk)) {
-      s = SvPV(chunk, len);
-      printf("  chunk = [%s]\n", s);
-    }
-  }
-#endif
-
   if (!chunk || !SvOK(chunk)) {
     /* EOF */
     if (p_state->buf && SvOK(p_state->buf)) {
@@ -948,7 +932,6 @@ html_parse(PSTATE* p_state,
     }
     return;
   }
-
 
   if (p_state->buf && SvOK(p_state->buf)) {
     sv_catsv(p_state->buf, chunk);
