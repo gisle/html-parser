@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.21 1999/11/15 12:22:57 gisle Exp $
+/* $Id: Parser.xs,v 2.22 1999/11/15 13:08:42 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -34,7 +34,6 @@ extern "C" {
 #endif
 
 #include "patchlevel.h"
-
 #if PATCHLEVEL <= 4 /* perl5.004 */
 
 #ifndef PL_sv_undef
@@ -56,25 +55,10 @@ newSVpvn(char *s, STRLEN len)
     return sv;
 }
 #endif
-
 #endif /* perl5.004 */
 
 
-/* This is used to classify "letters" that can make up an HTML identifier
- * (tagname or attribute name) after the first strict ALFA char.  In addition
- * to what is allowed according to the SGML reference syntax we allow "_"
- * and ":".   The underscore is known to be used in Netscape bookmarks.html
- * files.  MicroSoft Excel use ":" in their HTML exports:
- *
- *  <A HREF="..." ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">
- *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
- *
- *  HTML 4.0.1 now allows this too.
- */
-
-#define isHALPHA(c) (isALPHA(c) || (c) == '_' || (c) == ':')
-#define isHALNUM(c) (isALNUM(c) || (c) == '.' || (c) == '-' || (c) == ':')
-
+#include "hctype.h" /* isH...() macros */
 
 struct p_state {
   SV* buf;
