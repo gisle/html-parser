@@ -16,7 +16,7 @@ sub a_start_handler
     return unless exists $attr->{href};
     print "A $attr->{href}\n";
 
-    $self->handler(text  => [], "dtext" );
+    $self->handler(text  => [], '@{dtext}' );
     $self->handler(start => \&img_handler);
     $self->handler(end   => \&a_end_handler, "self,tagname");
 }
@@ -31,7 +31,7 @@ sub img_handler
 sub a_end_handler
 {
     my($self, $tag) = @_;
-    my $text = join("", map $_->[0], @{$self->handler("text")});
+    my $text = join("", @{$self->handler("text")});
     $text =~ s/^\s+//;
     $text =~ s/\s+$//;
     $text =~ s/\s+/ /g;

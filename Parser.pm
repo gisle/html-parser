@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.19';  # $Date: 2001/03/13 01:00:10 $
+$VERSION = '3.19';  # $Date: 2001/03/13 02:26:53 $
 
 require HTML::Entities;
 
@@ -668,6 +668,10 @@ in single (') or double (") quotes is passed as entered.
 Pass an undefined value.  Useful as padding.
 
 =back
+
+The whole argspec string can be wrapped up in C<'@{...}'> to signal
+that resulting event array should be flatten.  This only makes a
+difference if an array reference is used as the handler target.
 
 =head2 Events
 

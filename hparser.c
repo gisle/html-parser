@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.54 2001/03/13 01:00:11 gisle Exp $
+/* $Id: hparser.c,v 2.55 2001/03/13 02:26:53 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -45,7 +45,10 @@ enum argcode {
     ARG_LENGTH,
     ARG_EVENT,
     ARG_UNDEF,
-    ARG_LITERAL /* Always keep last */
+    ARG_LITERAL, /* Always keep last */
+
+    /* extra flags always encoded first */
+    ARG_FLAG_FLAT_ARRAY,
 };
 
 char *argname[] = {
@@ -66,6 +69,7 @@ char *argname[] = {
     "event",    /* ARG_EVENT */
     "undef",    /* ARG_UNDEF */
     /* ARG_LITERAL (not compared) */
+    /* ARG_FLAG_FLAT_ARRAY */
 };
 
 
@@ -187,19 +191,29 @@ report_event(PSTATE* p_state,
 
     /* At this point we have decided to generate an event callback */
 
+    argspec = h->argspec ? SvPV(h->argspec, my_na) : "";
+
     if (SvTYPE(h->cb) == SVt_PVAV) {
-	/* start sub-array for accumulator array */
-	array = newAV();
+	
+	if (*argspec == ARG_FLAG_FLAT_ARRAY) {
+	    argspec++;
+	    array = (AV*)h->cb;
+	}
+	else {
+	    /* start sub-array for accumulator array */
+	    array = newAV();
+	}
     }
     else {
 	array = 0;
+	if (*argspec == ARG_FLAG_FLAT_ARRAY)
+	    argspec++;
+
 	/* start argument stack for callback */
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
     }
-
-    argspec = h->argspec ? SvPV(h->argspec, my_na) : "";
 
     for (s = argspec; *s; s++) {
 	SV* arg = 0;
@@ -404,7 +418,8 @@ report_event(PSTATE* p_state,
     }
 
     if (array) {
-	av_push((AV*)h->cb, newRV_noinc((SV*)array));
+	if (array != (AV*)h->cb)
+	    av_push((AV*)h->cb, newRV_noinc((SV*)array));
     }
     else {
 	PUTBACK;
@@ -434,6 +449,20 @@ argspec_compile(SV* src)
 
     while (isHSPACE(*s))
 	s++;
+
+    if (*s == '@') {
+	/* try to deal with '@{ ... }' wrapping */
+	char *tmp = s + 1;
+	while (isHSPACE(*tmp))
+	    tmp++;
+	if (*tmp == '{') {
+	    sv_catpvf(argspec, "%c", ARG_FLAG_FLAT_ARRAY);
+	    tmp++;
+	    while (isHSPACE(*tmp))
+		tmp++;
+	    s = tmp;
+	}
+    }
     while (s < end) {
 	if (isHNAME_FIRST(*s) || *s == '@') {
 	    char *name = s;
@@ -487,6 +516,16 @@ argspec_compile(SV* src)
 
 	while (isHSPACE(*s))
 	    s++;
+	
+	if (*s == '}' && SvPVX(argspec)[0] == ARG_FLAG_FLAT_ARRAY) {
+	    /* end of '@{ ... }' */
+	    s++;
+	    while (isHSPACE(*s))
+		s++;
+	    if (s < end)
+		croak("Bad argspec: stuff after @{...} (%s)", s);
+	}
+
 	if (s == end)
 	    break;
 	if (*s != ',') {
