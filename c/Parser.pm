@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_01';  # $Date: 1999/11/03 20:49:17 $
+$VERSION = '2.99_01';  # $Date: 1999/11/03 20:59:34 $
 
 require DynaLoader;
 @ISA=qw(DynaLoader);
@@ -35,11 +35,14 @@ sub new
 sub _set_up_method_callbacks
 {
     my $self = shift;
-    for (qw(text end declaration comment)) {
-	my $meth = $_;
-	$self->callback($_ => sub { shift->$meth(@_) });
-    }
     require HTML::Entities;
+
+    $self->pass_cbdata(1);
+
+    $self->callback(text        => sub { shift->text(@_)});
+    $self->callback(end         => sub { shift->end(@_)});
+    $self->callback(comment     => sub { shift->comment(@_)});
+    $self->callback(declaration => sub { shift->declaration(reverse @_)});
     $self->callback(start =>
 		   sub {
 		       my($obj, $tag, $attr, $orig) = @_;
