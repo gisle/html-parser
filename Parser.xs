@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.77 1999/12/08 14:20:56 gisle Exp $
+/* $Id: Parser.xs,v 2.78 1999/12/08 15:14:54 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -84,7 +84,7 @@ check_handler(SV* h)
       return newSVsv(h);
     if (SvTYPE(ref) == SVt_PVAV)
       return SvREFCNT_inc(ref);
-    croak("Only code or array references allowed as handler destination");
+    croak("Only code or array references allowed as handler");
   }
   return SvOK(h) ? newSVsv(h) : 0;
 }
@@ -219,18 +219,18 @@ boolean_attribute_value(pstate,...)
     OUTPUT:
 	RETVAL
 
-void
-handler(pstate, name_sv,...)
+SV*
+handler(pstate, eventname,...)
 	PSTATE* pstate
-	SV* name_sv
+	SV* eventname
     PREINIT:
 	SV* self = ST(0);
 	STRLEN name_len;
-	char *name = SvPV(name_sv, name_len);
+	char *name = SvPV(eventname, name_len);
         int event = -1;
         int i;
         struct p_handler *h;
-    CODE:
+    PPCODE:
 	/* map event name string to event_id */
 	for (i = 0; i < EVENT_COUNT; i++) {
 	  if (strEQ(name, event_id_str[i])) {
@@ -239,10 +239,19 @@ handler(pstate, name_sv,...)
 	  }
 	}
         if (event < 0)
-	    croak("No %s handler", name);
+	    croak("No handler for %s events", name);
 
 	h = &pstate->handlers[event];
-	ST(0) = &PL_sv_undef;
+
+	/* set up return value */
+	if (h->cb) {
+	  ST(0) = (SvTYPE(h->cb) == SVt_PVAV)
+	             ? sv_2mortal(newRV_inc(h->cb))
+	             : h->cb;
+	}
+        else {
+	  ST(0) = &PL_sv_undef;
+        }
 
         /* update */
         if (items == 3 && SvROK(ST(2))) {
@@ -257,24 +266,30 @@ handler(pstate, name_sv,...)
 	  svp = av_fetch(av, 1, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->argspec);
+	    h->argspec = 0;
 	    h->argspec = argspec_compile(*svp);
 	  }
 
 	  svp = av_fetch(av, 0, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->cb);
+	    h->cb = 0;
 	    h->cb = check_handler(*svp);
 	  }
 	}
         else if (items > 2) {
 	  if (items > 3) {
 	    SvREFCNT_dec(h->argspec);
+	    h->argspec = 0;
 	    h->argspec = argspec_compile(ST(3));
 	  }
 
 	  SvREFCNT_dec(h->cb);
+          h->cb = 0;
 	  h->cb = check_handler(ST(2));
 	}
+        XSRETURN(1);
+
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
 
