@@ -117,6 +117,7 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 	my $file = $tmpfile;
 	die "$file already exists" if -e $file;
 	open(FILE, ">$file") or die "Can't create $file: $!";
+        binmode FILE;
         print FILE $HTML;
         close(FILE);
 
