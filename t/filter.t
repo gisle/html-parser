@@ -15,6 +15,8 @@ my $HTML = <<EOT;
 <tr>
 </table>
 
+<?process>
+
 EOT
 
 use HTML::Filter;
