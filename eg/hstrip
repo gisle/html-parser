@@ -20,8 +20,6 @@ my %ignore_elem = map {$_ => 1}
 
 my %inside_ignore;
 
-sub ignore { 0; }
-
 sub tag
 {
     my $tagname = shift;
@@ -69,8 +67,8 @@ sub text
 HTML::Parser->new(api_version   => 3,
 		  start_h       => [\&tag,   "tagname, '+1', tokenpos, text"],
 		  end_h         => [\&tag,   "tagname, '-1', undef,    text"],
-                  process_h     => [\&ignore, ""],
-		  comment_h     => [\&ignore, ""],
+                  process_h     => ["", ""],
+		  comment_h     => ["", ""],
                   declaration_h => [\&decl,   "tagname, text"],
                   default_h     => [\&text,   "text"],
                  )
