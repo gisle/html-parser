@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.102 2004/11/17 12:35:36 gisle Exp $
+/* $Id: hparser.c,v 2.103 2004/11/17 14:06:58 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -125,6 +125,12 @@ report_event(PSTATE* p_state,
     char *argspec;
     char *s;
 
+#ifdef UNICODE_HTML_PARSER
+    #define CHR_DIST(a,b) (utf8 ? utf8_distance((a),(b)) : (a) - (b))
+#else
+    #define CHR_DIST(a,b) ((a) - (b))
+#endif
+
     /* capture offsets */
     STRLEN offset = p_state->offset;
     STRLEN line = p_state->line;
@@ -167,7 +173,7 @@ report_event(PSTATE* p_state,
 #endif
 
     /* update offsets */
-    p_state->offset += end - beg;
+    p_state->offset += CHR_DIST(end, beg);
     if (line) {
 	char *s = beg;
 	char *nl = NULL;
@@ -179,9 +185,9 @@ report_event(PSTATE* p_state,
 	    s++;
 	}
 	if (nl)
-	    p_state->column = end - nl - 1;
+	    p_state->column = CHR_DIST(end, nl) - 1;
 	else
-	    p_state->column += end - beg;
+	    p_state->column += CHR_DIST(end, beg);
     }
 
     if (event == E_NONE)
@@ -364,8 +370,8 @@ report_event(PSTATE* p_state,
 		av_extend(av, num_tokens*2);
 		for (i = 0; i < num_tokens; i++) {
 		    if (tokens[i].beg) {
-			av_push(av, newSViv(tokens[i].beg-beg));
-			av_push(av, newSViv(tokens[i].end-tokens[i].beg));
+			av_push(av, newSViv(CHR_DIST(tokens[i].beg, beg)));
+			av_push(av, newSViv(CHR_DIST(tokens[i].end, tokens[i].beg)));
 		    }
 		    else { /* boolean tag value */
 			av_push(av, newSViv(0));
@@ -516,11 +522,11 @@ report_event(PSTATE* p_state,
 	    break;
 
 	case ARG_OFFSET_END:
-	    arg = sv_2mortal(newSViv(offset + (end - beg)));
+	    arg = sv_2mortal(newSViv(offset + CHR_DIST(end, beg)));
 	    break;
 
 	case ARG_LENGTH:
-	    arg = sv_2mortal(newSViv(end - beg));
+	    arg = sv_2mortal(newSViv(CHR_DIST(end, beg)));
 	    break;
 
 	case ARG_LINE:
@@ -615,6 +621,7 @@ IGNORE_EVENT:
 	}
 #endif
     }
+#undef CHR_DIST    
     return;
 }
 
