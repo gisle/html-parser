@@ -1,12 +1,10 @@
 package HTML::Parser;
 
-# $Id: Parser.pm,v 2.16 1998/04/02 11:08:22 aas Exp $
-
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "2.17";  # $Date: 1998/04/28 06:40:16 $
 
 
 sub new
@@ -19,7 +17,7 @@ sub new
 }
 
 
-# A note about how Netscape does it:
+# A little note about the observed Netscape behaviour:
 #
 # It parse <xmp> in the depreceated 'literal' mode, i.e. no tags are
 # recognized until a </xmp> is found.
@@ -31,9 +29,6 @@ sub new
 # too early):
 #
 #    <! -- comment -- --> more comment -->
-#
-# Netscape does not allow space after the initial "<" in the start tag.
-# Like this "<a href='gisle'>"
 #
 # Netscape ignores '<!--' and '-->' within the <SCRIPT> and <STYLE> tag.
 # This is used as a trick to make non-script-aware browsers ignore
@@ -62,21 +57,21 @@ sub parse
 
 	# First we try to pull off any plain text (anything before a "<" char)
 	if ($$buf =~ s|^([^<]+)||) {
-	    unless (length $$buf) {
+	    if (length $$buf) {
+		$self->text($1);
+	    } else {
 		my $text = $1;
 		# At the end of the buffer, we should not parse white space
 		# but leave it for parsing on the next round.
 		if ($text =~ s|(\s+)$||) {
 		    $$buf = $1;
-                # Same treatment for chopped up entites.  We must wait
-		# until we have it all.
-		} elsif ($text =~ s/(&[\#\w]*)$//) {
+                # Same treatment for chopped up entites and words.
+		# We must wait until we have it all.
+		} elsif ($text =~ s|(\S+)$||) {
 		    $$buf = $1;
 		};
 		$self->text($text) if length $text;
 		last TOKEN;
-	    } else {
-		$self->text($1);
 	    }
 
 	# Netscapes buggy comments are easy to handle
@@ -395,6 +390,11 @@ The text is passed on unmodified and might contain multiple lines.
 Note that for efficiency reasons entities in the text are B<not>
 expanded.  You should call HTML::Entities::decode($text) before you
 process the text any further.
+
+A sequence of text in the HTML document can be broken between several
+invokations of $self->text.  The parser will make sure that it does
+not break a word or a sequence of spaces between two invokations of
+$self->text().
 
 =item $self->comment($comment)
 
