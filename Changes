@@ -5,6 +5,8 @@
     Backed out patch that checked for legal handler and attribute
     names in the HTML::Parser constructor.
 
+    Documentation typo fixed by Micheal.
+
 
 
 2000-01-14   Gisle Aas <gisle@aas.no>
