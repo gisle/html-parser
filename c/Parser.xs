@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.9 1999/11/03 20:46:23 gisle Exp $
+/* $Id: Parser.xs,v 1.10 1999/11/03 21:00:23 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -23,6 +23,7 @@ struct p_state {
   SV* buf;
 
   int strict_comment;
+  int pass_cbdata;
 
   SV* text_cb;
   SV* start_cb;
@@ -53,18 +54,19 @@ html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
     return;
   cb = p_state->text_cb;
   if (cb) {
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -77,20 +79,21 @@ html_end(PSTATE* p_state,
 {
   SV *cb = p_state->end_cb;
   if (cb) {
-      SV tagsv;
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    SV tagsv;
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
-      XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+    XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -104,20 +107,21 @@ html_start(PSTATE* p_state,
 {
   SV *cb = p_state->start_cb;
   if (cb) {
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
-      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
-      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(sv_lower(newSVpv(tag_beg, tag_end - tag_beg))));
+    XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -127,18 +131,19 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->pi_cb;
   if (cb) {
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -148,18 +153,19 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->com_cb;
   if (cb) {
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -169,19 +175,20 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 {
   SV *cb = p_state->decl_cb;
   if (cb) {
-      dSP;
-      ENTER;
-      SAVETMPS;
-      PUSHMARK(SP);
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-      XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
-      PUTBACK;
+    XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
+    PUTBACK;
 
-      perl_call_sv(cb, G_DISCARD);
+    perl_call_sv(cb, G_DISCARD);
 
-      FREETMPS;
-      LEAVE;
+    FREETMPS;
+    LEAVE;
   }
 }
 
@@ -622,10 +629,10 @@ get_pstate(SV* sv)
   if (!sv || SvTYPE(sv) != SVt_PVHV)
     croak("Not a reference to a hash");
   hv = (HV*)sv;
-  svp = hv_fetch(hv, "_parser_state", 13, 0);
+  svp = hv_fetch(hv, "_parser_xs_state", 16, 0);
   if (svp)
     return (PSTATE*)SvIV(*svp);
-  croak("Can't find '_parser_state' element in HTML::Parser hash");
+  croak("Can't find '_parser_xs_state' element in HTML::Parser hash");
   return 0;
 }
 
@@ -652,7 +659,7 @@ _alloc_pstate(self)
 	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
 
-	hv_store(hv, "_parser_state", 13, sv, 0);
+	hv_store(hv, "_parser_xs_state", 16, sv, 0);
 
 void
 DESTROY(pstate)
@@ -685,6 +692,15 @@ strict_comment(pstate,...)
 	RETVAL = pstate->strict_comment;
 	if (items > 1)
 	     pstate->strict_comment = SvTRUE(ST(1));
+
+int
+pass_cbdata(pstate,...)
+	PSTATE* pstate
+    CODE:
+	RETVAL = pstate->pass_cbdata;
+	if (items > 1)
+	     pstate->pass_cbdata = SvTRUE(ST(1));
+
 
 void
 callback(pstate, name_sv, cb)
