@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.24 1999/11/17 11:17:52 gisle Exp $
+/* $Id: Parser.xs,v 2.25 1999/11/17 12:37:09 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -15,6 +15,7 @@
  *   - unicode support (whatever that means)
  *   - unicode character entities
  *   - count chars, line numbers
+ *   - magic number in header of pstate
  *
  * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
@@ -60,6 +61,14 @@ newSVpvn(char *s, STRLEN len)
 
 #include "hctype.h" /* isH...() macros */
 
+enum marked_section_t {
+  MS_NONE = 0,
+  MS_INCLUDE,
+  MS_RCDATA,
+  MS_CDATA,
+  MS_IGNORE,
+};
+
 struct p_state {
   SV* buf;
   char* literal_mode;
@@ -73,9 +82,15 @@ struct p_state {
   bool v2_compat;
   bool pass_cbdata;
 
+  /* marked section support */
+  enum marked_section_t ms;
+  AV* ms_stack;
+
+  /* various */
   SV* bool_attr_val;
   AV* accum;
 
+  /* callbacks */
   SV* text_cb;
   SV* start_cb;
   SV* end_cb;
@@ -639,10 +654,123 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 
+static void
+marked_section_update(PSTATE* p_state)
+{
+  /* we look at p_state->ms_stack to determine p_state->ms */
+  AV* ms_stack = p_state->ms_stack;
+  p_state->ms = MS_NONE;
+
+  if (ms_stack) {
+    int i;
+    int stack_len = av_len(ms_stack);
+    int stack_idx;
+    for (stack_idx = 0; stack_idx <= stack_len; stack_idx++) {
+      SV** svp = av_fetch(ms_stack, stack_idx, 0);
+      if (svp) {
+	AV* tokens = (AV*)SvRV(*svp);
+	int tokens_len = av_len(tokens);
+	int i;
+	assert(SvTYPE(tokens) == SVt_PVAV);
+	for (i = 0; i <= tokens_len; i++) {
+	  SV** svp = av_fetch(tokens, i, 0);
+	  if (svp) {
+	    STRLEN len;
+	    char *token_str = SvPV(*svp, len);
+	    enum marked_section_t token;
+	    if (strEQ(token_str, "include"))
+	      token = MS_INCLUDE;
+	    else if (strEQ(token_str, "rcdata"))
+	      token = MS_RCDATA;
+	    else if (strEQ(token_str, "cdata"))
+	      token = MS_CDATA;
+	    else if (strEQ(token_str, "ignore"))
+	      token = MS_IGNORE;
+	    else
+	      token = MS_NONE;
+	    if (p_state->ms < token)
+	      p_state->ms = token;
+	  }
+	}
+      }
+    }
+  }
+  printf("MS %d\n", p_state->ms);
+  return;
+}
+
+
 static char*
 html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
+  char *s = beg;
+  AV* tokens = 0;
+
+ FIND_NAMES:
+  while (isHSPACE(*s))
+    s++;
+  while (isHNAME_FIRST(*s)) {
+    char *name_start = s;
+    char *name_end;
+    s++;
+    while (isHNAME_CHAR(*s))
+      s++;
+    name_end = s;
+    while (isHSPACE(*s))
+      s++;
+    if (s == end)
+      goto PREMATURE;
+
+    if (!tokens)
+      tokens = newAV();
+    av_push(tokens, sv_lower(newSVpvn(name_start, name_end - name_start)));
+  }
+  if (*s == '-') {
+    s++;
+    if (*s == '-') {
+      /* comment */
+      s++;
+      while (1) {
+	while (s < end && *s != '-')
+	  s++;
+	if (s == end)
+	  goto PREMATURE;
+
+	s++;  /* skip first '-' */
+	if (*s == '-') {
+	  s++;
+	  /* comment finished */
+	  goto FIND_NAMES;
+	}
+      }      
+    }
+    else
+      goto FAIL;
+      
+  }
+  if (*s == '[') {
+    s++;
+    /* yup */
+
+    if (!tokens) {
+      tokens = newAV();
+      av_push(tokens, newSVpvn("include", 7));
+    }
+
+    if (!p_state->ms_stack)
+      p_state->ms_stack = newAV();
+    av_push(p_state->ms_stack, newRV_noinc((SV*)tokens));
+    marked_section_update(p_state);
+    return s;
+  }
+
+ FAIL:
+  SvREFCNT_dec(tokens);
   return 0; /* not yet implemented */
+  
+ PREMATURE:
+  SvREFCNT_dec(tokens);
+  return beg;
 }
 
 static char*
@@ -1097,6 +1225,28 @@ html_parse(PSTATE* p_state,
       }
     }
 
+    while (0 && p_state->ms) {  /* XXX */
+      while (s < end && *s != ']')
+	s++;
+      if (*s == ']') {
+	s++;
+	if (*s == ']') {
+	  s++;
+	  if (*s == '>') {
+	    /* marked section end */
+	    SvREFCNT_dec(av_pop(p_state->ms_stack));
+	    marked_section_update(p_state);
+	    t = s;
+	    continue;
+	  }
+	}
+      }
+      if (s == end) {
+	s = t;
+	goto DONE;
+      }
+    }
+
     /* first we try to match as much text as possible */
     while (s < end && *s != '<')
       s++;
@@ -1218,6 +1368,7 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	SvREFCNT_dec(pstate->buf);
+        SvREFCNT_dec(pstate->ms_stack);
         SvREFCNT_dec(pstate->bool_attr_val);
         SvREFCNT_dec(pstate->accum);
 	SvREFCNT_dec(pstate->text_cb);
