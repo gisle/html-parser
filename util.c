@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.13 2001/02/24 05:56:54 gisle Exp $
+/* $Id: util.c,v 2.14 2001/02/25 04:41:55 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -216,6 +216,5 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     *t = '\0';
     SvCUR_set(sv, t - SvPVX(sv));
 
-    //sv_dump(sv);
     return sv;
 }
