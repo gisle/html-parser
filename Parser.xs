@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.47 1999/11/30 12:54:08 gisle Exp $
+/* $Id: Parser.xs,v 2.48 1999/11/30 13:39:38 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -264,7 +264,7 @@ html_handle(PSTATE* p_state,
 {
   struct p_handler *h = &p_state->handlers[event];
 
-  if (1) {
+  if (0) {
     char *s = beg;
     int i;
 
@@ -298,7 +298,7 @@ html_handle(PSTATE* p_state,
   }
 
   if (!h->cb || !SvOK(h->cb)) {
-    /* event = E_DEFAULT; */
+    event = E_DEFAULT;
     h = &p_state->handlers[E_DEFAULT];
     if (!h->cb || !SvOK(h->cb))
       return;
@@ -320,46 +320,116 @@ html_handle(PSTATE* p_state,
 	arg = self;
 	break;
 
-      case 'T':
-	/* tokens flat */
-	break;
-
       case 't':
 	/* tokens arrayref */
+	{
+	  AV* av = newAV();
+	  int i;
+	  for (i = 0; i < num_tokens; i++) {
+	    av_push(av, newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg));
+	  }
+	  arg = newRV_noinc((SV*)av);
+	}
 	break;
 
       case '#':
-	/* tokenpos */
+	/* tokenpos arrayref */
+	{
+	  AV* av = newAV();
+	  int i;
+	  for (i = 0; i < num_tokens; i++) {
+	    av_push(av, newSViv(tokens[i].beg-beg));
+	    av_push(av, newSViv(tokens[i].end-tokens[i].beg));
+	  }
+	  arg = newRV_noinc((SV*)av);
+	}
 	break;
 
       case 'n':
 	/* tagname */
+	if (num_tokens >= 1) {
+	  arg = sv_2mortal(newSVpvn(tokens[0].beg, tokens[0].end - tokens[0].beg));
+	  if (!p_state->xml_mode)
+	    sv_lower(arg);
+	}
 	break;
 
       case 'a':
 	/* attr_hashref */
+	if (event == E_START) {
+	  HV* hv = newHV();
+	  int i;
+	  for (i = 1; i < num_tokens; i += 2) {
+	    SV* attrname = newSVpvn(tokens[i].beg,
+				    tokens[i].end-tokens[i].beg);
+	    SV* attrval;
+	    if (p_state->bool_attr_val && tokens[i].beg == tokens[i+1].beg) {
+	      attrval = newSVsv(p_state->bool_attr_val);
+	    }
+	    else {
+	      char *beg = tokens[i+1].beg;
+	      STRLEN len = tokens[i+1].end - beg;
+	      if (*beg == '"' || *beg == '\'') {
+		beg++; len -= 2;
+	      }
+	      attrval = newSVpvn(beg, len);
+	      decode_entities(attrval, entity2char);
+	    }
+	    
+	    if (!p_state->xml_mode)
+	      sv_lower(attrname);
+	    hv_store_ent(hv, attrname, attrval, 0);
+	  }
+	  arg = newRV_noinc((SV*)hv);
+	}
 	break;
 
       case 'A':
 	/* attrseq arrayref (v2 compatibility stuff) */
+	if (event == E_START) {
+	  AV* av = newAV();
+	  int i;
+	  for (i = 1; i < num_tokens; i += 2) {
+	    SV* attrname = newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg);
+	    if (!p_state->xml_mode)
+	      sv_lower(attrname);
+	    av_push(av, attrname);
+	  }
+	  arg = newRV_noinc((SV*)av);
+	}
 	break;
 	
       case 'd':
 	/* origtext, data */
+	arg = sv_2mortal(newSVpvn(beg, end - beg));
 	break;
 
       case 'D':
 	/* decoded text */
+	if (event == E_TEXT) {
+	  arg = sv_2mortal(newSVpvn(beg, end - beg));
+	  if (!p_state->literal_mode || p_state->ms == MS_CDATA)
+	    decode_entities(arg, entity2char);
+	}
 	break;
 
       case 'L':
 	/* literal */
+	{
+	  int len = attrspec[1];
+	  arg = sv_2mortal(newSVpvn(attrspec+2, len));
+	  attrspec += len + 1;
+	}
 	break;
 
       default:
 	arg = sv_2mortal(newSVpvn(attrspec, 1));
 	break;
       }
+
+      if (!arg)
+	arg = &PL_sv_undef;
+
       XPUSHs(arg);
     }
 
