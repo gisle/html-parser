@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.28 1999/11/08 12:52:25 gisle Exp $
+/* $Id: Parser.xs,v 1.29 1999/11/08 13:12:16 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -7,7 +7,7 @@
  */
 
 /* TODO:
- *   - embed entity encode/decode
+ *   - call entities_decode directly for text and attribute values
  *   - direct method calls
  *   - accum flags (filter out what enters @accum)
  *   - return partial text from literal mode
