@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1990';  # $Date: 2001/03/13 19:37:42 $
+$VERSION = '3.1990';  # $Date: 2001/03/15 01:11:06 $
 
 require HTML::Entities;
 
@@ -386,6 +386,11 @@ make it hard to do transformations on the text. When this attribute is
 enabled, blocks of text are always reported in one piece.  This will
 delay the text event until the following (non-text) event has been
 recognized by the parser.
+
+Note that the C<offset> argspec will give you the offset of the first
+segment of text and C<length> is the combined length of the segments.
+Since there might be ignored tags in between, these numbers can't be
+used to directly index in the original document file.
 
 =item $p->marked_sections( [$bool] )
 
