@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.08';  # $Date: 2000/05/23 10:56:40 $
+$VERSION = '3.08';  # $Date: 2000/06/01 13:19:40 $
 
 require HTML::Entities;
 
@@ -279,6 +279,8 @@ to the C<HTML::Parser> object:
 
 Parse $string as the next chunk of the HTML document.  The return
 value is normally a reference to the parser object (i.e. $p).
+Handlers invoked should not attempt modify the $string in-place until
+$p->parse returns.
 
 If an invoked event handler aborts parsing by calling $p->eof, then
 $p->parse() will return a FALSE value.
