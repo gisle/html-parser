@@ -4,7 +4,7 @@
 
     Implemented attrspec 'offset'
 
-    Documentation fra by Michael
+    Documentation from by Michael
 
     Some more cleanup/updated TODO
 
@@ -28,7 +28,7 @@
 
     Renamed attrspec 'origtext' to 'text' and 'decoded_text' to 'dtext'
 
-    Splitted up Parser.xs.  Moved stuff into hparser.c and util.c
+    Split up Parser.xs.  Moved stuff into hparser.c and util.c
 
     Dropped html_ prefix from internal parser functions.
 
