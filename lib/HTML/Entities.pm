@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.18 2000/09/17 00:49:21 gisle Exp $
+# $Id: Entities.pm,v 1.19 2000/12/04 16:20:36 gisle Exp $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -308,20 +308,20 @@ require HTML::Parser;  # for fast XS implemented decode_entities
    prop     => chr(8733),
    infin    => chr(8734),
    ang      => chr(8736),
-   and      => chr(8743),
-   or       => chr(8744),
+  'and'     => chr(8743),
+  'or'      => chr(8744),
    cap      => chr(8745),
    cup      => chr(8746),
-   int      => chr(8747),
+  'int'     => chr(8747),
    there4   => chr(8756),
    sim      => chr(8764),
    cong     => chr(8773),
    asymp    => chr(8776),
-   ne       => chr(8800),
+  'ne'      => chr(8800),
    equiv    => chr(8801),
-   le       => chr(8804),
-   ge       => chr(8805),
-   sub      => chr(8834),
+  'le'      => chr(8804),
+  'ge'      => chr(8805),
+  'sub'     => chr(8834),
    sup      => chr(8835),
    nsub     => chr(8836),
    sube     => chr(8838),
