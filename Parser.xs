@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.14 1999/11/09 21:06:45 gisle Exp $
+/* $Id: Parser.xs,v 2.15 1999/11/09 22:12:24 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -7,7 +7,6 @@
  */
 
 /* TODO:
- *   - call entities_decode directly for text and attribute values
  *   - direct method calls
  *   - accum flags (filter out what enters @accum)
  *   - return partial text from literal mode
@@ -85,6 +84,7 @@ struct p_state {
   int decode_text_entities;
   int keep_case;
   int xml_mode;
+  int v2_compat;
   int pass_cbdata;
 
   SV* bool_attr_val;
@@ -324,6 +324,27 @@ html_start(PSTATE* p_state,
   AV *accum = p_state->accum;
   SV *cb = p_state->start_cb;
 
+  HV *attr;
+  AV *attr_seq;
+
+  if ((accum || cb) && p_state->v2_compat) {
+    /* need to construct an attr hash and an attr_seq array */
+    int i;
+    int len = av_len(tokens);
+    attr = newHV();
+    attr_seq = newAV();
+    for (i = 0; i <= len; i += 2) {
+      SV** svp1 = av_fetch(tokens, i,   0);
+      SV** svp2 = av_fetch(tokens, i+1, 0);
+      if (svp1) {
+	av_push(attr_seq, SvREFCNT_inc(*svp1));
+	if (svp2)
+	  if (!hv_store_ent(attr, *svp1, SvREFCNT_inc(*svp2), 0))
+	    SvREFCNT_dec(*svp2);
+      }
+    }
+  }
+
   if (accum) {
     AV* av = newAV();
     SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
@@ -332,7 +353,13 @@ html_start(PSTATE* p_state,
     
     av_push(av, newSVpv("S", 1));
     av_push(av, tag);
-    av_push(av, newRV_inc((SV*)tokens));
+    if (p_state->v2_compat) {
+      av_push(av, newRV_noinc((SV*)attr));
+      av_push(av, newRV_noinc((SV*)attr_seq));
+    }
+    else {
+      av_push(av, newRV_inc((SV*)tokens));
+    }
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, newRV_noinc((SV*)av));
   }
@@ -348,7 +375,13 @@ html_start(PSTATE* p_state,
     if (!p_state->keep_case && !p_state->xml_mode)
       sv_lower(sv);
     XPUSHs(sv);
-    XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    if (p_state->v2_compat) {
+      XPUSHs(sv_2mortal(newRV_noinc((SV*)attr)));
+      XPUSHs(sv_2mortal(newRV_noinc((SV*)attr_seq)));
+    }
+    else {
+      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    }
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -357,10 +390,11 @@ html_start(PSTATE* p_state,
     FREETMPS;
     LEAVE;
   }
+  else
+    return;
 
-  if (empty_tag) {
+  if (empty_tag)
     html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, cbdata);
-  }
 }
 
 
@@ -442,7 +476,8 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
   if (accum) {
     AV* av = newAV();
     av_push(av, newSVpv("D", 1));
-    av_push(av, newRV_inc((SV*)tokens));
+    if (!p_state->v2_compat)
+      av_push(av, newRV_inc((SV*)tokens));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, newRV_noinc((SV*)av));
     return;
@@ -456,7 +491,8 @@ html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
     PUSHMARK(SP);
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-    XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    if (!p_state->v2_compat)
+      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -1130,7 +1166,8 @@ strict_comment(pstate,...)
 	HTML::Parser::decode_text_entities = 2
         HTML::Parser::keep_case = 3
         HTML::Parser::xml_mode = 4
-        HTML::Parser::pass_cbdata = 5
+	HTML::Parser::v2_compat = 5
+        HTML::Parser::pass_cbdata = 6
     PREINIT:
 	int *attr;
     CODE:
@@ -1139,7 +1176,8 @@ strict_comment(pstate,...)
 	case 2: attr = &pstate->decode_text_entities; break;
 	case 3: attr = &pstate->keep_case;            break;
 	case 4: attr = &pstate->xml_mode;             break;
-	case 5: attr = &pstate->pass_cbdata;          break;
+	case 5: attr = &pstate->v2_compat;            break;
+	case 6: attr = &pstate->pass_cbdata;          break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }
