@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.91 2003/08/15 14:38:37 gisle Exp $
+/* $Id: hparser.c,v 2.92 2003/08/17 18:19:13 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -804,7 +804,6 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	    s++;
 	token.end = s;
 	if (s < end) {
-	    assert(*s == '>');
 	    s++;
 	    report_event(p_state, E_COMMENT, beg-4, s, &token, 1, self);
 	    return s;
