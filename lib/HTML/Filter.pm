@@ -3,7 +3,7 @@ package HTML::Filter;
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub process     { $_[0]->output($_[2])          }
@@ -24,7 +24,7 @@ HTML::Filter - Filter HTML text through the parser
 
 =head1 NOTE
 
-This module is deprecated. C<HTML::Parser> now provides the
+B<This module is deprecated.> The C<HTML::Parser> now provides the
 functionally of C<HTML::Filter> much more efficiently with the the
 C<default> handler.
 

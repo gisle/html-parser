@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.31';  # $Date: 2003/08/19 14:50:15 $
+$VERSION = '3.31';  # $Date: 2003/10/10 09:56:15 $
 
 require HTML::Entities;
 
@@ -203,9 +203,8 @@ makes on-the-fly parsing as documents are received from the network
 possible.
 
 If event driven parsing does not feel right for your application, you
-might want to use C<HTML::PullParser>.  It is a
-C<HTML::Parser> subclass that allows a more conventional program
-structure.
+might want to use C<HTML::PullParser>.  It is a C<HTML::Parser>
+subclass that allows a more conventional program structure.
 
 
 =head1 METHODS
@@ -349,7 +348,9 @@ Methods that can be used to get and/or set parser options are:
 
 =over
 
-=item $p->strict_comment( [$bool] )
+=item $p->strict_comment
+
+=item $p->strict_comment( $bool )
 
 By default, comments are terminated by the first occurrence of "-->".
 This is the behaviour of most popular browsers (like Mozilla, Opera and
@@ -366,7 +367,10 @@ comments:
   </ comment>
   <! comment>
 
-=item $p->strict_names( [$bool] )
+
+=item $p->strict_names
+
+=item $p->strict_names( $bool )
 
 By default, almost anything is allowed in tag and attribute names.
 This is the behaviour of most popular browsers and allows us to parse
@@ -382,7 +386,9 @@ The official behaviour is enabled by enabling this attribute.  If
 enabled, it will cause the tag above to be reported as text
 since "LIST]" is not a legal attribute name.
 
-=item $p->strict_end( [$bool] )
+=item $p->strict_end
+
+=item $p->strict_end( $bool )
 
 By default attributes and other junk to be present on end tags in a
 manner that emulate MSIEs behaviour.
@@ -397,7 +403,9 @@ start tags.  By default, the name of the attribute is also used as its
 value.  This affects the values reported for C<tokens> and C<attr>
 argspecs.
 
-=item $p->xml_mode( [$bool] )
+=item $p->xml_mode
+
+=item $p->xml_mode( $bool )
 
 Enabling this attribute changes the parser to allow some XML
 constructs such as I<empty element tags> and I<XML processing
@@ -416,7 +424,9 @@ the correct tag name.
 I<XML processing instructions> are terminated by "?>" instead of a
 simple ">" as is the case for HTML.
 
-=item $p->unbroken_text( [$bool] )
+=item $p->unbroken_text
+
+=item $p->unbroken_text( $bool )
 
 By default, blocks of text are given to the text handler as soon as
 possible (but the parser makes sure to always break text at the
@@ -432,7 +442,9 @@ segment of text and C<length> is the combined length of the segments.
 Since there might be ignored tags in between, these numbers can't be
 used to directly index in the original document file.
 
-=item $p->marked_sections( [$bool] )
+=item $p->marked_sections
+
+=item $p->marked_sections( $bool )
 
 By default, section markings like <![CDATA[...]]> are treated like
 ordinary text.  When this attribute is enabled section markings are
@@ -441,13 +453,17 @@ honoured.
 There are currently no events associated with the marked section
 markup, but the text can be returned as C<skipped_text>.
 
-=item $p->attr_encoded( [$bool] )
+=item $p->attr_encoded
+
+=item $p->attr_encoded( $bool )
 
 By default, the C<attr> and C<@attr> argspecs will have general
 entities for attribute values decoded.  Enabling this attribute leaves
 entities alone.
 
-=item $p->case_sensitive( [$bool] )
+=item $p->case_sensitive
+
+=item $p->case_sensitive( $bool )
 
 By default, tagnames and attribute names are down-cased.  Enabling this
 attribute leave them as found in the HTML source document.
@@ -459,11 +475,11 @@ method is used to set up handlers for different events:
 
 =over
 
-=item $p->handler( event => \&subroutine, argspec )
+=item $p->handler( event => \&subroutine, $argspec )
 
-=item $p->handler( event => method_name, argspec )
+=item $p->handler( event => $method_name, $argspec )
 
-=item $p->handler( event => \@accum, argspec )
+=item $p->handler( event => \@accum, $argspec )
 
 =item $p->handler( event => "" );
 
@@ -476,19 +492,19 @@ This method assigns a subroutine, method, or array to handle an event.
 Event is one of C<text>, C<start>, C<end>, C<declaration>, C<comment>,
 C<process>, C<start_document>, C<end_document> or C<default>.
 
-I<Subroutine> is a reference to a subroutine which is called to handle
+The C<\&subroutine> is a reference to a subroutine which is called to handle
 the event.
 
-I<Method_name> is the name of a method of $p which is called to handle
+The C<$method_name> is the name of a method of $p which is called to handle
 the event.
 
-I<Accum> is a array that will hold the event information as
+The C<@accum> is a array that will hold the event information as
 sub-arrays.
 
 If the second argument is "", the event is ignored.
 If it is undef, the default handler is invoked for the event.
 
-I<Argspec> is a string that describes the information to be reported
+The C<$argspec> is a string that describes the information to be reported
 for the event.  Any requested information that does not apply to a
 specific event is passed as C<undef>.  If argspec is omitted, then it
 is left unchanged since last update.
@@ -543,17 +559,17 @@ The following methods control filters:
 
 =over
 
-=item $p->ignore_tags( TAG, ... )
+=item $p->ignore_tags( @tags )
 
 Any C<start> and C<end> events involving any of the tags given are
 suppressed.
 
-=item $p->report_tags( TAG, ... )
+=item $p->report_tags( @tags )
 
 Any C<start> and C<end> events involving any of the tags I<not> given
 are suppressed.
 
-=item $p->ignore_elements( TAG, ... )
+=item $p->ignore_elements( @tags )
 
 Both the C<start> and the C<end> event as well as any events that
 would be reported in between are suppressed.  The ignored elements can
@@ -768,7 +784,7 @@ the event to be passed.  This is the same as C<offset> + C<length>.
 Event causes the event name to be passed.
 
 The event name is one of C<text>, C<start>, C<end>, C<declaration>,
-C<comment>, C<process>, C<start_document>, C<end_document> or C<default>.
+C<comment>, C<process>, C<start_document> or C<end_document>.
 
 =item C<line>
 
@@ -968,12 +984,15 @@ parsing as soon as the title end tag is seen:
   $p->parse_file(shift || die) || die $!;
   print "\n";
 
-More examples are found in the "eg/" directory of the C<HTML-Parser>
+More examples are found in the F<eg/> directory of the C<HTML-Parser>
 distribution; the program C<hrefsub> shows how you can edit all links
 found in a document and C<htextsub> how to edid the text only; the
 program C<hstrip> shows how you can strip out certain tags/elements
 and/or attributes; and the program C<htext> show how to obtain the
 plain text, but not any script/style content.
+
+You can browse the F<eg/> directory online from the I<[Browse]> link on
+the http://search.cpan.org/~gaas/HTML-Parser/ page.
 
 =head1 BUGS
 

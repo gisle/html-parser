@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.6 2001/04/02 23:26:18 gisle Exp $
+# $Id: PullParser.pm,v 2.7 2003/10/10 09:56:18 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -167,23 +167,25 @@ instance, if you want C<start> tokens to be reported as the string
 C<'S'> followed by the tagname and the attributes you might pass an
 C<start>-option like this:
 
-   $p = HTML::Parser-New( doc   => $doc_to_parse,
-                          start => '"S", tagname, @attr',
-                          end   => '"E", tagname',
-                        );
+   $p = HTML::PullParser->new(
+          doc   => $document_to_parse,
+          start => '"S", tagname, @attr',
+          end   => '"E", tagname',
+        );
 
 At last other C<HTML::Parser> options, like C<ignore_tags>, and
 C<unbroken_text>, can be passed in.  Note that you should not use the
-I<event>_h options to set up parser handlers.
+I<event>_h options to set up parser handlers.  That would confuse the
+inner logic of C<HTML::PullParser>.
 
 =item $token = $p->get_token
 
 This method will return the next I<token> found in the HTML document,
-or C<undef> at the end of the document.  The token is usually returned
-as an array reference.  The content of this array match the argspec
-set up during C<HTML::PullParser> construction.
+or C<undef> at the end of the document.  The token is returned as an
+array reference.  The content of this array match the argspec set up
+during C<HTML::PullParser> construction.
 
-=item $p->unget_token($token,...)
+=item $p->unget_token( @tokens )
 
 If you find out you have read too many tokens you can push them back,
 so that they are returned again the next time $p->get_token is called.

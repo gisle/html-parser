@@ -72,9 +72,11 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.17 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.18 $ =~ /(\d+)\.(\d+)/);
 
-=item $hp = HTML::HeadParser->new( [$header] )
+=item $hp = HTML::HeadParser->new
+
+=item $hp = HTML::HeadParser->new( $header )
 
 The object constructor.  The optional $header argument should be a
 reference to an object that implement the header() and push_header()
@@ -233,8 +235,11 @@ __END__
 
 L<HTML::Parser>, L<HTTP::Headers>
 
-The I<HTTP::Headers> class is distributed as part of the I<libwww-perl>
-package.
+The I<HTTP::Headers> class is distributed as part of the
+I<libwww-perl> package.  If you don't have that distribution installed
+you need to provide the $header argument to the C<HTML::HeadParser>
+constructor with your own object that implements the documented
+protocol.
 
 =head1 COPYRIGHT
 

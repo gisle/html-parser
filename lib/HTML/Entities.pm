@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.26 2003/08/17 23:40:59 gisle Exp $
+# $Id: Entities.pm,v 1.27 2003/10/10 09:56:18 gisle Exp $
 
 =head1 NAME
 
@@ -16,12 +16,13 @@ HTML::Entities - Encode or decode strings with HTML entities
 
 For example, this:
 
- $input = "vis-à-vis Beyoncé's naïve papier-mâché résumé";
+ $input = "vis-à-vis Beyoncé's naïve\npapier-mâché résumé";
  print encode_entities($in), "\n"
 
 Prints this out:
 
- vis-&agrave;-vis Beyonc&eacute;'s na&iuml;ve papier-m&acirc;ch&eacute; r&eacute;sum&eacute;
+ vis-&agrave;-vis Beyonc&eacute;'s na&iuml;ve
+ papier-m&acirc;ch&eacute; r&eacute;sum&eacute;
 
 =head1 DESCRIPTION
 
@@ -30,7 +31,7 @@ character entities.  The module provides the following functions:
 
 =over 4
 
-=item decode_entities($string)
+=item decode_entities( $string )
 
 This routine replaces HTML entities found in the $string with the
 corresponding ISO-8859-1 character, and if possible (under perl 5.8
@@ -39,7 +40,9 @@ entities are left alone.
 
 This routine is exported by default.
 
-=item encode_entities($string, [$unsafe_chars])
+=item encode_entities( $string )
+
+=item encode_entities( $string, $unsafe_chars )
 
 This routine replaces unsafe characters in $string with their entity
 representation. A second argument can be given to specify which
@@ -53,7 +56,9 @@ C<< < >>, C<< & >>, C<< > >>, and C<< " >> characters:
 
 This routine is exported by default.
 
-=item encode_entities_numeric($string, [$unsafe_chars])
+=item encode_entities_numeric( $string )
+
+=item encode_entities_numeric( $string, $unsafe_chars )
 
 This routine works just like encode_entities, except that the replacement
 entities are always C<&#xI<hexnum>;> and never C<&I<entname>;>.  For
@@ -102,7 +107,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.26 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.27 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

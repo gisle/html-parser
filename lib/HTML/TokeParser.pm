@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.24 2001/03/26 07:32:17 gisle Exp $
+# $Id: TokeParser.pm,v 2.25 2003/10/10 09:56:18 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.24 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.25 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -118,7 +118,9 @@ HTML::TokeParser - Alternative HTML::Parser interface
 =head1 SYNOPSIS
 
  require HTML::TokeParser;
- $p = HTML::TokeParser->new("index.html") || die "Can't open: $!";
+ $p = HTML::TokeParser->new("index.html") ||
+      die "Can't open: $!";
+
  while (my $token = $p->get_token) {
      #...
  }
@@ -126,13 +128,19 @@ HTML::TokeParser - Alternative HTML::Parser interface
 =head1 DESCRIPTION
 
 The C<HTML::TokeParser> is an alternative interface to the
-C<HTML::Parser> class.  It is an C<HTML::PullParser> subclass.
+C<HTML::Parser> class.  It is an C<HTML::PullParser> subclass with a
+predeclared set of token types.  If you wish the tokens to be reported
+differently you probably want to use the C<HTML::PullParser> directly.
 
 The following methods are available:
 
 =over 4
 
-=item $p = HTML::TokeParser->new( $file_or_doc );
+=item $p = HTML::TokeParser->new( $filename );
+
+=item $p = HTML::TokeParser->new( $filehandle );
+
+=item $p = HTML::TokeParser->new( \$document );
 
 The object constructor argument is either a file name, a file handle
 object, or the complete document to be parsed.
@@ -155,13 +163,11 @@ EOF, but not closed.
 
 This method will return the next I<token> found in the HTML document,
 or C<undef> at the end of the document.  The token is returned as an
-array reference.  The first element of the array will be a (mostly)
-single character string denoting the type of this token: "S" for start
-tag, "E" for end tag, "T" for text, "C" for comment, "D" for
-declaration, and "PI" for process instructions.  The rest of the array
-is the same as the arguments passed to the corresponding HTML::Parser
-v2 compatible callbacks (see L<HTML::Parser>).  In summary, returned
-tokens look like this:
+array reference.  The first element of the array will be a string
+denoting the type of this token: "S" for start tag, "E" for end tag,
+"T" for text, "C" for comment, "D" for declaration, and "PI" for
+process instructions.  The rest of the token array depend on the type
+like this:
 
   ["S",  $tag, $attr, $attrseq, $text]
   ["E",  $tag, $text]
@@ -171,14 +177,17 @@ tokens look like this:
   ["PI", $token0, $text]
 
 where $attr is a hash reference, $attrseq is an array reference and
-the rest is plain scalars.
+the rest are plain scalars.  The L<HTML::Parser/Attrspec> explains the
+details.
 
-=item $p->unget_token($token,...)
+=item $p->unget_token( @tokens )
 
-If you find out you have read too many tokens you can push them back,
+If you find you have read too many tokens you can push them back,
 so that they are returned the next time $p->get_token is called.
 
-=item $p->get_tag( [$tag, ...] )
+=item $p->get_tag
+
+=item $p->get_tag( @tags )
 
 This method returns the next start or end tag (skipping any other
 tokens), or C<undef> if there are no more tags in the document.  If
@@ -200,7 +209,9 @@ returned like this:
 
   ["/$tag", $text]
 
-=item $p->get_text( [$endtag] )
+=item $p->get_text
+
+=item $p->get_text( $endtag )
 
 This method returns all text found at the current position. It will
 return a zero length string if the next token is not text.  The
@@ -225,7 +236,9 @@ The default $p->{textify} value is:
 This means that <IMG> and <APPLET> tags are treated as text, and that
 the text to substitute can be found in the ALT attribute.
 
-=item $p->get_trimmed_text( [$endtag] )
+=item $p->get_trimmed_text
+
+=item $p->get_trimmed_text( $endtag )
 
 Same as $p->get_text above, but will collapse any sequences of white
 space to a single space character.  Leading and trailing white space is
