@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.10 1999/12/05 20:50:41 gisle Exp $
+/* $Id: hparser.c,v 2.11 1999/12/05 20:53:38 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -131,7 +131,7 @@ report_event(PSTATE* p_state,
 
     case 't':
       /* tokens arrayref */
-      {
+      if (num_tokens >= 1) {
 	AV* av = newAV();
 	int i;
 	for (i = 0; i < num_tokens; i++) {
@@ -150,7 +150,7 @@ report_event(PSTATE* p_state,
 
     case '#':
       /* tokenpos arrayref */
-      {
+      if (num_tokens >= 1) {
 	AV* av = newAV();
 	int i;
 	for (i = 0; i < num_tokens; i++) {
