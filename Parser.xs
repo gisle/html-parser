@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.65 1999/12/02 12:22:58 gisle Exp $
+/* $Id: Parser.xs,v 2.66 1999/12/03 08:56:31 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -313,10 +313,10 @@ html_handle(PSTATE* p_state,
     return;
 #endif
 
-  if (!h->cb || !SvOK(h->cb)) {
+  if (!h->cb) {
     /* event = E_DEFAULT; */
     h = &p_state->handlers[E_DEFAULT];
-    if (!h->cb || !SvOK(h->cb))
+    if (!h->cb)
       return;
   }
 
@@ -507,6 +507,84 @@ html_handle(PSTATE* p_state,
   }
 }
 
+
+static SV*
+check_handler(char* name, SV* cb, SV* attrspec, SV* self)
+{
+  SV *sv;
+  int type = SvTYPE(cb);
+  STRLEN my_na;
+
+  if (SvROK(cb)) {
+    sv = SvRV(cb);
+    type = SvTYPE(sv);
+  }
+  else
+    sv = cb;
+
+  switch (type) {
+  case SVt_NULL: /* undef */
+    {
+      sv = 0;
+    }
+    break;
+  case SVt_PVAV: /* Array */
+    {
+      /* use as is */
+      sv = SvREFCNT_inc(sv);
+    }
+    break;
+  case SVt_PVCV: /* Code Reference */
+    {
+      /* use original SV */
+      sv = SvREFCNT_inc(cb);
+    }
+    break;
+  case SVt_PV: /* String */
+    {
+      /* use original SV, see if it's a method in the current object */
+      char *attr_str = SvPV(attrspec, my_na);
+      char *method = SvPV(sv, my_na);
+      sv = SvREFCNT_inc(sv);
+      if (*attr_str == 's') {
+	int i;
+	SV *val;
+	dSP;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(SP);
+	XPUSHs(self);
+	XPUSHs(sv);
+	PUTBACK;
+	i = perl_call_method("can", G_SCALAR);
+	SPAGAIN;
+	if (i)
+	  val = POPs;
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	if (0) {
+	  printf(", $self->can(%s) return(%d,%d)", name, i, SvOK(val));
+	}
+	if (0) { /* MAC: the can() call isn't working for some reason */
+	if (!i || !SvOK(val))
+	  croak("Method '%s' not found for %s handler (%i)", method, name, i);
+	}
+	if (0) {
+	  printf(", saving Method name '%s'\n", method);
+	}
+      }
+    }
+    break;
+  default:
+    { /* Didn't match */
+      croak("Handler (%d) for %s is not a method, subroutine, or array ref",
+	    name, type);
+    }
+  }
+
+  return sv;
+}
 
 static SV*
 attrspec_compile(SV* src)
@@ -1512,6 +1590,7 @@ handler(pstate, name_sv,...)
 	PSTATE* pstate
 	SV* name_sv
     PREINIT:
+	SV* self = ST(0);
 	STRLEN name_len;
 	char *name = SvPV(name_sv, name_len);
         int event = -1;
@@ -1541,27 +1620,28 @@ handler(pstate, name_sv,...)
 	    croak("Handler argument reference is not an array");
 	  av = (AV*)sv;
 
-	  svp = av_fetch(av, 0, 0);
-	  if (svp) {
-	    SvREFCNT_dec(h->cb);
-	    h->cb = SvREFCNT_inc(*svp);
-	  }
-
 	  svp = av_fetch(av, 1, 0);
 	  if (svp) {
 	    SvREFCNT_dec(h->attrspec);
 	    h->attrspec = attrspec_compile(*svp);
 	  }
 
+	  svp = av_fetch(av, 0, 0);
+	  if (svp) {
+	    SvREFCNT_dec(h->cb);
+	    h->cb = check_handler(name, *svp, h->attrspec, self);
+	    /* h->cb = SvREFCNT_inc(*svp); */
+	  }
 	}
         else if (items > 2) {
-	  SvREFCNT_dec(h->cb);
-	  h->cb = newSVsv(ST(2));
-
 	  if (items > 3) {
 	    SvREFCNT_dec(h->attrspec);
 	    h->attrspec = attrspec_compile(ST(3));
 	  }
+
+	  SvREFCNT_dec(h->cb);
+	  h->cb = check_handler(name, ST(2), h->attrspec, self);
+	  /* h->cb = newSVsv(ST(2)); */
 	}
 
         XSRETURN(1);
