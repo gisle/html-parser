@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.46 1999/11/30 07:11:12 gisle Exp $
+/* $Id: Parser.xs,v 2.47 1999/11/30 12:54:08 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -262,35 +262,115 @@ html_handle(PSTATE* p_state,
 	    SV* self
 	    )
 {
-  int i;
-  char *s = beg;
+  struct p_handler *h = &p_state->handlers[event];
 
-  switch(event) {
-  case E_DECLARATION: printf("DECLARATION"); break;
-  case E_COMMENT:     printf("COMMENT"); break;
-  case E_START:       printf("START"); break;
-  case E_END:         printf("END"); break;
-  case E_TEXT:        printf("TEXT"); break;
-  case E_PROCESS:     printf("PROCESS"); break;
-  default:            printf("EVENT #%d", event); break;
-  }
+  if (1) {
+    char *s = beg;
+    int i;
 
-  printf(" [");
-  while (s < end) {
-    if (*s == '\n') {
-      putchar('\\'); putchar('n');
+    /* print debug output */
+    switch(event) {
+    case E_DECLARATION: printf("DECLARATION"); break;
+    case E_COMMENT:     printf("COMMENT"); break;
+    case E_START:       printf("START"); break;
+    case E_END:         printf("END"); break;
+    case E_TEXT:        printf("TEXT"); break;
+    case E_PROCESS:     printf("PROCESS"); break;
+    default:            printf("EVENT #%d", event); break;
     }
-    else
-      putchar(*s);
-    s++;
+
+    printf(" [");
+    while (s < end) {
+      if (*s == '\n') {
+	putchar('\\'); putchar('n');
+      }
+      else
+	putchar(*s);
+      s++;
+    }
+    printf("] %d\n", end - beg);
+    for (i = 0; i < num_tokens; i++) {
+      printf("  token %d: %d %d\n",
+	     i,
+	     tokens[i].beg - beg,
+	     tokens[i].end - tokens[i].beg);
+    }
   }
-  printf("] %d\n", end - beg);
-  for (i = 0; i < num_tokens; i++) {
-    printf("  token %d: %d %d\n",
-	   i,
-	   tokens[i].beg - beg,
-	   tokens[i].end - tokens[i].beg);
+
+  if (!h->cb || !SvOK(h->cb)) {
+    /* event = E_DEFAULT; */
+    h = &p_state->handlers[E_DEFAULT];
+    if (!h->cb || !SvOK(h->cb))
+      return;
   }
+
+  if (1) {
+    dSP;
+    STRLEN my_na;
+    char *attrspec = SvPV(h->attrspec, my_na);
+
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+
+    for (; *attrspec; attrspec++) {
+      SV* arg = 0;
+      switch(*attrspec) {
+      case 's':
+	arg = self;
+	break;
+
+      case 'T':
+	/* tokens flat */
+	break;
+
+      case 't':
+	/* tokens arrayref */
+	break;
+
+      case '#':
+	/* tokenpos */
+	break;
+
+      case 'n':
+	/* tagname */
+	break;
+
+      case 'a':
+	/* attr_hashref */
+	break;
+
+      case 'A':
+	/* attrseq arrayref (v2 compatibility stuff) */
+	break;
+	
+      case 'd':
+	/* origtext, data */
+	break;
+
+      case 'D':
+	/* decoded text */
+	break;
+
+      case 'L':
+	/* literal */
+	break;
+
+      default:
+	arg = sv_2mortal(newSVpvn(attrspec, 1));
+	break;
+      }
+      XPUSHs(arg);
+    }
+
+    PUTBACK;
+  
+    perl_call_sv(h->cb, G_DISCARD | G_VOID);
+
+    FREETMPS;
+    LEAVE;
+  }
+
 }
 
 #if 0 /*********************************************************/
