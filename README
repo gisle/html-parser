@@ -1,13 +1,8 @@
-HTML-Parser
------------
+OVERVIEW
 
-This is a collection of modules that parse and extract information
-from HTML documents.  Bug reports and issues for discussion about
-these modules can be sent to the <libwww@perl.org> mailing list.
-Remember to also look at the HTML-Tree package that build on
-HTML::Parser to create and extract information from HTML syntax trees.
-
-The modules present in this collection are:
+The HTML-Parser distribution is is a collection of modules that parse
+and extract information from HTML documents.  The modules present in
+this collection are:
 
   HTML::Parser - The parser base class.  It receives arbitrary sized
         chunks of the HTML text, recognizes markup elements, and
@@ -31,15 +26,18 @@ The modules present in this collection are:
         token setup and methods for extracting text.  Many simple
         parsing needs are probably best attacked with this module.
 
+In addition take a look at the HTML-Tree package that build on
+HTML::Parser to create and extract information from HTML syntax trees
+(similar to HTML DOM).
 
 
 PREREQUISITES
 
 In order to install and use this package you will need Perl version
-5.005 or better.  The HTML::Tagset module should also be installed.
+5.005 or better.  The HTML::Tagset module should be installed.
+
 If you intend to use the HTML::HeadParser you probably want to install
 libwww-perl too.
-
 
 
 INSTALLATION
@@ -51,6 +49,11 @@ Just follow the usual procedure:
    make test
    make install
 
+
+REPORTING BUGS
+
+Bug reports and issues for discussion about these modules can be sent
+to the <libwww@perl.org> mailing list.
 
 
 COPYRIGHT
