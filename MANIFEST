@@ -20,6 +20,8 @@ t/headparser.t
 t/headparser-http.t
 t/linkextor-base.t
 t/linkextor-rel.t
+t/marked-sect.t
 t/parser.t
 t/parsefile.t
+t/process.t
 t/tokeparser.t
