@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.98 2004/11/11 10:12:51 gisle Exp $
+/* $Id: hparser.c,v 2.99 2004/11/15 22:19:49 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -27,6 +27,7 @@ literal_mode_elem[] =
     {5, "style", 1},
     {3, "xmp", 1},
     {9, "plaintext", 1},
+    {5, "title", 0},
     {8, "textarea", 0},
     {0, 0, 0}
 };
