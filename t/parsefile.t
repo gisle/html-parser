@@ -35,6 +35,7 @@ my $io = IO::File->new($filename) || die;
 MyParser->new->parse_file($io);
 $io->seek(0, 0) || die;
 MyParser->new->parse_file(*$io);
+close($io);  # needed because of bug in perl
 undef($io);
 
 unlink($filename) or warn "Can't unlink $filename: $!";
