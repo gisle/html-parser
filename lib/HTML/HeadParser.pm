@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.10 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.11 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -130,18 +130,19 @@ sub parse
 sub parse_file
 {
     my($self, $file) = @_;
-    no strict 'refs';  # so that a symbol ref as $file works
-    local(*F);
-    unless (ref($file) || $file =~ /^\*[\w:]+$/) {
+    my $opened;
+    if (!ref($file) && ref(\$file) ne "GLOB") {
         # Assume $file is a filename
-        open(F, $file) || die "Can't open $file: $!";
-        $file = \*F;
+        local(*F);
+        open(F, $file) || return undef;
+        $opened++;
+        $file = *F;
     }
     my $chunk = '';
     while(read($file, $chunk, 512)) {
         $self->parse($chunk) || last;
     }
-    close($file);
+    close($file) if $opened;
     return $self;
 }
 
