@@ -16,6 +16,8 @@
 
     Documented that HTML::Filter is depreciated.
 
+    Made backslash reserved in literal argspec strings.
+
     Added several new test scripts.
 
 
