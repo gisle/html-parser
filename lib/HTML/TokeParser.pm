@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.6 1999/10/29 12:00:41 gisle Exp $
+# $Id: TokeParser.pm,v 2.7 1999/10/29 12:18:50 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp qw(croak);
@@ -193,7 +193,8 @@ reading, then the constructor will return an undefined value and $!
 will tell you why it failed.
 
 If the argument is a reference to a plain scalar, then this scalar is
-taken to be the document to parse.
+taken to be the literal document to parse.  Changing the value of this
+scalar before all tokens have been extracted is not allowed.
 
 Otherwise the argument is taken to be some object that the
 C<HTML::TokeParser> can read() from when it need more data.  Typically
