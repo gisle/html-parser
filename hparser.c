@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.44 2000/06/28 11:35:05 gisle Exp $
+/* $Id: hparser.c,v 2.45 2000/09/14 18:20:32 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -401,7 +401,7 @@ argspec_compile(SV* src)
   while (s < end) {
     if (isHNAME_FIRST(*s)) {
       char *name = s;
-      enum argcode a = ARG_SELF;
+      int a = ARG_SELF;
       char temp;
       char **arg_name;
 

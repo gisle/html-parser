@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.88 2000/03/13 11:27:24 gisle Exp $
+/* $Id: Parser.xs,v 2.89 2000/09/14 18:20:32 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -50,7 +50,9 @@ newSVpvn(char *s, STRLEN len)
 #endif /* not perl5.004_05 */
 #endif /* perl5.004_XX */
 
-
+#ifndef MEMBER_TO_FPTR
+   #define MEMBER_TO_FPTR(x) (x)
+#endif
 
 /*
  * Include stuff.  We include .c files instead of linking them,
@@ -79,11 +81,11 @@ static SV*
 check_handler(SV* h)
 {
   if (SvROK(h)) {
-    SV* ref = SvRV(h);
-    if (SvTYPE(ref) == SVt_PVCV)
+    SV* myref = SvRV(h);
+    if (SvTYPE(myref) == SVt_PVCV)
       return newSVsv(h);
-    if (SvTYPE(ref) == SVt_PVAV)
-      return SvREFCNT_inc(ref);
+    if (SvTYPE(myref) == SVt_PVAV)
+      return SvREFCNT_inc(myref);
     croak("Only code or array references allowed as handler");
   }
   return SvOK(h) ? newSVsv(h) : 0;
@@ -153,7 +155,7 @@ magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 }
 
 
-MGVTBL vtbl_free_pstate = {0, 0, 0, 0, magic_free_pstate};
+MGVTBL vtbl_free_pstate = {0, 0, 0, 0, MEMBER_TO_FPTR(magic_free_pstate)};
 
 
 
