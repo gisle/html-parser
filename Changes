@@ -1,3 +1,15 @@
+1999-12-01   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_16
+
+   Support "event" in argspec.  It expands to the name of the
+   handler (minus "default").
+
+   Fix core dump for large start tags.  The tokens_grow() routine
+   needed an adjustment.  Added test for this; t/largstags.t.
+
+
+
 1999-11-30   Gisle Aas <gisle@aas.no>
 
    Release 2.99_15
