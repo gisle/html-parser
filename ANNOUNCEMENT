@@ -13,13 +13,13 @@ HTML-Parser-2.25, but we some parts of an HTML document is now
 recognized differently:
 
   - Anything inside <script> and <style> will now be returned as cdata
-    text.  HTML-Parser-2.25 would recongnize markup within these sections.
+    text.  HTML-Parser-2.25 would recognize markup within these sections.
     The same is also true for the depreciated tags <xmp> and <plaintext>.
 
   - Nearly anything is allowed as tag and attribute names by default
     now.  Previously strange names caused the tag to be parsed as text.
 
-  - <?...> is now recongnized as a processing instruction
+  - <?...> is now recognized as a processing instruction
 
 New features include:
 
