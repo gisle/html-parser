@@ -7,8 +7,6 @@ use HTML::Parser;
 
 $p = HTML::Parser->new(api_version => 3);
 
-use Data::Dump; Data::Dump::dump($p);
-
 $p->xml_mode(1);
 
 # We should not be able to simply modify this stuff
