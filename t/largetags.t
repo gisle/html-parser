@@ -6,7 +6,7 @@ print "1..2\n";
 use strict;
 use HTML::Parser ();
 
-my $p = HTML::Parser->new(3);
+my $p = HTML::Parser->new(api_version => 3);
 
 $p->handler("start" =>
 	    sub {
