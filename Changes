@@ -1,3 +1,14 @@
+2004-04-01   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.36
+
+     Improved MSIE/Mozilla compatibility.  If the same attribute
+     name repeats for a start tag, use the first value instead
+     of the last.  Patch by Nick Duffek <html-parser@duffek.com>.
+     <https://rt.cpan.org/Ticket/Display.html?id=5472>
+
+
+
 2003-12-12   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.35
