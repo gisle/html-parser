@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3992';  # $Date: 2004/11/29 10:53:15 $
+$VERSION = '3.3992';  # $Date: 2004/11/29 11:02:41 $
 
 require HTML::Entities;
 
@@ -454,6 +454,8 @@ encoded.  The character can also be represented by the entity
 then C<dtext> will be reported as "\xE2\x99\xA5\x{2665}" without
 C<utf8_mode> enabled, but as "\xE2\x99\xA5\xE2\x99\xA5" when enabled.
 The later string is what you want.
+
+This option is only available with perl-5.8 or better.
 
 =item $p->xml_mode
 
