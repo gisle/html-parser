@@ -1,3 +1,31 @@
+1999-12-08   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_94 (should almost be a 3.00 candidate)
+
+    Renamed 'cdata_flag' as 'is_cdata'.
+
+    Dropped support for wrapping callback handler and argspec
+    in an array and passing a reference to $p->handler.  It
+    created ambiguities when you want to pass a array as
+    handler destination and not update argspec.  The wrapping
+    for constructor arguments are unchanged.
+
+    Reworked the documentation after updates from Michael.
+
+    Simplified internal check_handler().  It should probably simply
+    be inlined in handler() again.
+
+    Added argspec 'length' and 'undef'
+
+    Fix statement-less label.  Fix suggested by Matthew Langford
+    <langfml@Eng.Auburn.EDU>.
+
+    Added two more example programs: eg/hstrip and eg/htext.
+
+    Various minor patches from Michael.
+
+
+
 1999-12-07   Gisle Aas <gisle@aas.no>
 
     Release 2.99_93
