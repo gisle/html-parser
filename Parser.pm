@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_07';  # $Date: 1999/11/08 14:11:29 $
+$VERSION = '2.99_07';  # $Date: 1999/11/08 15:04:49 $
 
 require HTML::Entities;
 
@@ -37,7 +37,6 @@ sub new
 sub _set_up_method_callbacks
 {
     my $self = shift;
-    require HTML::Entities;
 
     $self->pass_cbdata(1);
 
@@ -52,8 +51,7 @@ sub _set_up_method_callbacks
 		       my(%attr, @seq);
 		       while (@$attr) {
 			   my $key = shift @$attr;
-			   my $val  = HTML::Entities::decode(shift @$attr);
-			   $attr{$key} = $val;
+			   $attr{$key} = shift @$attr;
 			   push(@seq, $key);
 		       }
 		       $obj->start($tag, \%attr, \@seq, $orig);
