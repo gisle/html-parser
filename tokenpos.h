@@ -41,8 +41,8 @@ tokens_grow(token_pos_t **token_ptr, int *token_lim_ptr, bool realloc)
     token_pos_t *new_tokens;
     int i;
     New(57, new_tokens, new_lim, token_pos_t);
-    for (i = 0; i <= *token_lim_ptr; i++)
-      new_tokens[i] = *token_ptr[i];
+    for (i = 0; i < *token_lim_ptr; i++)
+      new_tokens[i] = (*token_ptr)[i];
     *token_ptr = new_tokens;
   }
   *token_lim_ptr = new_lim;
