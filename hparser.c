@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.85 2003/05/13 19:32:54 gisle Exp $
+/* $Id: hparser.c,v 2.86 2003/08/15 00:02:33 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -717,6 +717,28 @@ flush_pending_text(PSTATE* p_state, SV* self)
     p_state->column        = old_column;
 }
 
+static char*
+skip_until_gt(char *beg, char *end)
+{
+    /* tries to emulate quote skipping behaviour observed in MSIE */
+    char *s = beg;
+    char quote = '\0';
+    char prev = ' ';
+    while (s < end) {
+	if (!quote && *s == '>')
+	    return s;
+	if (*s == '"' || *s == '\'') {
+	    if (*s == quote) {
+		quote = '\0';  /* end of quoted string */
+	    }
+	    else if (!quote && (prev == ' ' || prev == '=')) {
+		quote = *s;
+	    }
+	}
+	prev = *s++;
+    }
+    return end;
+}
 
 static char*
 parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
@@ -1281,8 +1303,14 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 	while (s < end && isHCTYPE(*s, name_char))
 	    s++;
 	tagname.end = s;
-	while (isHSPACE(*s))
-	    s++;
+
+	if (p_state->strict_names) {
+	    while (isHSPACE(*s))
+		s++;
+	}
+	else {
+	    s = skip_until_gt(s, end);
+	}
 	if (s < end) {
 	    if (*s == '>') {
 		s++;
@@ -1290,6 +1318,20 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 		report_event(p_state, E_END, beg, s, &tagname, 1, self);
 		return s;
 	    }
+	}
+	else {
+	    return beg;
+	}
+    }
+    else if (!p_state->strict_comment) {
+	s = skip_until_gt(s, end);
+	if (s < end) {
+	    token_pos_t empty;
+	    empty.beg = beg + 2;
+	    empty.end = s;
+	    s++;
+	    report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+	    return s;
 	}
 	else {
 	    return beg;

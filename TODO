@@ -29,10 +29,6 @@ MINOR "BUGS" (alias FEATURES)
 
 
 MSIE bug compatibility
- - </foo a=1>        - allow attributes on end tags
- - </foo "foo <> ">  - allow quoted strings on end tags
- - </ comment>       - treated as comment (any nonchar after / will do)
- - </ "<>" >         - quoted text
  - <!-- ... >        - comments that end with ">".  MSIE
                        first looks for "-->".  If it hits
                        EOF before it finds it it goes back

@@ -51,6 +51,7 @@ t/linkextor-base.t	Test HTML::LinkExtor
 t/linkextor-rel.t	Test HTML::LinkExtor
 t/magic.t		Test that checking magic head in p_state works
 t/marked-sect.t         Test marked section support
+t/msie-compat.t		Test some MSIE compatibility edge cases
 t/offset.t		Test attrspec offset
 t/options.t             Test set/get for various parser options
 t/parsefile.t		Test the $p->parse_file() method
