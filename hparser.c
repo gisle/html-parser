@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.27 1999/12/09 19:07:33 gisle Exp $
+/* $Id: hparser.c,v 2.28 1999/12/13 11:18:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -42,10 +42,28 @@ enum argcode {
   ARG_OFFSET,
   ARG_LENGTH,
   ARG_EVENT,
-  ARG_LITERAL,
   ARG_UNDEF,
+  ARG_LITERAL, /* Always keep last */
 };
 
+char *argname[] = {
+  /* Must be in the same order as enum argcode */
+  "self",     /* ARG_SELF */
+  "tokens",   /* ARG_TOKENS */   
+  "tokenpos", /* ARG_TOKENPOS */
+  "token0",   /* ARG_TOKEN0 */
+  "tagname",  /* ARG_TAGNAME */
+  "attr",     /* ARG_ATTR */
+  "attrseq",  /* ARG_ATTRSEQ */
+  "text",     /* ARG_TEXT */
+  "dtext",    /* ARG_DTEXT */
+  "is_cdata", /* ARG_IS_CDATA */
+  "offset",   /* ARG_OFFSET */
+  "length",   /* ARG_LENGTH */
+  "event",    /* ARG_EVENT */
+  "undef",    /* ARG_UNDEF */
+              /* ARG_LITERAL (not compared) */
+};
 
 
 /*
@@ -345,46 +363,33 @@ argspec_compile(SV* src)
   char *s = SvPV(src, len);
   char *end = s + len;
 
-  static HV* names = 0;
-  if (!names) {
-    /* printf("Init argspec names\n"); */
-    names = newHV();
-    hv_store(names, "self", 4,        newSViv(ARG_SELF),      0);
-    hv_store(names, "tokens", 6,      newSViv(ARG_TOKENS),    0);
-    hv_store(names, "tokenpos", 8,    newSViv(ARG_TOKENPOS),  0);
-    hv_store(names, "token0", 6,      newSViv(ARG_TOKEN0),    0);
-    hv_store(names, "tagname", 7,     newSViv(ARG_TAGNAME),   0);
-    hv_store(names, "attr", 4,        newSViv(ARG_ATTR),      0);
-    hv_store(names, "attrseq", 7,     newSViv(ARG_ATTRSEQ),   0);
-    hv_store(names, "text", 4,        newSViv(ARG_TEXT),      0);
-    hv_store(names, "dtext", 5,       newSViv(ARG_DTEXT),     0);
-    hv_store(names, "is_cdata", 8,    newSViv(ARG_IS_CDATA),  0);
-    hv_store(names, "offset", 6,      newSViv(ARG_OFFSET),    0);
-    hv_store(names, "length", 6,      newSViv(ARG_LENGTH),    0);
-    hv_store(names, "event", 5,       newSViv(ARG_EVENT),     0);
-    hv_store(names, "undef", 5,       newSViv(ARG_UNDEF),     0);
-  }
-
   while (isHSPACE(*s))
     s++;
   while (s < end) {
     if (isHNAME_FIRST(*s)) {
       char *name = s;
-      SV** svp;
+      enum argcode a = ARG_SELF;
+      char temp;
+      char **arg_name;
+
       s++;
       while (isHNAME_CHAR(*s))
 	s++;
 
       /* check identifier */
-      svp = hv_fetch(names, name, s - name, 0);
-      if (svp) {
-	unsigned char c = (unsigned char)SvIV(*svp);
-	sv_catpvf(argspec, "%c", c);
+      temp = *s;
+      *s = '\0';
+      for ( arg_name = argname; a < ARG_LITERAL ; ++a, ++arg_name ) {
+	if (strEQ(*arg_name, name))
+	  break;
+      }
+      if (a < ARG_LITERAL) {
+	sv_catpvf(argspec, "%c", (unsigned char) a);
       }
       else {
-	*s = '\0';
 	croak("Unrecognized identifier %s in argspec", name);
       }
+      *s = temp;
     }
     else if (*s == '"' || *s == '\'') {
       char *string_beg = s;
