@@ -18,7 +18,7 @@
 
    Release 2.99_10
 
-   The mkhctype and mkpfunc scripts did use \z inside RE.  This
+   The mkhctype and mkpfunc scripts were using \z inside RE.  This
    did not work for perl5.004.  Replaced them with plain old
    dollar signs.
 
@@ -33,9 +33,9 @@
    Some more test suite patches for Win32 by Michael A. Chase
    <mchase@ix.netcom.com>
 
-   Implemented $p->strict_names() attribute.  By default we now
+   Implemented $p->strict_names attribute.  By default we now
    allow almost anything in tag and attribute names.  This is much
-   closer to the behaviour of some popular browsers.  This allow us
+   closer to the behaviour of some popular browsers.  This allows us
    to parse broken tags like this example from the LWP mailing list:
    <IMG ALIGN=MIDDLE SRC=newprevlstGr.gif ALT=[PREV LIST] BORDER=0>
 
@@ -51,7 +51,7 @@
    Make Parser.xs compile on perl5.004_05 too.
 
    New callback called 'default'.  This will be called for any
-   document text no other callback shows interest in.
+   document text no other callback shows an interest in.
 
    Patch by Michael A. Chase <mchase@ix.netcom.com> that should
    help clean up files for the test suite on Win32.
@@ -67,7 +67,7 @@
    New boolean attribute v2_compat.  This influences how attributes
    are reported for start tags.
 
-   HTML::Filter filters now process instructions too.
+   HTML::Filter now filters process instructions too.
 
    Faster HTML::LinkExtor by taking advantage of the new
    callback interface.  The module now also uses URI.pm (instead
