@@ -17,6 +17,7 @@ mkhctype
 mkpfunc
 tokenpos.h
 typemap
+t/attrspec.t
 t/cases.t
 t/default.t
 t/entities.t
