@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.6 1999/12/04 23:40:04 gisle Exp $
+/* $Id: hparser.c,v 2.7 1999/12/04 23:43:03 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -135,7 +135,14 @@ report_event(PSTATE* p_state,
 	AV* av = newAV();
 	int i;
 	for (i = 0; i < num_tokens; i++) {
-	  av_push(av, newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg));
+	  if (tokens[i].beg >= beg && tokens[i].beg < end &&
+	      tokens[i].end >= beg && tokens[i].end < end)
+	  {
+	    av_push(av, newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg));
+	  }
+	  else {
+	    av_push(av, newSVpvn("", 0));
+	  }
 	}
 	arg = sv_2mortal(newRV_noinc((SV*)av));
       }
@@ -147,8 +154,16 @@ report_event(PSTATE* p_state,
 	AV* av = newAV();
 	int i;
 	for (i = 0; i < num_tokens; i++) {
-	  av_push(av, newSViv(tokens[i].beg-beg));
-	  av_push(av, newSViv(tokens[i].end-tokens[i].beg));
+	  if (tokens[i].beg >= beg && tokens[i].beg < end &&
+	      tokens[i].end >= beg && tokens[i].end < end)
+	  {
+	    av_push(av, newSViv(tokens[i].beg-beg));
+	    av_push(av, newSViv(tokens[i].end-tokens[i].beg));
+	  }
+	  else {
+	    av_push(av, newSViv(0));
+	    av_push(av, newSViv(0));
+	  }
 	}
 	arg = sv_2mortal(newRV_noinc((SV*)av));
       }
