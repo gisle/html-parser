@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.51 1999/11/30 13:53:48 gisle Exp $
+/* $Id: Parser.xs,v 2.52 1999/11/30 16:06:45 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -152,6 +152,7 @@ literal_mode_elem[] =
 
 static HV* entity2char;  /* %HTML::Entities::entity2char */
 
+
 static SV*
 sv_lower(SV* sv)
 {
@@ -161,6 +162,7 @@ sv_lower(SV* sv)
 	*s = toLOWER(*s);
    return sv;
 }
+
 
 static SV*
 decode_entities(SV* sv, HV* entity2char)
@@ -250,6 +252,7 @@ decode_entities(SV* sv, HV* entity2char)
   }
   return sv;
 }
+
 
 static void
 html_handle(PSTATE* p_state,
@@ -447,409 +450,6 @@ html_handle(PSTATE* p_state,
 
 }
 
-#if 0 /*********************************************************/
-
-static void
-html_default(PSTATE* p_state, char* beg, char *end, SV* self)
-{	
-  SV *cb = p_state->default_cb;
-  if (beg == end)
-    return;
-
-  if (cb) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-    
-  }
-}
-
-static void
-html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* self)
-{
-  AV *accum = p_state->accum;
-  SV *cb = p_state->text_cb;
-
-  SV* text;
-
-  if (beg == end)
-    return;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  if (!accum && !cb) {
-    html_default(p_state, beg, end, self);
-    return;
-  }
-
-  if (p_state->unbroken_text) {
-    if (p_state->pending_text)
-      sv_catpvn(p_state->pending_text, beg, end - beg);
-    else
-      p_state->pending_text = newSVpvn(beg, end - beg);
-    return;
-  }
-
-  text = newSVpvn(beg, end - beg);
-  if (!cdata && p_state->decode_text_entities) {
-    decode_entities(text, entity2char);
-    cdata++;
-  }
-
-  if (accum) {
-    AV* av = newAV();
-    av_push(av, newSVpv("T", 1));
-    av_push(av, text);
-    if (cdata)
-      av_push(av, newSVsv(&PL_sv_yes));
-    av_push(accum, newRV_noinc((SV*)av));
-    return;
-  }
-
-  if (cb) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    XPUSHs(sv_2mortal(text));
-    XPUSHs(boolSV(cdata));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-  }
-}
-
-
-static void
-flush_pending_text(PSTATE* p_state, SV* self)
-{
-  char *s;
-  STRLEN len;
-  bool old_unbroken_text;
-
-  if (!p_state->pending_text)
-    return;
-  old_unbroken_text = p_state->unbroken_text;
-  p_state->unbroken_text = 0;
-  s = SvPV(p_state->pending_text, len);
-  html_text(p_state, s, s+len, 0, self);
-  SvREFCNT_dec(p_state->pending_text);
-  p_state->pending_text = 0;
-  p_state->unbroken_text = old_unbroken_text;
-  return;
-}
-
-
-static void
-html_end(PSTATE* p_state,
-	 char *tag_beg, char *tag_end,
-	 char *beg, char *end,
-	 SV* self)
-{
-  AV *accum;
-  SV *cb;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  flush_pending_text(p_state, self);
-
-  accum = p_state->accum;
-  if (accum) {
-    AV* av = newAV();
-    SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
-    if (!p_state->keep_case && !p_state->xml_mode)
-      sv_lower(tag);
-    
-    av_push(av, newSVpv("E", 1));
-    av_push(av, tag);
-    av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, newRV_noinc((SV*)av));
-    return;
-  }
-
-  cb = p_state->end_cb;
-  if (cb) {
-    SV *sv;
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
-    if (!p_state->keep_case && !p_state->xml_mode)
-      sv_lower(sv);
-    XPUSHs(sv);
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-    return;
-  }
-
-  html_default(p_state, beg, end, self);
-}
-
-
-static void
-html_start(PSTATE* p_state,
-	   char *tag_beg, char *tag_end,
-	   AV* tokens,
-	   int empty_tag,
-	   char *beg, char *end,
-	   SV* self)
-{
-  AV *accum = p_state->accum;
-  SV *cb = p_state->start_cb;
-
-  HV *attr;
-  AV *attr_seq;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  flush_pending_text(p_state, self);
-
-  if ((accum || cb) && p_state->v2_compat) {
-    /* need to construct an attr hash and an attr_seq array */
-    int i;
-    int len = av_len(tokens);
-    attr = newHV();
-    attr_seq = newAV();
-    for (i = 0; i <= len; i += 2) {
-      SV** svp1 = av_fetch(tokens, i,   0);
-      SV** svp2 = av_fetch(tokens, i+1, 0);
-      if (svp1) {
-	av_push(attr_seq, SvREFCNT_inc(*svp1));
-	if (svp2)
-	  if (!hv_store_ent(attr, *svp1, SvREFCNT_inc(*svp2), 0))
-	    SvREFCNT_dec(*svp2);
-      }
-    }
-  }
-
-  if (accum) {
-    AV* av = newAV();
-    SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
-    if (!p_state->keep_case && !p_state->xml_mode)
-      sv_lower(tag);
-    
-    av_push(av, newSVpv("S", 1));
-    av_push(av, tag);
-    if (p_state->v2_compat) {
-      av_push(av, newRV_noinc((SV*)attr));
-      av_push(av, newRV_noinc((SV*)attr_seq));
-    }
-    else {
-      av_push(av, newRV_inc((SV*)tokens));
-    }
-    av_push(av, newSVpv(beg, end - beg));
-    av_push(accum, newRV_noinc((SV*)av));
-  }
-  else if (cb) {
-    SV *sv;
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    sv = sv_2mortal(newSVpv(tag_beg, tag_end - tag_beg));
-    if (!p_state->keep_case && !p_state->xml_mode)
-      sv_lower(sv);
-    XPUSHs(sv);
-    if (p_state->v2_compat) {
-      XPUSHs(sv_2mortal(newRV_noinc((SV*)attr)));
-      XPUSHs(sv_2mortal(newRV_noinc((SV*)attr_seq)));
-    }
-    else {
-      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
-    }
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-  }
-  else {
-    html_default(p_state, beg, end, self);
-    return;
-  }
-
-  if (empty_tag)
-    html_end(p_state, tag_beg, tag_end, tag_beg, tag_beg, self);
-}
-
-
-static void
-html_process(PSTATE* p_state,
-	     char *pi_beg, char *pi_end,
-	     char *beg, char *end,
-	     SV* self)
-{
-  AV *accum;
-  SV *cb;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  flush_pending_text(p_state, self);
-
-  accum = p_state->accum;
-  if (accum) {
-    AV* av = newAV();
-    av_push(av, newSVpv("PI", 2));
-    av_push(av, newSVpvn(pi_beg, pi_end - pi_beg));
-    av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, newRV_noinc((SV*)av));
-    return;
-  }
-
-  cb = p_state->pi_cb;
-  if (cb) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    XPUSHs(sv_2mortal(newSVpvn(pi_beg, pi_end - pi_beg)));
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-    return;
-  }
-
-  html_default(p_state, beg, end, self);
-}
-
-
-static void
-html_comment(PSTATE* p_state, char *beg, char *end, SV* self)
-{
-  AV *accum;
-  SV *cb;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  flush_pending_text(p_state, self);
-
-  accum = p_state->accum;
-  if (accum) {
-    AV* av = newAV();
-    av_push(av, newSVpv("C", 1));
-    av_push(av, newSVpvn(beg, end - beg));
-    av_push(accum, newRV_noinc((SV*)av));
-    return;
-  }
-
-  cb = p_state->com_cb;
-  if (cb) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-  }
-}
-
-
-static void
-html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* self)
-{
-  AV *accum;
-  SV *cb;
-
-#ifdef MARKED_SECTION
-  if (p_state->ms == MS_IGNORE)
-    return;
-#endif
-
-  flush_pending_text(p_state, self);
-
-  accum = p_state->accum;
-  if (accum) {
-    AV* av = newAV();
-    av_push(av, newSVpv("D", 1));
-    if (!p_state->v2_compat)
-      av_push(av, newRV_inc((SV*)tokens));
-    av_push(av, newSVpv(beg, end - beg));
-    av_push(accum, newRV_noinc((SV*)av));
-    return;
-  }
-
-  cb = p_state->decl_cb;
-  if (cb) {
-    dSP;
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
-    if (p_state->pass_self)
-      XPUSHs(self);
-    if (!p_state->v2_compat)
-      XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
-    XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
-    PUTBACK;
-
-    perl_call_sv(cb, G_DISCARD);
-
-    FREETMPS;
-    LEAVE;
-    return;
-  }
-
-  html_default(p_state, beg-2, end+1, self);
-}
-
-#endif /*********************************************************/
-
-
 
 static char*
 html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
@@ -941,6 +541,7 @@ html_parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 
   return 0;
 }
+
 
 #ifdef MARKED_SECTION
 
@@ -1066,6 +667,7 @@ html_parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
   return beg;
 }
 #endif
+
 
 static char*
 html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
@@ -1350,6 +952,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
   return beg;
 }
 
+
 static char*
 html_parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 {
@@ -1388,6 +991,7 @@ html_parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
   return 0;
 }
 
+
 static char*
 html_parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 {
@@ -1420,13 +1024,16 @@ html_parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
   return 0;
 }
 
+
 static char*
 html_parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   return 0;
 }
 
+
 #include "pfunc.h"  /* declares the html_parsefunc[] */
+
 
 static void
 html_parse(PSTATE* p_state,
@@ -1635,7 +1242,6 @@ html_parse(PSTATE* p_state,
   }
   return;
 }
-
 
 
 static PSTATE*
