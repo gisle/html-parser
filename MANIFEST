@@ -11,6 +11,7 @@ lib/HTML/Filter.pm
 lib/HTML/HeadParser.pm
 lib/HTML/LinkExtor.pm
 lib/HTML/TokeParser.pm
+mkhctype
 mkpfunc
 t/cases.t
 t/entities.t
