@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.31';  # $Date: 2003/10/10 09:56:15 $
+$VERSION = '3.31';  # $Date: 2003/10/10 11:07:31 $
 
 require HTML::Entities;
 
@@ -997,7 +997,9 @@ the http://search.cpan.org/~gaas/HTML-Parser/ page.
 =head1 BUGS
 
 The <style> and <script> sections do not end with the first "</", but
-need the complete corresponding end tag.
+need the complete corresponding end tag.  MSIE avoids terminating a
+<script> section if the </script> occurs inside quotes.  HTML::Parser
+is not that "smart".
 
 When the I<strict_comment> option is enabled, we still recognize
 comments where there is something other than whitespace between even
