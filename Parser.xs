@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.27 1999/11/17 14:05:21 gisle Exp $
+/* $Id: Parser.xs,v 2.28 1999/11/17 19:55:39 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1213,7 +1213,7 @@ html_parse(PSTATE* p_state,
       /* here we rely on '\0' termination of perl svpv buffers */
       if (*s == '/') {
 	s++;
-	while (*l && *s == *l) {
+	while (*l && toLOWER(*s) == *l) {
 	  s++;
 	  l++;
 	}
