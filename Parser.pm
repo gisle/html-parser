@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.37';  # $Date: 2004/11/10 18:50:31 $
+$VERSION = '3.37';  # $Date: 2004/11/11 10:12:51 $
 
 require HTML::Entities;
 
@@ -442,6 +442,16 @@ entities alone.
 
 By default, tagnames and attribute names are down-cased.  Enabling this
 attribute leaves them as found in the HTML source document.
+
+=item $p->closing_plaintext
+
+=item $p->closing_plaintext( $bool )
+
+By default, "plaintext" element can never be closed. Everything up to
+the end of the document is parsed in CDATA mode.  This historical
+behaviour is what at least MSIE does.  Enabling this attribute makes
+closing "</plaintext>" tag effective and the parsing process will resume
+after seeing this tag.  This emulates gecko-based browsers.
 
 =back
 

@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.97 2004/11/08 14:33:01 gisle Exp $
+/* $Id: hparser.c,v 2.98 2004/11/11 10:12:51 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1438,7 +1438,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 		    l++;
 		}
 
-		if (!*l && strNE(p_state->literal_mode, "plaintext")) {
+		if (!*l && (strNE(p_state->literal_mode, "plaintext") || p_state->closing_plaintext)) {
 		    /* matched it all */
 		    token_pos_t end_token;
 		    end_token.beg = end_text + 2;
