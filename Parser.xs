@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.31 1999/11/17 22:45:48 gisle Exp $
+/* $Id: Parser.xs,v 2.32 1999/11/18 00:13:44 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -90,6 +90,7 @@ struct p_state {
   bool v2_compat;
   bool pass_cbdata;
   bool unbroken_text;
+  bool attr_pos;
 
   /* special parsing modes */
   char* literal_mode;
@@ -993,6 +994,27 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 }
 
 
+static SV*
+attr_val(PSTATE* p_state, char *tag_beg, char *attr_beg,
+	 char *val_beg, char *val_end, bool quote)
+{
+  if (p_state->attr_pos) {
+    AV* av = newAV();
+    av_extend(av, 2);
+    av_push(av, newSViv(attr_beg - tag_beg));
+    av_push(av, newSViv(val_beg - tag_beg));
+    av_push(av, newSViv(val_end - tag_beg));
+    return newRV_noinc((SV*)av);
+  }
+  else {
+    if (quote) {
+      val_beg++;
+      val_end--;
+    }
+    return decode_entities(newSVpvn(val_beg, val_end - val_beg), entity2char);
+  }
+}
+
 
 static char*
 html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
@@ -1063,7 +1085,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	goto PREMATURE;
       if (*s == '>') {
 	/* parse it similar to ="" */
-	av_push(tokens, newSVpvn("", 0));
+	av_push(tokens, attr_val(p_state, beg, attr_beg, s, s, 0));
 	break;
       }
       if (*s == '"' || *s == '\'') {
@@ -1074,8 +1096,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	if (s == end)
 	  goto PREMATURE;
 	s++;
-	av_push(tokens, decode_entities(newSVpvn(str_beg+1, s - str_beg - 2),
-					entity2char));
+	av_push(tokens, attr_val(p_state, beg, attr_beg, str_beg, s, 1));
       }
       else {
 	char *word_start = s;
@@ -1086,8 +1107,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 	}
 	if (s == end)
 	  goto PREMATURE;
-	av_push(tokens, decode_entities(newSVpv(word_start, s - word_start),
-					entity2char));
+	av_push(tokens, attr_val(p_state, beg, attr_beg, word_start, s, 0));
       }
 
       while (isHSPACE(*s))
@@ -1533,24 +1553,26 @@ strict_comment(pstate,...)
 	HTML::Parser::v2_compat = 6
         HTML::Parser::pass_cbdata = 7
 	HTML::Parser::unbroken_text = 8
-        HTML::Parser::marked_sections = 9
+        HTML::Parser::attr_pos = 9
+        HTML::Parser::marked_sections = 10
     PREINIT:
 	bool *attr;
     CODE:
         switch (ix) {
-	case 1: attr = &pstate->strict_comment;       break;
-	case 2: attr = &pstate->strict_names;         break;
-	case 3: attr = &pstate->decode_text_entities; break;
-	case 4: attr = &pstate->keep_case;            break;
-	case 5: attr = &pstate->xml_mode;             break;
-	case 6: attr = &pstate->v2_compat;            break;
-	case 7: attr = &pstate->pass_cbdata;          break;
-	case 8: attr = &pstate->unbroken_text;        break;
-        case 9:
+	case  1: attr = &pstate->strict_comment;       break;
+	case  2: attr = &pstate->strict_names;         break;
+	case  3: attr = &pstate->decode_text_entities; break;
+	case  4: attr = &pstate->keep_case;            break;
+	case  5: attr = &pstate->xml_mode;             break;
+	case  6: attr = &pstate->v2_compat;            break;
+	case  7: attr = &pstate->pass_cbdata;          break;
+	case  8: attr = &pstate->unbroken_text;        break;
+	case  9: attr = &pstate->attr_pos;             break;
+        case 10:
 #ifdef MARKED_SECTION
-		attr = &pstate->marked_sections;      break;
+		 attr = &pstate->marked_sections;      break;
 #else
-	        croak("marked sections not supported"); break;
+	         croak("marked sections not supported"); break;
 #endif
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
