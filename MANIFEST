@@ -5,6 +5,7 @@ Makefile.PL
 Parser.pm
 Parser.xs
 TODO
+eg/hrefsub
 hints/solaris.pl
 hparser.h
 hparser.c
