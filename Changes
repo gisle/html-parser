@@ -1,10 +1,15 @@
 1998-04-02   Gisle Aas <aas@sn.no>
 
-   Release 2.15
+   Release 2.16
+   
+   The HTML::Parser could some times break hex entites (like &#xFFFF;)
+   in the middle.
 
    Removed remaining forced dependencies on libwww-perl modules.  It
    means that all tests should now pass, even if libwww-perl was not
    installed previously.
+
+   More tests.
 
 
 
