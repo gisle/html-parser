@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.8 1999/11/09 15:19:05 gisle Exp $
+/* $Id: Parser.xs,v 2.9 1999/11/09 15:36:06 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -246,7 +246,7 @@ html_text(PSTATE* p_state, char* beg, char *end, int cdata, SV* cbdata)
     PUSHMARK(SP);
     if (p_state->pass_cbdata)
       XPUSHs(cbdata);
-    XPUSHs(sv_2mortal(newSVpv(beg, end - beg)));
+    XPUSHs(sv_2mortal(text));
     XPUSHs(boolSV(cdata));
     
     PUTBACK;
