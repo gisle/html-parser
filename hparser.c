@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.49 2000/12/26 08:52:44 gisle Exp $
+/* $Id: hparser.c,v 2.50 2001/02/02 05:22:42 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -106,7 +106,7 @@ report_event(PSTATE* p_state,
   char *s;
 
 #if 0
-  if (0) {  /* used for debugging at some point */
+  {  /* used for debugging at some point */
     char *s = beg;
     int i;
 
@@ -145,6 +145,19 @@ report_event(PSTATE* p_state,
     return;
 #endif
 
+  h = &p_state->handlers[event];
+  if (!h->cb) {
+    /* event = E_DEFAULT; */
+    h = &p_state->handlers[E_DEFAULT];
+    if (!h->cb)
+      return;
+  }
+
+  if (SvTYPE(h->cb) != SVt_PVAV && !SvTRUE(h->cb)) {
+    /* FALSE scalar ('' or 0) means IGNORE this event */
+    return;
+  }
+
   if (p_state->unbroken_text && event == E_TEXT) {
     /* should buffer text */
     if (!p_state->pend_text)
@@ -170,21 +183,11 @@ report_event(PSTATE* p_state,
     SPAGAIN;
   }
 
-  h = &p_state->handlers[event];
-  if (!h->cb) {
-    /* event = E_DEFAULT; */
-    h = &p_state->handlers[E_DEFAULT];
-    if (!h->cb)
-      return;
-  }
+  /* At this point we have decided to generate an event callback */
 
   if (SvTYPE(h->cb) == SVt_PVAV) {
     /* start sub-array for accumulator array */
     array = newAV();
-  }
-  else if (!SvTRUE(h->cb)) {
-    /* FALSE scalar ('' or 0) means IGNORE this event */
-    return;
   }
   else {
     array = 0;

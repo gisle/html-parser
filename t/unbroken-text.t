@@ -53,7 +53,7 @@ $p->parse("</xmp");
 $p->parse(">bar");
 $p->eof;
 
-print "not " unless $text eq "[TEXT:0:foo][TEXT:8:bar\nfoo][CDATA:20:xmp][TEXT:29:bar]";
+print "not " unless $text eq "[TEXT:0:foobar\nfoo][CDATA:20:xmp][TEXT:29:bar]";
 print "ok 3\n";
 
 
