@@ -8,7 +8,8 @@ my $HTML = <<'EOT';
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
  "http://www.w3.org/TR/html40/strict.dtd">
 
-<foo bar baz=3>heisan</foo> <?process>
+<foo bar baz=3>heisan
+</foo> <?process>
 <!-- comment -->
 <xmp>xmp</xmp>
 
