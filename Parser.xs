@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.64 1999/12/02 12:05:04 gisle Exp $
+/* $Id: Parser.xs,v 2.65 1999/12/02 12:22:58 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -354,7 +354,7 @@ html_handle(PSTATE* p_state,
 	  for (i = 0; i < num_tokens; i++) {
 	    av_push(av, newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg));
 	  }
-	  arg = newRV_noinc((SV*)av);
+	  arg = sv_2mortal(newRV_noinc((SV*)av));
 	}
 	break;
 
@@ -367,7 +367,7 @@ html_handle(PSTATE* p_state,
 	    av_push(av, newSViv(tokens[i].beg-beg));
 	    av_push(av, newSViv(tokens[i].end-tokens[i].beg));
 	  }
-	  arg = newRV_noinc((SV*)av);
+	  arg = sv_2mortal(newRV_noinc((SV*)av));
 	}
 	break;
 
@@ -408,9 +408,12 @@ html_handle(PSTATE* p_state,
 	    
 	    if (!p_state->xml_mode)
 	      sv_lower(attrname);
-	    hv_store_ent(hv, attrname, attrval, 0);
+	    if (!hv_store_ent(hv, attrname, attrval, 0)) {
+	      SvREFCNT_dec(attrval);
+	    }
+	    SvREFCNT_dec(attrname);
 	  }
-	  arg = newRV_noinc((SV*)hv);
+	  arg = sv_2mortal(newRV_noinc((SV*)hv));
 	}
 	break;
 
@@ -426,7 +429,7 @@ html_handle(PSTATE* p_state,
 	      sv_lower(attrname);
 	    av_push(av, attrname);
 	  }
-	  arg = newRV_noinc((SV*)av);
+	  arg = sv_2mortal(newRV_noinc((SV*)av));
 	}
 	break;
 	
