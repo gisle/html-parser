@@ -1,4 +1,4 @@
-print "1..8\n";
+print "1..11\n";
 
 use strict;
 use HTML::TokeParser;
@@ -146,3 +146,34 @@ print "not " unless $t eq "This is some more text.";
 print "ok 8\n";
 
 undef($p);
+
+$p = HTML::TokeParser->new(\<<'EOT');
+<H1>This is a <b>bold</b> heading</H1>
+This is some <i>italic</i> text.<br />This is some <span id=x>more text</span>.
+<p>
+This is even some more.
+EOT
+
+$p->get_tag("h1");
+
+$t = $p->get_phrase;
+print "not " unless $t eq "This is a bold heading";
+print "ok 9\n";
+
+$t = $p->get_phrase;
+print "not " unless $t eq "";
+print "ok 10\n";
+
+$p->get_tag;
+
+$t = $p->get_phrase;
+print "'$t'\n";
+print "not " unless $t eq "This is some italic text. This is some more text.";
+print "ok 11\n";
+
+undef($p);
+
+
+
+
+

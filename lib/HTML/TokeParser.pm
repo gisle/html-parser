@@ -1,14 +1,15 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.26 2003/10/10 10:45:46 gisle Exp $
+# $Id: TokeParser.pm,v 2.27 2003/10/14 09:55:48 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.26 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.27 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
 use HTML::Entities qw(decode_entities);
+use HTML::Tagset ();
 
 my %ARGS =
 (
@@ -59,6 +60,23 @@ sub get_tag
 }
 
 
+sub _textify {
+    my($self, $token) = @_;
+    my $tag = $token->[1];
+    return undef unless exists $self->{textify}{$tag};
+
+    my $alt = $self->{textify}{$tag};
+    my $text;
+    if (ref($alt)) {
+	$text = &$alt(@$token);
+    } else {
+	$text = $token->[2]{$alt || "alt"};
+	$text = "[\U$tag]" unless defined $text;
+    }
+    return $text;
+}
+
+
 sub get_text
 {
     my $self = shift;
@@ -72,15 +90,7 @@ sub get_text
 	} elsif ($type =~ /^[SE]$/) {
 	    my $tag = $token->[1];
 	    if ($type eq "S") {
-		if (exists $self->{textify}{$tag}) {
-		    my $alt = $self->{textify}{$tag};
-		    my $text;
-		    if (ref($alt)) {
-			$text = &$alt(@$token);
-		    } else {
-			$text = $token->[2]{$alt || "alt"};
-			$text = "[\U$tag]" unless defined $text;
-		    }
+		if (defined(my $text = _textify($self, $token))) {
 		    push(@text, $text);
 		    next;
 		}
@@ -101,6 +111,35 @@ sub get_trimmed_text
 {
     my $self = shift;
     my $text = $self->get_text(@_);
+    $text =~ s/^\s+//; $text =~ s/\s+$//; $text =~ s/\s+/ /g;
+    $text;
+}
+
+sub get_phrase {
+    my $self = shift;
+    my @text;
+    while (my $token = $self->get_token) {
+	my $type = $token->[0];
+	if ($type eq "T") {
+	    my $text = $token->[1];
+	    decode_entities($text) unless $token->[2];
+	    push(@text, $text);
+	} elsif ($type =~ /^[SE]$/) {
+	    my $tag = $token->[1];
+	    if ($type eq "S") {
+		if (defined(my $text = _textify($self, $token))) {
+		    push(@text, $text);
+		    next;
+		}
+	    }
+	    if (!$HTML::Tagset::isPhraseMarkup{$tag}) {
+		$self->unget_token($token);
+		last;
+	    }
+	    push(@text, " ") if $tag eq "br";
+	}
+    }
+    my $text = join("", @text);
     $text =~ s/^\s+//; $text =~ s/\s+$//; $text =~ s/\s+/ /g;
     $text;
 }
@@ -223,7 +262,7 @@ before the first of the specified tags found. For example:
 
 will return the text up to either a paragraph of linebreak element.
 
-The text might span tags that should be I<texified>.  This is
+The text might span tags that should be I<textified>.  This is
 controlled by the $p->{textify} attribute, which is a hash that
 defines how certain tags can be treated as text.  If the name of a
 start tag matches a key in this hash then this tag is converted to
@@ -248,6 +287,17 @@ the text to substitute can be found in the ALT attribute.
 Same as $p->get_text above, but will collapse any sequences of white
 space to a single space character.  Leading and trailing white space is
 removed.
+
+=item $p->get_phrase
+
+This will return all text found at the current position ignoring any
+phrasal-level tags.  Text is extracted until the first non
+phrasal-level tag.  Textification of tags is the same as for
+get_text().  This method will collapse white space in the same way as
+get_trimmed_text() does.
+
+The definition of <i>phrasal-level tags</i> is obtained from the
+HTML::Tagset module.
 
 =back
 
