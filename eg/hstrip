@@ -26,7 +26,7 @@ sub tag
 	my($k_offset, $k_len, $v_offset, $v_len) = @{$pos}[-4 .. -1];
 	my $next_attr = $v_offset ? $v_offset + $v_len : $k_offset + $k_len;
 	my $edited;
-	while (4 <= @$pos) {
+	while (@$pos >= 4) {
 	    ($k_offset, $k_len, $v_offset, $v_len) = splice @$pos, -4;
 	    if ($ignore_attr{lc substr($text, $k_offset, $k_len)}) {
 		substr($text, $k_offset, $next_attr - $k_offset) = "";
