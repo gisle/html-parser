@@ -3,7 +3,7 @@
 use strict;
 use HTML::Parser;
 
-print "1..1\n";
+print "1..2\n";
 
 my $TEXT = "";
 sub h
@@ -47,5 +47,16 @@ print "not " unless $TEXT eq <<'EOT'; print "ok 1\n";
 [text,<undef>,text]
 [comment,comment,<!--comment>]
 [comment,p,<p]
+[end_document,<undef>,]
+EOT
+
+$TEXT = "";
+$p->parse("<!comment>");
+$p->eof;
+
+print $TEXT;
+print "not " unless $TEXT eq <<'EOT'; print "ok 2\n";
+[start_document,<undef>,]
+[comment,comment,<!comment>]
 [end_document,<undef>,]
 EOT
