@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.60 2001/03/26 22:05:38 gisle Exp $
+/* $Id: hparser.c,v 2.61 2001/03/27 16:42:10 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -509,7 +509,8 @@ argspec_compile(SV* src)
 	while (isHSPACE(*tmp))
 	    tmp++;
 	if (*tmp == '{') {
-	    sv_catpvf(argspec, "%c", ARG_FLAG_FLAT_ARRAY);
+	    char c = ARG_FLAG_FLAT_ARRAY;
+	    sv_catpvn(argspec, &c, 1);
 	    tmp++;
 	    while (isHSPACE(*tmp))
 		tmp++;
@@ -535,7 +536,8 @@ argspec_compile(SV* src)
 		    break;
 	    }
 	    if (a < ARG_LITERAL) {
-		sv_catpvf(argspec, "%c", (unsigned char) a);
+		char c = (unsigned char) a;
+		sv_catpvn(argspec, &c, 1);
 	    }
 	    else {
 		croak("Unrecognized identifier %s in argspec", name);
@@ -550,9 +552,12 @@ argspec_compile(SV* src)
 	    if (*s == *string_beg) {
 		/* literal */
 		int len = s - string_beg - 1;
+		unsigned char buf[2];
 		if (len > 255)
 		    croak("Literal string is longer than 255 chars in argspec");
-		sv_catpvf(argspec, "%c%c", ARG_LITERAL, len);
+		buf[0] = ARG_LITERAL;
+		buf[1] = len;
+		sv_catpvn(argspec, buf, 2);
 		sv_catpvn(argspec, string_beg+1, len);
 		s++;
 	    }
