@@ -16,4 +16,5 @@ t/headparser-http.t
 t/linkextor-base.t
 t/linkextor-rel.t
 t/parser.t
+t/parsefile.t
 t/tokeparser.t
