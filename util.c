@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.4 2000/09/16 23:48:27 gisle Exp $
+/* $Id: util.c,v 2.5 2000/09/17 01:05:05 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  *
@@ -52,6 +52,7 @@ decode_entities(SV* sv, HV* entity2char)
 
     if (*s == '#') {
       UV num = 0;
+      UV prev = 0;
       int ok = 0;
       s++;
       if (*s == 'x' || *s == 'X') {
@@ -62,6 +63,12 @@ decode_entities(SV* sv, HV* entity2char)
 	  if (!tmp)
 	    break;
 	  num = num << 4 | ((tmp - PL_hexdigit) & 15);
+	  if (num < prev) {
+	      /* overflow */
+	      ok = 0;
+	      break;
+	  }
+	  prev = num;
 	  s++;
 	  ok = 1;
 	}
@@ -69,6 +76,12 @@ decode_entities(SV* sv, HV* entity2char)
       else {
 	while (isDIGIT(*s)) {
 	  num = num*10 + (*s - '0');
+	  if (num < prev) {
+	      /* overflow */
+	      ok = 0;
+	      break;
+	  }
+	  prev = num;
 	  s++;
 	  ok = 1;
 	}
