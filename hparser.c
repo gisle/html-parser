@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.35 2000/01/21 22:06:09 gisle Exp $
+/* $Id: hparser.c,v 2.36 2000/01/21 22:15:30 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -156,11 +156,11 @@ report_event(PSTATE* p_state,
     if (SvOK(p_state->pend_text)) {
       if (p_state->is_cdata != p_state->pend_text_is_cdata) {
 	flush_pending_text(p_state, self);
-	p_state->pend_text_is_cdata = p_state->is_cdata;
-	sv_setpvn(p_state->pend_text, "", 0);
+	goto INIT_PEND_TEXT;
       }
     }
     else {
+    INIT_PEND_TEXT:
       p_state->pend_text_offset = p_state->chunk_offset + offset;
       p_state->pend_text_is_cdata = p_state->is_cdata;
       sv_setpvn(p_state->pend_text, "", 0);
