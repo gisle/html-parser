@@ -1,3 +1,22 @@
+2000-03-06   Gisle Aas <gisle@aas.no>
+
+     Release 3.06
+
+     Multi-threading/MULTIPLICITY compilation fix.
+     Both Doug MacEachern <dougm@pobox.com> and
+     Matthias Urlichs <smurf@noris.net> provided a patch.
+
+     Avoid some "statement not reached" warnings from picky
+     compilers.
+
+     Remove final commas in enums as ANSI C does not allow
+     them and some compilers actually care.
+     Patch by James Walden <jamesw@ichips.intel.com>
+
+     Added eg/htextsub example program.
+
+
+
 2000-01-22   Gisle Aas <gisle@aas.no>
 
      Release 3.05
