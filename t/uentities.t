@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-print "1..9\n";
+print "1..10\n";
 
 use HTML::Entities;
 
@@ -40,6 +40,13 @@ print "not " unless decode_entities("&#&aring&#229&#229;&#xFFF") eq
                                     "&#еее\x{FFF}";
 print "ok 8\n";
 
+# This might fail when we get more than 64 bit UVs
+print "not " unless decode_entities("&#0009999999999999999999999999999;") eq
+                                    "&#0009999999999999999999999999999;"
+                and decode_entities("&#xFFFF0000FFFF0000FFFF1") eq
+                                    "&#xFFFF0000FFFF0000FFFF1";
+print "ok 9\n";
+
 my $err;
 for ([32, 48], [120, 169], [240, 250], [250, 260], [3000, 3005]) {
     my $a = join("", map chr, $_->[0] .. $_->[1]);
@@ -59,6 +66,6 @@ for ([32, 48], [120, 169], [240, 250], [250, 260], [3000, 3005]) {
     }
 }
 print "not " if $err;
-print "ok 9\n";
+print "ok 10\n";
 
 
