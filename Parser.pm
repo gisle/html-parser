@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.24";  # $Date: 1999/10/29 11:09:48 $
+$VERSION = "2.24";  # $Date: 1999/10/29 12:17:55 $
 
 
 sub new
@@ -227,7 +227,7 @@ sub parse_file
     if (!ref($file) && ref(\$file) ne "GLOB") {
 	# Assume $file is a filename
         local(*F);
-	open(F, $file) || die "Can't open $file: $!";
+	open(F, $file) || return;
 	$opened++;
 	$file = *F;
     }
@@ -335,9 +335,17 @@ text.  The return value is a reference to the parser object.
 
 =item $p->parse_file( $file );
 
-This method can be called to parse text from a file.  The argument can
-be a filename or an already opened file handle. The return value from
-parse_file() is a reference to the parser object.
+This method can be called to parse text directly from a file.  The
+$file argument can be a filename or an already opened file handle (or
+a reference to such a handle).
+
+If $file is a plain filename and the file can't be opened, then the
+method will return an undefined value and $! will tell you why it
+failed.  In all other cases the return value will be a reference to
+the parser object.
+
+If a filehandle is passed in, then the file will be read until EOF,
+but not otherwise affected.
 
 =item $p->strict_comment( [$bool] )
 
