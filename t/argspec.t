@@ -9,7 +9,7 @@ $end = '</a>';
 $empty = "<IMG SRC='foo'/>";
 $proc = '<? something completely different ?>';
 
-my $attrspec = join ',',
+my $argspec = join ',',
     qw( self offset event tagname token0
 	text
 	cdata_flag dtext
@@ -19,7 +19,7 @@ my $attrspec = join ',',
 	attrseq );
 
 my @result = ();
-my $p = HTML::Parser -> new(default_h => [\@result, $attrspec],
+my $p = HTML::Parser -> new(default_h => [\@result, $argspec],
 			    strict_comment => 1, xml_mode => 1);
 
 @tests =
