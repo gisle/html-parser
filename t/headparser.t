@@ -1,4 +1,4 @@
-print "1..2\n";
+print "1..3\n";
 
 { package H;
   sub new { bless {}, shift; }
@@ -113,3 +113,24 @@ $got = $p->as_string;
 print "$got";
 print "not " if $expected ne $got;
 print "ok 2\n";
+
+
+# Try reading it from a file
+print "\n\n#### Parsing from file\n\n";
+my $file = "hp-test$$.html";
+die "$file already exists" if -e $file;
+
+open(FILE, ">$file") or die "Can't create $file: $!";
+print FILE $HTML;
+print FILE "<p>This is more content...</p>\n" x 2000;
+print FILE "<title>Buuuh!</title>\n" x 200;
+#unlink($file);
+
+$p = HTML::HeadParser->new(H->new);
+$p->parse_file($file);
+unlink($file);
+
+print $p->as_string;
+
+print "not " if $p->header("Title") ne "Å være eller å ikke være";
+print "ok 3\n";
