@@ -7,12 +7,6 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
-PLAIN BUGS
-
-  - the tokenpos reported for the generated end event for
-    empty tags in xml_mode can't work.  Should tokens be empty
-    and tagname reported?
-
 ISSUES
 
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
