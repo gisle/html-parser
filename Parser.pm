@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_17;  # $Date: 1999/12/02 11:25:12 $
+$VERSION = 2.99_17;  # $Date: 1999/12/02 11:32:29 $
 
 require HTML::Entities;
 
@@ -24,7 +24,7 @@ sub new
     _alloc_pstate($self);
 
     my %arg = @_;
-    my $api_version = delete $arg{version} || (@_ ? 3 : 2);
+    my $api_version = delete $arg{api_version} || (@_ ? 3 : 2);
     if ($api_version >= 4) {
 	require Carp;
 	Carp::croak("API version $api_version not supported by HTML::Parser $VERSION");
