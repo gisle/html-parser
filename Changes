@@ -1,9 +1,20 @@
+2000-01-15   Gisle Aas <gisle@aas.no>
+
+    Release 3.04
+
+    Backed out patch that checked for legal handler and attribute
+    names in the HTML::Parser constructor.
+
+
+
 2000-01-14   Gisle Aas <gisle@aas.no>
 
     Release 3.03
 
     We did not get out of comment mode for comments ending with an
     odd number of "-" before ">".  Patch by la mouton <kero@3sheep.com>
+
+    Documentation patch by Michael.
 
 
 
