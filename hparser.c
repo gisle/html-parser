@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.21 1999/12/07 13:41:27 gisle Exp $
+/* $Id: hparser.c,v 2.22 1999/12/07 21:08:31 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -887,7 +887,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 		   offset + (s - beg), self);
     FREE_TOKENS;
 
-    if (1) {
+    {
       /* find out if this start tag should put us into literal_mode
        */
       int i;
@@ -914,8 +914,8 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 	}
       }
     END_OF_LITERAL_SEARCH:
+      ;
     }
-
     return s;
   }
   
