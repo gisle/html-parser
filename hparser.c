@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.118 2004/12/02 11:52:32 gisle Exp $
+/* $Id: hparser.c,v 2.119 2004/12/28 13:47:44 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1522,7 +1522,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 			    inside_quote = 0;
 			else if (*s == '\r' || *s == '\n')
 			    inside_quote = 0;
-			else if (*s == '"' || *s == '\'')
+			else if (!inside_quote && (*s == '"' || *s == '\''))
 			    inside_quote = *s;
 		    }
 		}

@@ -60,6 +60,7 @@ t/parser.t		Test HTML::Parser subclassing
 t/plaintext.t		Test parsing of <plaintext>
 t/process.t		Test process instruction support
 t/pullparser.t		Test HTML::PullParser
+t/script.t              Test parsing of <script> with quoted strings
 t/skipped-text.t	Test skipped_text argspec
 t/stack-realloc.t	Test that stack reallocation bug don't come back
 t/textarea.t	        Test handling of <textarea>
