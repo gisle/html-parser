@@ -1,3 +1,13 @@
+1998-04-28   Gisle Aas <aas@sn.no>
+
+   Release 2.17
+
+   Never split words (a sequence of non-space) between two invocations
+   of $self->text.  This is just a simplification of the code that tried
+   not to break entities.
+
+
+
 1998-04-02   Gisle Aas <aas@sn.no>
 
    Release 2.16
