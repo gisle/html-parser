@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -113,7 +113,10 @@ FALSE as soon as parsing should end.
 sub parse
 {
     my $self = shift;
-    eval { $self->SUPER::parse(@_) };
+    eval {
+	local $SIG{__DIE__};
+	$self->SUPER::parse(@_)
+    };
     if ($@) {
         print $@ if $DEBUG;
 	$self->{'_buf'} = '';  # flush rest of buffer
