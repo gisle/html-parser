@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.19 1999/11/15 11:03:10 gisle Exp $
+/* $Id: Parser.xs,v 2.20 1999/11/15 11:28:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -971,7 +971,14 @@ html_parse_process(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   }
   return 0;
 }
-  
+
+static char*
+html_parse_null(PSTATE* p_state, char *beg, char *end, SV* cbdata)
+{
+  return 0;
+}
+
+#include "pfunc.h"  /* declares the html_parsefunc[] */
 
 static void
 html_parse(PSTATE* p_state,
@@ -1086,31 +1093,10 @@ html_parse(PSTATE* p_state,
     if (end - s < 3)
       break;
 
-    /* next char is known to be '<' */
+    /* next char is known to be '<' and pointed to by 't' as well as 's' */
     s++;
-    new_pos = 0;
 
-    /* XXX might be a good idea to simply have an array of
-     * function pointers to call to avoid this testing.
-     *   new_pos = parse_func[*s](p_state, t, end, cbdata);
-     */
-    if (isHALPHA(*s)) {
-      new_pos = html_parse_start(p_state, t, end, cbdata);
-    }
-    else if (*s == '/') {
-      new_pos = html_parse_end(p_state, t, end, cbdata);
-    }
-    else if (*s == '!') {
-      new_pos = html_parse_decl(p_state, t, end, cbdata);
-    }
-    else if (*s == '?') {
-      new_pos = html_parse_process(p_state, t, end, cbdata);
-    }
-    else {
-      continue;
-    }
-
-    if (new_pos) {
+    if ( (new_pos = html_parsefunc[*s](p_state, t, end, cbdata))) {
       if (new_pos == t) {
 	/* no progress, need more data to know what it is */
 	s = t;
@@ -1119,7 +1105,7 @@ html_parse(PSTATE* p_state,
       t = s = new_pos;
     }
 
-    /* if we get out here thene this was not a conforming tag, so
+    /* if we get out here then this was not a conforming tag, so
      * treat it is plain text at the top of the loop again (we
      * have already skipped past the "<").
      */
