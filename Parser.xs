@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.83 1999/12/21 08:09:59 gisle Exp $
+/* $Id: Parser.xs,v 2.84 1999/12/21 09:43:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -172,7 +172,7 @@ _alloc_pstate(self)
     CODE:
 	sv = SvRV(self);
         if (!sv || SvTYPE(sv) != SVt_PVHV)
-            croak("Self is not a reference to a hash");
+            croak("Not a reference to a hash");
 	hv = (HV*)sv;
 
 	Newz(56, pstate, 1, PSTATE);
