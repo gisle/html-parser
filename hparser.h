@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.19 2001/04/06 20:03:24 gisle Exp $
+/* $Id: hparser.h,v 2.20 2001/04/10 20:10:58 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -108,6 +108,7 @@ struct p_state {
 
     /* cache */
     HV* entity2char;            /* %HTML::Entities::entity2char */
+    SV* tmp;
 };
 typedef struct p_state PSTATE;
 

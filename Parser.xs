@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.107 2001/04/10 18:33:27 gisle Exp $
+/* $Id: Parser.xs,v 2.108 2001/04/10 20:10:58 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -160,6 +160,8 @@ free_pstate(PSTATE* pstate)
     SvREFCNT_dec(pstate->ignore_elements);
     SvREFCNT_dec(pstate->ignoring_element);
 
+    SvREFCNT_dec(pstate->tmp);
+
     pstate->signature = 0;
     Safefree(pstate);
 }
@@ -203,6 +205,7 @@ _alloc_pstate(self)
 	Newz(56, pstate, 1, PSTATE);
 	pstate->signature = P_SIGNATURE;
 	pstate->entity2char = perl_get_hv("HTML::Entities::entity2char", TRUE);
+	pstate->tmp = NEWSV(0, 20);
 
 	sv = newSViv(PTR2IV(pstate));
 	sv_magic(sv, 0, '~', 0, 0);
