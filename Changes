@@ -1,3 +1,12 @@
+1998-07-07   Gisle Aas <aas@sn.no>
+
+   Release 2.19
+
+   Don't end a text chunk with space when we try to avoid breaking up
+   words.
+
+
+
 1998-06-22   Gisle Aas <aas@sn.no>
 
    Release 2.18
