@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.119 2003/10/27 21:05:04 gisle Exp $
+/* $Id: Parser.xs,v 2.120 2003/10/27 21:32:48 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -238,7 +238,6 @@ parse(self, chunk)
 	    SV* generator = chunk;
 	    STRLEN len;
 	    do {
-		dSP;
                 int count;
 		PUSHMARK(SP);
 	        count = perl_call_sv(generator, G_SCALAR|G_EVAL);
