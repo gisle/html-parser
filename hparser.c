@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.57 2001/03/13 19:22:14 gisle Exp $
+/* $Id: hparser.c,v 2.58 2001/03/19 04:05:30 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1236,7 +1236,7 @@ parse(pTHX_
     STRLEN len;
 
     if (!chunk) {
-	/* flush */
+	/* eof */
 	if (p_state->buf && SvOK(p_state->buf)) {
 	    /* flush it */
 	    STRLEN len;
@@ -1249,6 +1249,12 @@ parse(pTHX_
 	}
 	if (p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
+
+	if (p_state->ignoring_element) {
+	    /* document not balanced */
+	    SvREFCNT_dec(p_state->ignoring_element);
+	    p_state->ignoring_element = 0;
+	}
 	return;
     }
 
