@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.3 1999/12/03 20:26:09 gisle Exp $
+/* $Id: hparser.c,v 2.4 1999/12/04 12:45:23 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -47,7 +47,7 @@ literal_mode_elem[] =
  *                      has recongnized something.
  */
 
-EXTERN void
+static void
 report_event(PSTATE* p_state,
 	     event_id_t event,
 	     char *beg, char *end,
@@ -236,6 +236,10 @@ report_event(PSTATE* p_state,
       }
       break;
 
+    case '=':
+      arg = sv_2mortal(newSViv(p_state->offset));
+      break;
+
     case 'E':
       /* event */
       assert(event >= 0 && event < EVENT_COUNT);
@@ -289,7 +293,7 @@ report_event(PSTATE* p_state,
 }
 
 
-EXTERN SV*
+static SV*
 attrspec_compile(SV* src)
 {
   SV* attrspec = newSVpvn("", 0);
@@ -312,6 +316,7 @@ attrspec_compile(SV* src)
     hv_store(names, "dtext", 5,         newSVpvn("D", 1), 0);
     hv_store(names, "cdata_flag", 10,   newSVpvn("c", 1), 0);
     hv_store(names, "event", 5,         newSVpvn("E", 1), 0);
+    hv_store(names, "offset", 6,        newSVpvn("=", 1), 0);
   }
 
   while (isHSPACE(*s))
@@ -371,7 +376,7 @@ attrspec_compile(SV* src)
 }
 
 
-EXTERN char*
+static char*
 parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
@@ -465,7 +470,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 
 #ifdef MARKED_SECTION
 
-EXTERN void
+static void
 marked_section_update(PSTATE* p_state)
 {
   /* we look at p_state->ms_stack to determine p_state->ms */
@@ -511,7 +516,7 @@ marked_section_update(PSTATE* p_state)
 }
 
 
-EXTERN char*
+static char*
 parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
@@ -589,7 +594,7 @@ parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 #endif
 
 
-EXTERN char*
+static char*
 parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg + 2;
@@ -722,7 +727,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 }
 
 
-EXTERN char*
+static char*
 parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg;
@@ -873,7 +878,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 }
 
 
-EXTERN char*
+static char*
 parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg+2;
@@ -912,7 +917,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 }
 
 
-EXTERN char*
+static char*
 parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   char *s = beg + 2;
@@ -945,7 +950,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 }
 
 
-EXTERN char*
+static char*
 parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 {
   return 0;
@@ -960,7 +965,7 @@ parse(PSTATE* p_state,
 	   SV* chunk,
 	   SV* self)
 {
-  char *s, *t, *end, *new_pos;
+  char *s, *t, *beg, *end, *new_pos;
   STRLEN len;
 
   if (!chunk || !SvOK(chunk)) {
@@ -971,6 +976,7 @@ parse(PSTATE* p_state,
       char *s = SvPV(p_state->buf, len);
       assert(len);
       report_event(p_state, E_TEXT, s, s+len, 0, 0, self);
+      p_state->offset += len;
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -979,16 +985,17 @@ parse(PSTATE* p_state,
 
   if (p_state->buf && SvOK(p_state->buf)) {
     sv_catsv(p_state->buf, chunk);
-    s = SvPV(p_state->buf, len);
+    beg = SvPV(p_state->buf, len);
   }
   else {
-    s = SvPV(chunk, len);
+    beg = SvPV(chunk, len);
   }
 
   if (!len)
     return; /* nothing to do */
 
-  t = s;
+  s = beg;
+  t = beg;
   end = s + len;
 
   while (1) {
@@ -1138,6 +1145,8 @@ parse(PSTATE* p_state,
   }
 
  DONE:
+
+  p_state->offset += (s - beg);
 
   if (s == end) {
     if (p_state->buf) {
