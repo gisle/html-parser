@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.12 1999/11/04 22:19:57 gisle Exp $
+/* $Id: Parser.xs,v 1.13 1999/11/04 22:44:19 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -25,6 +25,8 @@ struct p_state {
   int strict_comment;
   int keep_case;
   int pass_cbdata;
+
+  AV* accum;
 
   SV* text_cb;
   SV* start_cb;
@@ -734,6 +736,7 @@ DESTROY(pstate)
 	PSTATE* pstate
     CODE:
 	SvREFCNT_dec(pstate->buf);
+        SvREFCNT_dec(pstate->accum);
 	SvREFCNT_dec(pstate->text_cb);
 	SvREFCNT_dec(pstate->start_cb);
 	SvREFCNT_dec(pstate->end_cb);
@@ -759,7 +762,9 @@ strict_comment(pstate,...)
     CODE:
 	RETVAL = pstate->strict_comment;
 	if (items > 1)
-	     pstate->strict_comment = SvTRUE(ST(1));
+	    pstate->strict_comment = SvTRUE(ST(1));
+    OUTPUT:
+	RETVAL
 
 int
 pass_cbdata(pstate,...)
@@ -767,7 +772,9 @@ pass_cbdata(pstate,...)
     CODE:
 	RETVAL = pstate->pass_cbdata;
 	if (items > 1)
-	     pstate->pass_cbdata = SvTRUE(ST(1));
+	    pstate->pass_cbdata = SvTRUE(ST(1));
+    OUTPUT:
+	RETVAL
 
 int
 keep_case(pstate,...)
@@ -775,8 +782,27 @@ keep_case(pstate,...)
     CODE:
 	RETVAL = pstate->keep_case;
 	if (items > 1)
-	     pstate->keep_case = SvTRUE(ST(1));
+	    pstate->keep_case = SvTRUE(ST(1));
+    OUTPUT:
+	RETVAL
 
+SV*
+accum(pstate,...)
+	PSTATE* pstate
+    CODE:
+        RETVAL = pstate->accum ? newRV_inc((SV*)pstate->accum)
+	                       : &PL_sv_undef;
+        if (items > 1) {
+	    SV* aref = ST(1);
+            AV* av = (AV*)SvRV(aref);
+            if (!av || SvTYPE(av) != SVt_PVAV)
+		croak("accum argument is not an array reference");
+	    SvREFCNT_dec(pstate->accum);
+	    pstate->accum = av;
+	    SvREFCNT_inc(pstate->accum);
+        }
+    OUTPUT:
+	RETVAL
 
 void
 callback(pstate, name_sv, cb)
