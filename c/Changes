@@ -1,3 +1,26 @@
+1999-11-08   Gisle Aas <gisle@aas.no>
+
+   Release 2.99_06
+
+   Internal fast decode_entities().   By using it we are able to make
+   the HTML::Entities::decode funtion 6 times faster than the old one
+   implemented in pure perl.
+
+   $p->bool_attr_value() can be set to influence the value that
+   boolean attributes will be assigned.  The default is to assign
+   a value identical to the attribute name.
+
+   Process instructions are reported as "PI" in @accum
+   
+   $p->xml_mode(1) modify how processing instructions are terminated
+   and allow "/>" in the end of start tags.
+
+   Turn off optimizations when compiling with gcc on Solaris.  Avoid
+   what we believe to be a compiler bug.  Should probably figure out
+   which version of gcc have this bug.
+
+
+
 1999-11-05   Gisle Aas <gisle@aas.no>
 
    Release 2.99_05
