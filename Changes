@@ -1,3 +1,12 @@
+2000-06-28   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.09
+
+     Avoid core dump if somebody clobbers the aliased $self argument of
+     a handler.
+
+
+
 2000-05-23   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.08
