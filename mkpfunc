@@ -10,7 +10,7 @@ print "static PFUNC html_parsefunc[] = {\n";
 for my $c (0..255) {
     local $_ = chr($c);
     my $func = "null";
-    if (/\A[A-Za-z]\z/) {
+    if (/^[A-Za-z]$/) {
 	$func = "start";
     }
     elsif ($_ eq "/") {
