@@ -1,6 +1,7 @@
 package HTML::Parser;
 
 # Copyright 1996-1999, Gisle Aas.
+# Copyright 1999, Michael A. Chase.
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
@@ -8,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_13;  # $Date: 1999/11/26 15:22:40 $
+$VERSION = 2.99_14;  # $Date: 1999/11/26 15:28:38 $
 
 require HTML::Entities;
 
@@ -564,7 +565,8 @@ L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
 
 =head1 COPYRIGHT
 
-Copyright 1996-1999 Gisle Aas. All rights reserved.
+ Copyright 1996-1999 Gisle Aas. All rights reserved.
+ Copyright 1999 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
