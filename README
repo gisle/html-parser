@@ -1,14 +1,3 @@
-HTML-Parser-XS
---------------
-
-This is a beta release of a new XS based implementation of
-HTML::Parser.  It should be completely compatible with the old
-HTML-Parser-2.xx, but improves parsing speed (4-40x) and adds
-several new features.
-
-
-
-
 HTML-Parser
 -----------
 
