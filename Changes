@@ -1,3 +1,18 @@
+1999-12-13   Gisle Aas <gisle@aas.no>
+
+    Release 2.99_96
+
+    Various patches from Michael:
+
+       - A handler of "" means that the event will be ignored.
+         More efficient than using sub{} as handler.
+
+       - Don't use a perl hash for looking up argspec keywords.
+
+       - Documentation and English tweaks.
+
+
+
 1999-12-09   Gisle Aas <gisle@aas.no>
 
     Release 2.99_95 (this is a 3.00 candidate)
