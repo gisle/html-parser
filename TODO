@@ -35,3 +35,5 @@ MSIE bug compatibility
                        of quoted text skipping behaviour.
 	               Unclear if it is really JavaScript
                        aware.
+ - unterminated entities like foo&nbspbar
+ - reparse in broken mode if literal elements are not terminated
