@@ -10,7 +10,7 @@ sub start
     my($self, $tag, $attr) = @_;
     print "START[$tag]\n";
     push @result, "START[$tag]";
-    for (keys %$attr) {
+    for (sort keys %$attr) {
 	print "\t$_: $attr->{$_}\n";
         push @result, "\t$_: " . $attr->{$_};
     }
