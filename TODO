@@ -19,7 +19,6 @@ ISSUES
     the length of a text segment, then 'tokenpos' could be used instead
     of asking for 'text' and then applying length($text).
   - Something better than '' as the default argspec?
-
   - Should some '\n' be part of markup instead of text.  The SGML standard
     has a few things to say about this.  A '\n' following a start tag should
     be considered part of that tag.  A '\n' preceeding an end tag should
@@ -39,7 +38,7 @@ FEATURES THAT CAN WAIT
  - $p->ignore("script", "style");
 
 
-SGML FEATURES WE PROBABLY IGNORE
+SGML FEATURES WE PROBABLY IGNORE FOREVER
  - Empty tags: <> </>  (repeat previous start tag)
  - <foo<bar>  (same as <foo><bar>)
  - NET tags <name/.../
