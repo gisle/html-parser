@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.100 2004/11/16 17:57:47 gisle Exp $
+/* $Id: hparser.c,v 2.101 2004/11/17 09:47:22 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -112,7 +112,7 @@ static void flush_pending_text(PSTATE* p_state, SV* self);
 static void
 report_event(PSTATE* p_state,
 	     event_id_t event,
-	     char *beg, char *end,
+	     char *beg, char *end, U32 utf8,
 	     token_pos_t *tokens, int num_tokens,
 	     SV* self
 	    )
@@ -197,10 +197,13 @@ report_event(PSTATE* p_state,
 
 	if (event == E_START || event == E_END) {
 	    SV* tagname = p_state->tmp;
-	    U32 hash;
 
 	    assert(num_tokens >= 1);
 	    sv_setpvn(tagname, tokens[0].beg, tokens[0].end - tokens[0].beg);
+	    if (utf8)
+		SvUTF8_on(tagname);
+	    else
+		SvUTF8_off(tagname);
 	    if (!CASE_SENSITIVE(p_state))
 		sv_lower(aTHX_ tagname);
 
@@ -216,10 +219,8 @@ report_event(PSTATE* p_state,
 		goto IGNORE_EVENT;
 	    }
 
-	    PERL_HASH(hash, SvPVX(tagname), SvCUR(tagname));
-
 	    if (p_state->ignore_elements &&
-		hv_fetch_ent(p_state->ignore_elements, tagname, 0, hash))
+		hv_fetch_ent(p_state->ignore_elements, tagname, 0, 0))
 	    {
 		p_state->ignoring_element = newSVsv(tagname);
 		p_state->ignore_depth = 1;
@@ -227,12 +228,12 @@ report_event(PSTATE* p_state,
 	    }
 
 	    if (p_state->ignore_tags &&
-		hv_fetch_ent(p_state->ignore_tags, tagname, 0, hash))
+		hv_fetch_ent(p_state->ignore_tags, tagname, 0, 0))
 	    {
 		goto IGNORE_EVENT;
 	    }
 	    if (p_state->report_tags &&
-		!hv_fetch_ent(p_state->report_tags, tagname, 0, hash))
+		!hv_fetch_ent(p_state->report_tags, tagname, 0, 0))
 	    {
 		goto IGNORE_EVENT;
 	    }
@@ -273,8 +274,18 @@ report_event(PSTATE* p_state,
 	    p_state->pend_text_column = column;
 	    p_state->pend_text_is_cdata = p_state->is_cdata;
 	    sv_setpvn(p_state->pend_text, "", 0);
+	    if (!utf8)
+		SvUTF8_off(p_state->pend_text);
 	}
-	sv_catpvn(p_state->pend_text, beg, end - beg);
+	if (utf8 && !SvUTF8(p_state->pend_text))
+	    sv_utf8_upgrade(p_state->pend_text);
+	if (utf8 || !SvUTF8(p_state->pend_text)) {
+	    sv_catpvn(p_state->pend_text, beg, end - beg);
+	}
+	else {
+	    SV *tmp = NULL;
+	    sv_catpvn_utf8_upgrade(p_state->pend_text, beg, end - beg, tmp);
+	}
 	return;
     }
     else if (p_state->pend_text && SvOK(p_state->pend_text)) {
@@ -328,6 +339,8 @@ report_event(PSTATE* p_state,
 		for (i = 0; i < num_tokens; i++) {
 		    if (tokens[i].beg) {
 			prev_token = newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg);
+			if (utf8)
+			    SvUTF8_on(prev_token);
 			av_push(av, prev_token);
 		    }
 		    else { /* boolean */
@@ -367,6 +380,8 @@ report_event(PSTATE* p_state,
 	    if (num_tokens >= 1) {
 		arg = sv_2mortal(newSVpvn(tokens[0].beg,
 					  tokens[0].end - tokens[0].beg));
+		if (utf8)
+		    SvUTF8_on(arg);
 		if (!CASE_SENSITIVE(p_state) && argcode != ARG_TOKEN0)
 		    sv_lower(aTHX_ arg);
 		if (argcode == ARG_TAG && event != E_START) {
@@ -398,6 +413,8 @@ report_event(PSTATE* p_state,
 					    tokens[i].end-tokens[i].beg);
 		    SV* attrval;
 
+		    if (utf8)
+			SvUTF8_on(attrname);
 		    if (tokens[i+1].beg) {
 			char *beg = tokens[i+1].beg;
 			STRLEN len = tokens[i+1].end - beg;
@@ -406,6 +423,8 @@ report_event(PSTATE* p_state,
 			    beg++; len -= 2;
 			}
 			attrval = newSVpvn(beg, len);
+			if (utf8)
+			    SvUTF8_on(attrval);
 			if (!p_state->attr_encoded)
 			    decode_entities(aTHX_ attrval, p_state->entity2char);
 		    }
@@ -420,10 +439,8 @@ report_event(PSTATE* p_state,
 			sv_lower(aTHX_ attrname);
 
 		    if (argcode == ARG_ATTR) {
-			U32 hash;
-			PERL_HASH(hash, SvPVX(attrname), SvCUR(attrname));
-			if (hv_exists_ent(hv, attrname, hash) ||
-			    !hv_store_ent(hv, attrname, attrval, hash)) {
+			if (hv_exists_ent(hv, attrname, 0) ||
+			    !hv_store_ent(hv, attrname, attrval, 0)) {
 			    SvREFCNT_dec(attrval);
 			}
 			SvREFCNT_dec(attrname);
@@ -452,6 +469,8 @@ report_event(PSTATE* p_state,
 		for (i = 1; i < num_tokens; i += 2) {
 		    SV* attrname = newSVpvn(tokens[i].beg,
 					    tokens[i].end-tokens[i].beg);
+		    if (utf8)
+			SvUTF8_on(attrname);
 		    if (!CASE_SENSITIVE(p_state))
 			sv_lower(aTHX_ attrname);
 		    av_push(av, attrname);
@@ -462,11 +481,15 @@ report_event(PSTATE* p_state,
 	
 	case ARG_TEXT:
 	    arg = sv_2mortal(newSVpvn(beg, end - beg));
+	    if (utf8)
+		SvUTF8_on(arg);
 	    break;
 
 	case ARG_DTEXT:
 	    if (event == E_TEXT) {
 		arg = sv_2mortal(newSVpvn(beg, end - beg));
+		if (utf8)
+		    SvUTF8_on(arg);
 		if (!p_state->is_cdata)
 		    decode_entities(aTHX_ arg, p_state->entity2char);
 	    }
@@ -481,6 +504,7 @@ report_event(PSTATE* p_state,
         case ARG_SKIPPED_TEXT:
 	    arg = sv_2mortal(p_state->skipped_text);
 	    p_state->skipped_text = newSVpvn("", 0);
+	    SvUTF8_off(p_state->skipped_text);
             break;
 
 	case ARG_OFFSET:
@@ -512,6 +536,8 @@ report_event(PSTATE* p_state,
 	{
 	    int len = (unsigned char)s[1];
 	    arg = sv_2mortal(newSVpvn(s+2, len));
+	    if (SvUTF8(h->argspec))
+		SvUTF8_on(arg);
 	    s += len + 1;
 	}
 	break;
@@ -571,7 +597,15 @@ IGNORE_EVENT:
     if (p_state->skipped_text) {
 	if (event != E_TEXT && p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
-	sv_catpvn(p_state->skipped_text, beg, end - beg);
+	if (utf8 && !SvUTF8(p_state->skipped_text))
+	    sv_utf8_upgrade(p_state->skipped_text);
+	if (utf8 || !SvUTF8(p_state->skipped_text)) {
+	    sv_catpvn(p_state->skipped_text, beg, end - beg);
+	}
+	else {
+	    SV *tmp = NULL;
+	    sv_catpvn_utf8_upgrade(p_state->skipped_text, beg, end - beg, tmp);
+	}
     }
     return;
 }
@@ -585,6 +619,9 @@ argspec_compile(SV* src, PSTATE* p_state)
     STRLEN len;
     char *s = SvPV(src, len);
     char *end = s + len;
+
+    if (SvUTF8(src))
+	SvUTF8_on(argspec);
 
     while (isHSPACE(*s))
 	s++;
@@ -711,8 +748,8 @@ flush_pending_text(PSTATE* p_state, SV* self)
     p_state->column        = p_state->pend_text_column;
 
     report_event(p_state, E_TEXT,
-		 SvPVX(old_pend_text), SvEND(old_pend_text),
-		 0, 0, self);
+		 SvPVX(old_pend_text), SvEND(old_pend_text), 
+		 SvUTF8(old_pend_text), 0, 0, self);
     SvOK_off(old_pend_text);
 
     p_state->unbroken_text = old_unbroken_text;
@@ -747,7 +784,7 @@ skip_until_gt(char *beg, char *end)
 }
 
 static char*
-parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_comment(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg;
 
@@ -774,7 +811,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 
 		/* we are done recognizing all comments, make callbacks */
 		report_event(p_state, E_COMMENT,
-			     beg - 4, s,
+			     beg - 4, s, utf8,
 			     tokens, num_tokens,
 			     self);
 		FREE_TOKENS;
@@ -811,7 +848,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	token.end = s;
 	if (s < end) {
 	    s++;
-	    report_event(p_state, E_COMMENT, beg-4, s, &token, 1, self);
+	    report_event(p_state, E_COMMENT, beg-4, s, utf8, &token, 1, self);
 	    return s;
 	}
 	else {
@@ -835,7 +872,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 		if (*s == '>') {
 		    s++;
 		    /* yup */
-		    report_event(p_state, E_COMMENT, beg-4, s, &token, 1, self);
+		    report_event(p_state, E_COMMENT, beg-4, s, utf8, &token, 1, self);
 		    return s;
 		}
 	    }
@@ -903,7 +940,7 @@ marked_section_update(PSTATE* p_state)
 
 
 static char*
-parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_marked_section(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     dTHX;
     char *s = beg;
@@ -918,6 +955,7 @@ FIND_NAMES:
     while (isHNAME_FIRST(*s)) {
 	char *name_start = s;
 	char *name_end;
+	SV *name;
 	s++;
 	while (isHNAME_CHAR(*s))
 	    s++;
@@ -929,8 +967,10 @@ FIND_NAMES:
 
 	if (!tokens)
 	    tokens = newAV();
-	av_push(tokens, sv_lower(aTHX_ newSVpvn(name_start,
-						name_end - name_start)));
+	name = newSVpvn(name_start, name_end - name_start);
+	if (utf8)
+	    SvUTF8_on(name);
+	av_push(tokens, sv_lower(aTHX_ name));
     }
     if (*s == '-') {
 	s++;
@@ -968,7 +1008,7 @@ FIND_NAMES:
 	    p_state->ms_stack = newAV();
 	av_push(p_state->ms_stack, newRV_noinc((SV*)tokens));
 	marked_section_update(p_state);
-	report_event(p_state, E_NONE, beg, s, 0, 0, self);
+	report_event(p_state, E_NONE, beg, s, utf8, 0, 0, self);
 	return s;
     }
 
@@ -984,7 +1024,7 @@ PREMATURE:
 
 
 static char*
-parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg + 2;
 
@@ -1002,7 +1042,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	/* yes, two dashes seen */
 	s++;
 
-	tmp = parse_comment(p_state, s, end, self);
+	tmp = parse_comment(p_state, s, end, utf8, self);
 	return (tmp == s) ? beg : tmp;
     }
 
@@ -1011,7 +1051,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	/* marked section */
 	char *tmp;
 	s++;
-	tmp = parse_marked_section(p_state, s, end, self);
+	tmp = parse_marked_section(p_state, s, end, utf8, self);
 	if (!tmp)
 	    goto DECL_FAIL;
 	return (tmp == s) ? beg : tmp;
@@ -1024,7 +1064,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	token.beg = s;
 	token.end = s;
 	s++;
-	report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
+	report_event(p_state, E_COMMENT, beg, s, utf8, &token, 1, self);
 	return s;
     }
 
@@ -1115,7 +1155,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 	    goto PREMATURE;
 	if (*s == '>') {
 	    s++;
-	    report_event(p_state, E_DECLARATION, beg, s, tokens, num_tokens, self);
+	    report_event(p_state, E_DECLARATION, beg, s, utf8, tokens, num_tokens, self);
 	    FREE_TOKENS;
 	    return s;
 	}
@@ -1141,7 +1181,7 @@ DECL_FAIL:
 	token.beg = beg + 2;
 	token.end = s;
 	s++;
-	report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
+	report_event(p_state, E_COMMENT, beg, s, utf8, &token, 1, self);
 	return s;
     }
     else {
@@ -1151,7 +1191,7 @@ DECL_FAIL:
 
 
 static char*
-parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg;
     int empty_tag = 0;  /* XML feature */
@@ -1252,9 +1292,9 @@ parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
     if (*s == '>') {
 	s++;
 	/* done */
-	report_event(p_state, E_START, beg, s, tokens, num_tokens, self);
+	report_event(p_state, E_START, beg, s, utf8, tokens, num_tokens, self);
 	if (empty_tag)
-	    report_event(p_state, E_END, s, s, tokens, 1, self);
+	    report_event(p_state, E_END, s, s, utf8, tokens, 1, self);
 
 	if (!p_state->xml_mode) {
 	    /* find out if this start tag should put us into literal_mode
@@ -1301,7 +1341,7 @@ PREMATURE:
 
 
 static char*
-parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_end(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg+2;
     hctype_t name_first, name_char;
@@ -1333,7 +1373,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 	    if (*s == '>') {
 		s++;
 		/* a complete end tag has been recognized */
-		report_event(p_state, E_END, beg, s, &tagname, 1, self);
+		report_event(p_state, E_END, beg, s, utf8, &tagname, 1, self);
 		return s;
 	    }
 	}
@@ -1348,7 +1388,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 	    token.beg = beg + 2;
 	    token.end = s;
 	    s++;
-	    report_event(p_state, E_COMMENT, beg, s, &token, 1, self);
+	    report_event(p_state, E_COMMENT, beg, s, utf8, &token, 1, self);
 	    return s;
 	}
 	else {
@@ -1360,7 +1400,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_process(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg + 2;  /* skip '<?' */
     /* processing instruction */
@@ -1380,7 +1420,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 	    }
       
 	    /* a complete processing instruction seen */
-	    report_event(p_state, E_PROCESS, beg, s,
+	    report_event(p_state, E_PROCESS, beg, s, utf8, 
 			 &token_pos, 1, self);
 	    return s;
 	}
@@ -1392,7 +1432,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 
 #ifdef USE_PFUNC
 static char*
-parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_null(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     return 0;
 }
@@ -1403,7 +1443,7 @@ parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
 #endif /* USE_PFUNC */
 
 static char*
-parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
+parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg;
     char *t = beg;
@@ -1450,9 +1490,9 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 		    if (*s == '>') {
 			s++;
 			if (t != end_text)
-			    report_event(p_state, E_TEXT, t, end_text,
+			    report_event(p_state, E_TEXT, t, end_text, utf8,
 					 0, 0, self);
-			report_event(p_state, E_END,  end_text, s,
+			report_event(p_state, E_END,  end_text, s, utf8,
 				     &end_token, 1, self);
 			p_state->literal_mode = 0;
 			p_state->is_cdata = 0;
@@ -1475,9 +1515,9 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 			s++;
 			/* marked section end */
 			if (t != end_text)
-			    report_event(p_state, E_TEXT, t, end_text,
+			    report_event(p_state, E_TEXT, t, end_text, utf8,
 					 0, 0, self);
-			report_event(p_state, E_NONE, end_text, s, 0, 0, self);
+			report_event(p_state, E_NONE, end_text, s, utf8, 0, 0, self);
 			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
 			marked_section_update(p_state);
@@ -1502,9 +1542,9 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 		    s++;
 		    if (*s == '>') {
 			s++;
-			report_event(p_state, E_TEXT, t, end_text,
+			report_event(p_state, E_TEXT, t, end_text, utf8,
 				     0, 0, self);
-			report_event(p_state, E_NONE, end_text, s,
+			report_event(p_state, E_NONE, end_text, s, utf8,
 				     0, 0, self);
 			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
@@ -1518,7 +1558,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 	}
 	if (s != t) {
 	    if (*s == '<') {
-		report_event(p_state, E_TEXT, t, s, 0, 0, self);
+		report_event(p_state, E_TEXT, t, s, utf8, 0, 0, self);
 		t = s;
 	    }
 	    else {
@@ -1537,7 +1577,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 		}
 		s++;
 		if (s != t)
-		    report_event(p_state, E_TEXT, t, s, 0, 0, self);
+		    report_event(p_state, E_TEXT, t, s, utf8, 0, 0, self);
 		break;
 	    }
 	}
@@ -1549,16 +1589,16 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, SV* self)
 	s++;
 
 #ifdef USE_PFUNC
-	new_pos = parsefunc[(unsigned char)*s](p_state, t, end, self);
+	new_pos = parsefunc[(unsigned char)*s](p_state, t, end, utf8, self);
 #else
 	if (isHNAME_FIRST(*s))
-	    new_pos = parse_start(p_state, t, end, self);
+	    new_pos = parse_start(p_state, t, end, utf8, self);
 	else if (*s == '/')
-	    new_pos = parse_end(p_state, t, end, self);
+	    new_pos = parse_end(p_state, t, end, utf8, self);
 	else if (*s == '!')
-	    new_pos = parse_decl(p_state, t, end, self);
+	    new_pos = parse_decl(p_state, t, end, utf8, self);
 	else if (*s == '?')
-	    new_pos = parse_process(p_state, t, end, self);
+	    new_pos = parse_process(p_state, t, end, utf8, self);
 	else
 	    new_pos = 0;
 #endif /* USE_PFUNC */
@@ -1590,6 +1630,7 @@ parse(pTHX_
       SV* self)
 {
     char *s, *beg, *end;
+    U32 utf8 = 0;
     STRLEN len;
 
     if (!chunk) {
@@ -1604,14 +1645,14 @@ parse(pTHX_
 		if (*s == '<') {
 		    /* try to parse with comments terminated with a plain '>' first */
 		    p_state->no_dash_dash_comment_end = 1;
-		    s = parse_buf(aTHX_ p_state, s, end, self);
+		    s = parse_buf(aTHX_ p_state, s, end, SvUTF8(p_state->buf), self);
 		}
 		if (*s == '<') {
 		    /* some kind of unterminated markup.  Report rest as as comment */
 		    token_pos_t token;
 		    token.beg = s + 1;
 		    token.end = end;
-		    report_event(p_state, E_COMMENT, s, end, &token, 1, self);
+		    report_event(p_state, E_COMMENT, s, end, utf8, &token, 1, self);
 		    SvREFCNT_dec(p_state->buf);
 		    p_state->buf = 0;
 		}
@@ -1622,7 +1663,7 @@ parse(pTHX_
 	    else  {
 		/* report rest as text */
 	    REST_IS_TEXT:
-		report_event(p_state, E_TEXT, s, end, 0, 0, self);
+		report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
 		SvREFCNT_dec(p_state->buf);
 		p_state->buf = 0;
 	    }
@@ -1635,7 +1676,7 @@ parse(pTHX_
 	    SvREFCNT_dec(p_state->ignoring_element);
 	    p_state->ignoring_element = 0;
 	}
-	report_event(p_state, E_END_DOCUMENT, empty, empty, 0, 0, self);
+	report_event(p_state, E_END_DOCUMENT, empty, empty, 0, 0, 0, self);
 
 	/* reset state */
 	p_state->offset = 0;
@@ -1650,18 +1691,20 @@ parse(pTHX_
     if (p_state->buf && SvOK(p_state->buf)) {
 	sv_catsv(p_state->buf, chunk);
 	beg = SvPV(p_state->buf, len);
+	utf8 = SvUTF8(p_state->buf);
     }
     else {
 	beg = SvPV(chunk, len);
+	utf8 = SvUTF8(chunk);
 	if (p_state->offset == 0)
-	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, self);
+	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, 0, self);
     }
 
     if (!len)
 	return; /* nothing to do */
 
     end = beg + len;
-    s = parse_buf(aTHX_ p_state, beg, end, self);
+    s = parse_buf(aTHX_ p_state, beg, end, utf8, self);
 
     if (s == end || p_state->eof) {
 	if (p_state->buf) {
@@ -1672,13 +1715,21 @@ parse(pTHX_
 	/* need to keep rest in buffer */
 	if (p_state->buf) {
 	    /* chop off some chars at the beginning */
-	    if (SvOK(p_state->buf))
+	    if (SvOK(p_state->buf)) {
 		sv_chop(p_state->buf, s);
-	    else
+	    }
+	    else {
 		sv_setpvn(p_state->buf, s, end - s);
+		if (utf8)
+		    SvUTF8_on(p_state->buf);
+		else
+		    SvUTF8_off(p_state->buf);
+	    }
 	}
 	else {
 	    p_state->buf = newSVpv(s, end - s);
+	    if (utf8)
+		SvUTF8_on(p_state->buf);
 	}
     }
     return;
