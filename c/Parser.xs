@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.2 1999/11/03 13:07:27 gisle Exp $ */
+/* $Id: Parser.xs,v 1.3 1999/11/03 13:20:39 gisle Exp $ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -377,7 +377,7 @@ html_parse(struct p_state* p_state,
   char *s, *t, *end;
   STRLEN len;
 
-#ifdef DEBUG
+#if 1
   {
     STRLEN len;
     char *s;
@@ -441,9 +441,9 @@ html_parse(struct p_state* p_state,
 	}
 	else {
 	  /* might be a chopped up entities/words */
-	  while (s > t && !isSPACE(*s))
+	  while (s >= t && !isSPACE(*s))
 	    s--;
-	  while (s > t && isSPACE(*s))
+	  while (s >= t && isSPACE(*s))
 	    s--;
 	}
 	s++;
@@ -555,12 +555,18 @@ html_parse(struct p_state* p_state,
 static PSTATE*
 get_pstate(SV* sv)
 {
-  HV* hv = SvRV(sv);
+  HV* hv;
   SV** svp;
+
+  sv = SvRV(sv);
+  if (!sv || SvTYPE(sv) != SVt_PVHV)
+    croak("No a reference to a hash");
+  hv = (HV*)sv;
   svp = hv_fetch(hv, "_parser_state", 13, 0);
-  printf("svp=%p\n", svp);
+  /* printf("svp=%p\n", svp); */
   if (svp)
     return (PSTATE*)SvIV(*svp);
+  croak("Can't find _parser_state element");
   return 0;
 }
 
@@ -579,16 +585,14 @@ new(xclass)
 	HV* hv;
     PPCODE:
 	Newz(56, pstate, 1, PSTATE);
-	printf("Allocated pstate %p\n", pstate);
-	sv = newSViv(pstate);
+	/* printf("Allocated pstate %p\n", pstate); */
+	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
 
 	hv = newHV();
 	hv_store(hv, "_parser_state", 13, sv, 0);
 
-	
-
-	ST(0) = sv_2mortal(newRV_noinc(hv));
+	ST(0) = sv_2mortal(newRV_noinc((SV*)hv));
 	sv_bless(ST(0), gv_stashpv(sclass, 1));
 
 	XSRETURN(1);
@@ -597,7 +601,7 @@ void
 DESTROY(pstate)
 	PSTATE* pstate
     CODE:
-	printf("Safefree %p\n", pstate);
+	/* printf("Safefree %p\n", pstate); */
 	Safefree(pstate);
 
 void
