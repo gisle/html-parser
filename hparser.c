@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.79 2002/03/08 03:49:23 gisle Exp $
+/* $Id: hparser.c,v 2.80 2002/03/11 17:30:10 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -541,10 +541,19 @@ report_event(PSTATE* p_state,
 
 	if ((enum argcode)*argspec == ARG_SELF && !SvROK(h->cb)) {
 	    char *method = SvPV(h->cb, my_na);
-	    perl_call_method(method, G_DISCARD | G_VOID);
+	    perl_call_method(method, G_DISCARD | G_EVAL | G_VOID);
 	}
 	else {
-	    perl_call_sv(h->cb, G_DISCARD | G_VOID);
+	    perl_call_sv(h->cb, G_DISCARD | G_EVAL | G_VOID);
+	}
+
+	if (SvTRUE(ERRSV)) {
+#if defined(PERL_VERSION) && PERL_VERSION > 6 || (PERL_VERSION == 6 && PERL_SUB_VERSION > 0)
+	    croak(Nullch);
+#else
+	    STRLEN my_na;
+	    croak("%s", SvPV(ERRSV, my_na));
+#endif
 	}
 
 	FREETMPS;
