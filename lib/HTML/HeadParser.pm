@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.17 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new( [$header] )
 
@@ -160,7 +160,7 @@ sub start
     $self->flush_text if $self->{'tag'};
     if ($tag eq 'meta') {
 	my $key = $attr->{'http-equiv'};
-	if (!defined $key) {
+	if (!defined($key) || !length($key)) {
 	    return unless $attr->{'name'};
 	    $key = "X-Meta-\u$attr->{'name'}";
 	}
