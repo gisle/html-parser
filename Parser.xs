@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.62 1999/12/02 10:32:43 gisle Exp $
+/* $Id: Parser.xs,v 2.63 1999/12/02 11:31:21 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -1045,11 +1045,8 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
     s++;
     /* done */
     html_handle(p_state, E_START, beg, s, tokens, num_tokens, self);
-    /* MAC: empty end tag points to start tag text,
-       I expected (..., E_END, s, s, ...)
-       instead of (..., E_END, beg, s, ... */
     if (empty_tag)
-      html_handle(p_state, E_END, beg, s, tokens, 1, self);
+      html_handle(p_state, E_END, s, s, tokens, 1, self);
     FREE_TOKENS;
 
     if (1) {
