@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.108 2004/11/22 18:01:56 gisle Exp $
+/* $Id: hparser.c,v 2.109 2004/11/23 10:26:58 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -171,6 +171,16 @@ report_event(PSTATE* p_state,
 	}
     }
 #endif
+
+    if (p_state->pending_end_tag && event != E_TEXT && event != E_COMMENT) {
+	token_pos_t t;
+	char dummy;
+	t.beg = p_state->pending_end_tag;
+	t.end = p_state->pending_end_tag + strlen(p_state->pending_end_tag);
+	p_state->pending_end_tag = 0;
+	report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+	SPAGAIN;
+    }
 
     /* update offsets */
     p_state->offset += CHR_DIST(end, beg);
@@ -1680,32 +1690,42 @@ parse(pTHX_
 	    end = s + len;
 	    utf8 = SvUTF8(p_state->buf);
 	    assert(len);
-	    if (!p_state->strict_comment && !p_state->is_cdata) {
-		if (*s == '<') {
-		    /* try to parse with comments terminated with a plain '>' first */
+
+	    while (s < end) {
+		if (p_state->literal_mode) {
+		    if (strEQ(p_state->literal_mode, "plaintext") && !p_state->closing_plaintext)
+			break;
+		    p_state->pending_end_tag = p_state->literal_mode;
+		    p_state->literal_mode = 0;
+		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
+		    continue;
+		}
+
+		if (!p_state->strict_comment && !p_state->no_dash_dash_comment_end && *s == '<') {
 		    p_state->no_dash_dash_comment_end = 1;
 		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
+		    continue;
 		}
-		if (*s == '<') {
+
+		if (!p_state->strict_comment && *s == '<') {
 		    /* some kind of unterminated markup.  Report rest as as comment */
 		    token_pos_t token;
 		    token.beg = s + 1;
 		    token.end = end;
 		    report_event(p_state, E_COMMENT, s, end, utf8, &token, 1, self);
-		    SvREFCNT_dec(p_state->buf);
-		    p_state->buf = 0;
+		    s = end;
 		}
-		else {
-		    goto REST_IS_TEXT;
-		}
+
+		break;
 	    }
-	    else  {
+
+	    if (s < end) {
 		/* report rest as text */
-	    REST_IS_TEXT:
 		report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
-		SvREFCNT_dec(p_state->buf);
-		p_state->buf = 0;
 	    }
+	    
+	    SvREFCNT_dec(p_state->buf);
+	    p_state->buf = 0;
 	}
 	if (p_state->pend_text && SvOK(p_state->pend_text))
 	    flush_pending_text(p_state, self);
