@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.29 1999/11/17 21:39:20 gisle Exp $
+/* $Id: Parser.xs,v 2.30 1999/11/17 21:46:38 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -11,11 +11,9 @@
  *   - accum flags (filter out what enters @accum)
  *   - option that prevents text broken between callbacks
  *   - return partial text from literal mode
- *   - marked IGNORE/INCLUDE sections?
  *   - unicode support (whatever that means)
  *   - unicode character entities
  *   - count chars, line numbers
- *   - magic number in header of pstate
  *
  * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
@@ -60,6 +58,7 @@ newSVpvn(char *s, STRLEN len)
 #endif
 #endif /* perl5.004 */
 
+#define P_MAGIC 0x16091964
 
 #include "hctype.h" /* isH...() macros */
 
@@ -74,6 +73,7 @@ enum marked_section_t {
 #endif
 
 struct p_state {
+  U32 magic;
   SV* buf;
   char* literal_mode;
 
@@ -1403,8 +1403,14 @@ get_pstate(SV* sv)
     croak("Not a reference to a hash");
   hv = (HV*)sv;
   svp = hv_fetch(hv, "_parser_xs_state", 16, 0);
-  if (svp)
-    return (PSTATE*)SvIV(*svp);
+  if (svp) {
+    PSTATE* p = (PSTATE*)SvIV(*svp);
+#ifdef P_MAGIC
+    if (p->magic != P_MAGIC)
+      croak("Bad magic in parser state object at %p", p);
+#endif
+    return p;
+  }
   croak("Can't find '_parser_xs_state' element in HTML::Parser hash");
   return 0;
 }
@@ -1429,6 +1435,9 @@ _alloc_pstate(self)
 	hv = (HV*)sv;
 
 	Newz(56, pstate, 1, PSTATE);
+#ifdef P_MAGIC
+	pstate->magic = P_MAGIC;
+#endif
 	sv = newSViv((IV)pstate);
 	SvREADONLY_on(sv);
 
