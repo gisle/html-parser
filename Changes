@@ -2,7 +2,7 @@
 
     Release 2.99_96
 
-    Various patches from Michael:
+    Some patches from Michael:
 
        - A handler of "" means that the event will be ignored.
          More efficient than using sub{} as handler.
