@@ -1,3 +1,24 @@
+2001-03-13   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_90
+
+     This is an developer only release.  It contains some new
+     experimental features.  The interface to these might still change.
+
+     Implemented filters to reduce the numbers of callbacks generated:
+        - $p->ignore_tags()
+        - $p->report_only_tags()
+        - $p->ignore_elements()
+
+     New @attr argspec.  Less overhead than 'attr' and allow
+     compatibility with XML::Parser style start events.
+
+     The whole argspec can be wrapped up in @{...} to signal
+     flattening.  Only makes a difference when the target is an
+     array.
+
+
+
 2001-03-09   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.19
