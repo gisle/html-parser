@@ -40,12 +40,17 @@ sub tag
 	# kill some attributes
 	my($k_offset, $k_len, $v_offset, $v_len) = @{$pos}[-4 .. -1];
 	my $next_attr = $v_offset ? $v_offset + $v_len : $k_offset + $k_len;
+	my $edited;
 	while (4 <= @$pos) {
 	    ($k_offset, $k_len, $v_offset, $v_len) = splice @$pos, -4;
-	    substr($text, $k_offset, $next_attr - $k_offset) = ""
-		if $ignore_attr{lc substr($text, $k_offset, $k_len)};
+	    if ($ignore_attr{lc substr($text, $k_offset, $k_len)}) {
+		substr($text, $k_offset, $next_attr - $k_offset) = "";
+		$edited++;
+	    }
 	    $next_attr = $k_offset;
 	}
+	# if we killed all attributed, kill any extra whitespace too
+	$text =~ s/^(<\w+)\s+>$/$1>/ if $edited;
     }
     print $text;
 }
