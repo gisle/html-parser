@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.32 2000/01/15 15:34:17 gisle Exp $
+/* $Id: hparser.c,v 2.33 2000/01/21 12:08:59 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -900,7 +900,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 		   offset + (s - beg), self);
     FREE_TOKENS;
 
-    {
+    if (!p_state->xml_mode) {
       /* find out if this start tag should put us into literal_mode
        */
       int i;
