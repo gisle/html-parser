@@ -9,14 +9,16 @@ ISSUES FOR THE 3.0 RELEASE
     '../html4.0.1/appendix/notes.html#h-B.3.1'  Problematic when NL sometimes
     is \r\n and sometimes just \r (from Mac servers).  Perhaps an option
     later?
-  - Should there be a way to get both types of quotes into the same
-    literal strings in argspec (need some kind of escaping).
+
+  - Calling $p->eof from a handler should abort parsing.
+  - Calling $p->parse from a handler should croak.
 
 
 FEATURES THAT CAN WAIT
 
  - official interface to $self->{parse_file_stop}
- - remove 255 char limit on literal strings in argspec
+ - remove 255 char limit on literal argspec strings
+ - implement backslash escapes in literal argspec string
  - report 'line'
  - unbroken_text option
  - utf8 mode (where entities expand to utf8 chars instead of latin1 chars)
