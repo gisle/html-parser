@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.28 2004/11/16 17:57:47 gisle Exp $
+/* $Id: hparser.h,v 2.29 2004/11/22 10:44:53 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -108,6 +108,7 @@ struct p_state {
     /* other configuration stuff */
     SV* bool_attr_val;
     struct p_handler handlers[EVENT_COUNT];
+    bool argspec_entity_decode;
 
     /* filters */
     HV* report_tags;

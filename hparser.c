@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.104 2004/11/17 14:09:41 gisle Exp $
+/* $Id: hparser.c,v 2.105 2004/11/22 10:44:53 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -683,6 +683,9 @@ argspec_compile(SV* src, PSTATE* p_state)
 			p_state->skipped_text = newSVpvn("", 0);
                     }
                 }
+		if (a == ARG_ATTR || a == ARG_ATTRARR || a == ARG_DTEXT) {
+		    p_state->argspec_entity_decode++;
+		}
 	    }
 	    else {
 		croak("Unrecognized identifier %.*s in argspec", s - name, name);
@@ -1710,8 +1713,32 @@ parse(pTHX_
     else {
 	beg = SvPV(chunk, len);
 	utf8 = SvUTF8(chunk);
-	if (p_state->offset == 0)
+	if (p_state->offset == 0) {
 	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, 0, self);
+	    if ((!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
+		(utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6))
+	       )
+	    {
+		if (p_state->argspec_entity_decode)
+		    warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
+	    }
+	    if (utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
+		warn("Parsing string decoded with wrong endianess");
+	    }
+	    if (!utf8 && len >= 4 &&
+		(strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
+		 strnEQ(beg, "\xFE\xFF\x00\x00", 4))
+	       )
+	    {
+		warn("Parsing of undecoded UTF-32");
+	    }
+	    else if (!utf8 && len >= 2 &&
+		     (strnEQ(beg, "\xFE\xFF", 2) || strnEQ(beg, "\xFF\xFE", 2))
+		    )
+	    {
+		warn("Parsing of undecoded UTF-16");
+	    }
+	}
     }
 
     if (!len)
