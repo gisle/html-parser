@@ -141,7 +141,7 @@ ok($warn[0] =~ /^Parsing of undecoded UTF-8 will give garbage when decoding enti
 
 @warn = ();
 @parsed = ();
-open($fh, "<:utf8", $file) || die;
+open($fh, "<:raw:utf8", $file) || die;
 $p->parse_file($fh);
 ok(@parsed, "11");
 ok($parsed[6][0], "start");
