@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.39 1999/11/25 09:48:04 gisle Exp $
+/* $Id: Parser.xs,v 2.40 1999/11/25 11:22:22 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -9,6 +9,8 @@
 /* TODO:
  *   - write test scritps
  *   - write documentation
+ *   - callback parameter spec
+ *   - pic attribute (">" or "?>" are defaults)
  *   - count chars, line numbers
  *   - utf8 mode (entities expand to utf8 chars)
  *   - option that make start tag attrs be returned as a hash
