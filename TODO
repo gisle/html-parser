@@ -7,7 +7,7 @@ BEFORE 3.00
   - run more leak-tests
   - update README
 
-  - perhaps 'charpos' in attrspec?
+  - perhaps 'bytepos/offset' in attrspec?
 
 PLAIN BUGS
 
@@ -34,7 +34,7 @@ ISSUES
 
 FEATURES THAT CAN WAIT
 
- - report 'charpos'
+ - report 'bytepos/offset'
  - report 'linenumber'
  - unbroken_text option
  - utf8 mode (where entities expand to utf8 chars instead of latin1 chars)
@@ -53,4 +53,6 @@ MINOR "BUGS" (alias FEATURES):
    the attribute as value.  Perhaps not really a problem.
  - <plaintext> should not end with </plaintext>; can't be
    escaped.
+ - <style> and <script> does not end with the first "</".
+
 
