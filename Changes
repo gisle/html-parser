@@ -1,3 +1,20 @@
+2001-02-22   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.16
+
+     The unbroken_text option now works across ignored tags.
+
+     Fix casting of pointers on some 64 bit platforms.
+
+     Fix decoding of Unicode entities.  Only optionally available for
+     perl-5.7.0 or better.
+
+     Expose internal decode_entities() function at the Perl level.
+
+     Reindented some code.
+
+
+
 2000-12-26   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.15
