@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.37 2000/01/21 22:19:50 gisle Exp $
+/* $Id: hparser.c,v 2.38 2000/01/21 23:56:09 gisle Exp $
  *
  * Copyright 1999, Gisle Aas
  * Copyright 1999 Michael A. Chase
@@ -142,14 +142,6 @@ report_event(PSTATE* p_state,
     return;
 #endif
 
-  h = &p_state->handlers[event];
-  if (!h->cb) {
-    /* event = E_DEFAULT; */
-    h = &p_state->handlers[E_DEFAULT];
-    if (!h->cb)
-      return;
-  }
-
   if (p_state->unbroken_text && event == E_TEXT) {
     /* should buffer text */
     if (!p_state->pend_text)
@@ -171,6 +163,14 @@ report_event(PSTATE* p_state,
   }
   else if (p_state->pend_text && SvOK(p_state->pend_text)) {
     flush_pending_text(p_state, self);
+  }
+
+  h = &p_state->handlers[event];
+  if (!h->cb) {
+    /* event = E_DEFAULT; */
+    h = &p_state->handlers[E_DEFAULT];
+    if (!h->cb)
+      return;
   }
 
   if (SvTYPE(h->cb) == SVt_PVAV) {
@@ -1242,7 +1242,7 @@ parse(PSTATE* p_state,
 	}
 	s++;
 	if (s != t)
-	  report_event(p_state, E_TEXT, t, s, 0, 0, beg - t, self);
+	  report_event(p_state, E_TEXT, t, s, 0, 0, t - beg, self);
 	break;
       }
     }
