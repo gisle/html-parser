@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.90 2003/08/15 05:31:49 gisle Exp $
+/* $Id: hparser.c,v 2.91 2003/08/15 14:38:37 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -859,7 +859,6 @@ marked_section_update(PSTATE* p_state)
     p_state->ms = MS_NONE;
 
     if (ms_stack) {
-	int i;
 	int stack_len = av_len(ms_stack);
 	int stack_idx;
 	for (stack_idx = 0; stack_idx <= stack_len; stack_idx++) {
@@ -1150,7 +1149,6 @@ static char*
 parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 {
     char *s = beg;
-    SV* attr;
     int empty_tag = 0;  /* XML feature */
     dTOKENS(16);
 

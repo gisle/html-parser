@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.16 2003/07/21 06:42:40 gisle Exp $
+/* $Id: util.c,v 2.17 2003/08/15 14:38:37 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -95,7 +95,6 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 	    int ok = 0;
 	    s++;
 	    if (*s == 'x' || *s == 'X') {
-		char *tmp;
 		s++;
 		while (*s) {
 		    char *tmp = strchr(PL_hexdigit, *s);
@@ -128,7 +127,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 	    if (ok) {
 #ifdef UNICODE_ENTITIES
 		if (!SvUTF8(sv) && num <= 255) {
-		    buf[0] = num;
+		    buf[0] = (char) num;
 		    repl = buf;
 		    repl_len = 1;
 		    repl_utf8 = 0;
@@ -141,7 +140,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
 		}
 #else
 		if (num <= 255) {
-		    buf[0] = num & 0xFF;
+		    buf[0] = (char) num & 0xFF;
 		    repl = buf;
 		    repl_len = 1;
 		}
