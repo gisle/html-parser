@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.23 2001/03/26 00:32:51 gisle Exp $
+# $Id: TokeParser.pm,v 2.24 2001/03/26 07:32:17 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.23 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.24 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -24,12 +24,19 @@ my %ARGS =
 sub new
 {
     my $class = shift;
-    my %cnf = (@_ == 1) ? (file => $_[0]) : @_;
+    my %cnf;
+    if (@_ == 1) {
+	my $type = (ref($_[0]) eq "SCALAR") ? "doc" : "file";
+	%cnf = ($type => $_[0]);
+    }
+    else {
+	%cnf = @_;
+    }
 
     my $textify = delete $cnf{textify} || {img => "alt", applet => "alt"};
 
-    # Create object
     my $self = $class->SUPER::new(%cnf, %ARGS) || return undef;
+
     $self->{textify} = $textify;
     $self;
 }
@@ -118,14 +125,10 @@ HTML::TokeParser - Alternative HTML::Parser interface
 
 =head1 DESCRIPTION
 
-The HTML::TokeParser is an alternative interface to the HTML::Parser class.
-It basically turns the HTML::Parser inside out.  You associate a file
-(or any IO::Handle object or string) with the parser at construction time and
-then repeatedly call $parser->get_token to obtain the tags and text
-found in the parsed document.
+The C<HTML::TokeParser> is an alternative interface to the
+C<HTML::Parser> class.  It is an C<HTML::PullParser> subclass.
 
-Calling the methods defined by the HTML::Parser base class will be
-confusing, so don't do that.  Use the following methods instead:
+The following methods are available:
 
 =over 4
 

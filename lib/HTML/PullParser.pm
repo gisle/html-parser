@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.2 2001/03/26 05:59:47 gisle Exp $
+# $Id: PullParser.pm,v 2.3 2001/03/26 07:32:17 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.3 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -20,22 +20,15 @@ sub new
 	next unless defined $tmp;
 	$argspec{$_} = $tmp;
     }
+    Carp::croak("Info not collected for any events")
+	  unless %argspec;
 
     my $file = delete $cnf{file};
     my $doc  = delete $cnf{doc};
     Carp::croak("Can't parse from both 'doc' and 'file' at the same time")
 	  if defined($file) && defined($doc);
-    if (defined $doc) {
-	$file = ref($doc) ? $doc : \$doc;
-    }
-    elsif (!defined $file) {
-	Carp::croak("No file to parse from given");
-    }
-
-    if (!ref($file) && ref(\$file) ne "GLOB") {
-	require IO::File;
-	$file = IO::File->new($file, "r") || return;
-    }
+    Carp::croak("No 'doc' or 'file' given to parse from")
+	  unless defined($file) || defined($doc);
 
     # Create object
     $cnf{api_version} = 3;
@@ -46,18 +39,16 @@ sub new
 	$self->SUPER::handler($event => $accum, $argspec);
     }
 
-    if (ref($file) eq "SCALAR") {
-	if (!defined $$file) {
-	    Carp::carp("HTML::PullParser got undefined value as document")
-		if $^W;
-	    $self->{pullparser_eof}++;
-	}
-	else {
-	    $self->{pullparser_scalar} = $file;
-	    $self->{pullparser_scalarpos}  = 0;
-	}
+    if (defined $doc) {
+	$self->{pullparser_str_ref} = ref($doc) ? $doc : \$doc;
+	$self->{pullparser_str_pos} = 0;
     }
     else {
+	if (!ref($file) && ref(\$file) ne "GLOB") {
+	    require IO::File;
+	    $file = IO::File->new($file, "r") || return;
+	}
+
 	$self->{pullparser_file} = $file;
     }
     $self;
@@ -85,20 +76,20 @@ sub get_token
 		delete $self->{pullparser_file};
 	    }
 	}
-	elsif (my $sref = $self->{pullparser_scalar}) {
+	elsif (my $sref = $self->{pullparser_str_ref}) {
 	    # must try to parse more from the scalar
-	    my $pos = $self->{pullparser_scalarpos};
+	    my $pos = $self->{pullparser_str_pos};
 	    my $chunk = substr($$sref, $pos, 512);
 	    $self->parse($chunk);
 	    $pos += length($chunk);
 	    if ($pos < length($$sref)) {
-		$self->{pullparser_scalarpos} = $pos;
+		$self->{pullparser_str_pos} = $pos;
 	    }
 	    else {
 		$self->eof;
 		$self->{pullparser_eof}++;
-		delete $self->{pullparser_scalar};
-		delete $self->{pullparser_scalarpos};
+		delete $self->{pullparser_str_ref};
+		delete $self->{pullparser_str_pos};
 	    }
 	}
 	else {
@@ -129,12 +120,13 @@ HTML::PullParser - Alternative HTML::Parser interface
 
  use HTML::PullParser;
 
- $p = HTML::TokeParser->new(file => "index.html",
+ $p = HTML::PullParser->new(file => "index.html",
                             start => "event, tag",
                             end   => "event, tag",
+                            ignore_elements => [qw(script style)],
                            ) || die "Can't open: $!";
  while (my $token = $p->get_token) {
-     #...
+     #...do something with $token
  }
 
 =head1 DESCRIPTION
@@ -145,7 +137,47 @@ It basically turns the HTML::Parser inside out.  You associate a file
 then repeatedly call $parser->get_token to obtain the tags and text
 found in the parsed document.
 
-Methods: ...
+The following methods are provided:
+
+=over 4
+
+=item $p = HTML::PullParser->new( file => $file, %options )
+
+=item $p = HTML::PullParser->new( doc => \$doc, %options )
+
+A C<HTML::PullParser> can be made to parse from either a file or a
+literal document based on whether the C<file> or C<doc> option is
+passed to the parser's constructor.
+
+The C<file> passed in can either be a file name or a file handle
+object.  If a file name is passed, and it can't be opened for reading,
+then the constructor will return an undefined value and $!  will tell
+you why it failed.  Otherwise the argument is taken to be some object
+that the C<HTML::PullParser> can read() from when it needs more data.
+The stream will be read() until EOF, but not closed.
+
+A C<doc> can be passed plain or as a reference
+to a scalar.  If a reference is passed then the value of this scalar
+should not be changed before all tokens have been extracted.
+
+Next the information to be returned for the different token types must
+be set up.  This is done by simply assosiating an argspec (as defined
+in L<HTML::Parser>) with the events you have an interrest in.
+
+At last other C<HTML::Parser> options can be passed in.  Note that you
+should not use the I<event>_h options to set up parser handlers.
+
+=item $token = $p->get_token
+
+This method will return the next I<token> found in the HTML document,
+or C<undef> at the end of the document.  The token is returned as an
+array reference.  The content of this array match the argspec set up
+during C<HTML::PullParser> construction.
+
+=item $p->unget_token($token,...)
+
+If you find out you have read too many tokens you can push them back,
+so that they are returned again the next time $p->get_token is called.
 
 =head1 SEE ALSO
 
