@@ -1,3 +1,17 @@
+1999-11-05   Gisle Aas <gisle@aas.no>
+
+   Release 2.25
+
+   Allow ":" in attribute names as a workaround for Microsoft Excel
+   2000 which generates such files.
+
+   Make depreciate warning if netscape_buggy_comment() method is
+   used.  The method to use in strict_comment().
+
+   Avoid duplication of parse_file() method in HTML::HeadParser.
+
+
+
 1999-10-29   Gisle Aas <gisle@aas.no>
 
    Release 2.24
