@@ -4,8 +4,15 @@
 # Examples:
 #
 #  $ hrefsub 's/foo/bar/g' index.html
-#  $ hrefsub 'URI->new_abs($_, "http://foo")' index.html
+#  $ hrefsub '$_=URI->new_abs($_, "http://foo")' index.html
 #
+# The first argument is a perl expression that might modify $_.
+# It is called for each link in the document with $_ set to
+# the original value of the link URI.  The variables $tag and
+# $attr can be used to access the tagname and attributename
+# within the tag where the current link is found.
+#
+# The second argument is the name of a file to process.
 
 use strict;
 use HTML::Parser ();
