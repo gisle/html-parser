@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.08';  # $Date: 2000/06/01 13:19:40 $
+$VERSION = '3.08';  # $Date: 2000/06/09 06:39:58 $
 
 require HTML::Entities;
 
@@ -547,6 +547,9 @@ passed.  This should always be the same as $tokens->[0].
 For C<declaration> events, this is the declaration type.
 
 For C<start> and C<end> events, this is the tag name.
+
+For C<process> and non-strict C<comment> events, this is everything
+inside the tag.
 
 This passes undef if there are no tokens in the event.
 
