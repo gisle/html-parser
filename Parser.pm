@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.3992';  # $Date: 2004/11/23 22:20:35 $
+$VERSION = '3.3992';  # $Date: 2004/11/24 14:37:16 $
 
 require HTML::Entities;
 
@@ -1192,7 +1192,7 @@ L<HTML::LinkExtor>, L<HTML::Form>
 
 L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
 
-http://www.w3.org/TR/REC-html40
+http://www.w3.org/TR/html4
 
 More information about marked sections and processing instructions may
 be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
