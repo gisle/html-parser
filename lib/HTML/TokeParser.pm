@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.7 1999/10/29 12:18:50 gisle Exp $
+# $Id: TokeParser.pm,v 2.8 1999/11/09 22:18:27 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.8 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp qw(croak);
@@ -20,8 +20,9 @@ sub new
 	require IO::File;
 	$file = IO::File->new($file, "r") || return;
     }
-    my $self = $class->SUPER::new;
-    $self->{tokens} = [];
+    my $self = $class->SUPER::new(accum => [],
+				  v2_compat => 1,
+				 );
     $self->{textify} = {img => "alt", applet => "alt"};
     if (ref($file) eq "SCALAR") {
 	$self->{toke_scalar} = $file;
@@ -32,18 +33,11 @@ sub new
     $self;
 }
 
-# Set up callback methods
-for (qw(declaration start end text comment)) {
-    my $t = uc(substr($_,0,1));
-    no strict 'refs';
-    *$_ = sub { my $self = shift; push(@{$self->{tokens}}, [$t, @_]) };
-}
-
 
 sub get_token
 {
     my $self = shift;
-    while (!@{$self->{tokens}} && !$self->{toke_eof}) {
+    while (!@{$self->accum} && !$self->{toke_eof}) {
 	if (my $f = $self->{toke_file}) {
 	    # must try to parse more from the file
 	    my $buf;
@@ -75,14 +69,14 @@ sub get_token
 	    die;
 	}
     }
-    shift @{$self->{tokens}};
+    shift @{$self->accum};
 }
 
 
 sub unget_token
 {
     my $self = shift;
-    unshift @{$self->{tokens}}, @_;
+    unshift @{$self->accum}, @_;
     $self;
 }
 
@@ -205,18 +199,20 @@ EOF, but not closed.
 
 This method will return the next I<token> found in the HTML document,
 or C<undef> at the end of the document.  The token is returned as an
-array reference.  The first element of the array will be a single
-character string denoting the type of this token; "S" for start tag,
-"E" for end tag, "T" for text, "C" for comment, and "D" for
-declaration.  The rest of the array is the same as the arguments
-passed to the corresponding HTML::Parser callbacks (see
-L<HTML::Parser>).  This summarize the tokens that can occur:
+array reference.  The first element of the array will be a (mostly)
+single character string denoting the type of this token; "S" for start
+tag, "E" for end tag, "T" for text, "C" for comment, "D" for
+declaration, and "PI" for process instructions.  The rest of the array
+is the same as the arguments passed to the corresponding HTML::Parser
+callbacks (see L<HTML::Parser>).  This summarize the tokens that can
+occur:
 
-  ["S", $tag, %$attr, @$attrseq, $origtext]
-  ["E", $tag, $origtext]
-  ["T", $text]
-  ["C", $text]
-  ["D", $text]
+  ["S",  $tag, %$attr, @$attrseq, $origtext]
+  ["E",  $tag, $origtext]
+  ["T",  $text]
+  ["C",  $text]
+  ["D",  $text]
+  ["PI", $text]
 
 =item $p->unget_token($token,...)
 
