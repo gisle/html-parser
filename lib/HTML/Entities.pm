@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.22 2001/04/11 17:22:45 gisle Exp $
+# $Id: Entities.pm,v 1.23 2001/11/05 21:23:21 gisle Exp $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.22 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.23 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -396,7 +396,7 @@ sub encode_entities
 	&{$subst{$_[1]}}($$ref);
     } else {
 	# Encode control chars, high bit chars and '<', '&', '>', '"'
-	$$ref =~ s/([^\n\t !\#\$%\'-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
+	$$ref =~ s/([^\n\r\t !\#\$%\'-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
     }
     $$ref;
 }
