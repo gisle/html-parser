@@ -1,18 +1,17 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.1 2001/03/26 00:32:51 gisle Exp $
+# $Id: PullParser.pm,v 2.2 2001/03/26 05:59:47 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.1 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.2 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
 
 sub new
 {
-    my $class = shift;
-    my %cnf = (@_ == 1) ? (file => $_[0]) : @_;
+    my($class, %cnf) = @_;
 
     # Construct argspecs for the various events
     my %argspec;
@@ -23,8 +22,15 @@ sub new
     }
 
     my $file = delete $cnf{file};
-    Carp::croak("Usage: $class->new(\$file)")
-	  unless defined $file;
+    my $doc  = delete $cnf{doc};
+    Carp::croak("Can't parse from both 'doc' and 'file' at the same time")
+	  if defined($file) && defined($doc);
+    if (defined $doc) {
+	$file = ref($doc) ? $doc : \$doc;
+    }
+    elsif (!defined $file) {
+	Carp::croak("No file to parse from given");
+    }
 
     if (!ref($file) && ref(\$file) ne "GLOB") {
 	require IO::File;
