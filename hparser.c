@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.25 1999/12/09 12:21:56 gisle Exp $
+/* $Id: hparser.c,v 2.26 1999/12/09 15:40:28 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -389,7 +389,7 @@ argspec_compile(SV* src)
     else if (*s == '"' || *s == '\'') {
       char *string_beg = s;
       s++;
-      while (s < end && *s != *string_beg)
+      while (s < end && *s != *string_beg && *s != '\\')
 	s++;
       if (*s == *string_beg) {
 	/* literal */
@@ -399,6 +399,9 @@ argspec_compile(SV* src)
 	sv_catpvf(argspec, "%c%c", ARG_LITERAL, len);
 	sv_catpvn(argspec, string_beg+1, len);
 	s++;
+      }
+      else if (*s == '\\') {
+	croak("Backslash reserved for literal string in argspec");
       }
       else {
 	croak("Unterminated literal string in argspec");
