@@ -1,17 +1,4 @@
-ISSUES FOR THE 3.0 RELEASE
-
-  - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
-  - Should we report tokens for 'text'?
-  - Should some '\n' be part of markup instead of text.  The SGML standard
-    has a few things to say about this.  A '\n' following a start tag should
-    be considered part of that tag.  A '\n' preceeding an end tag should
-    be part of that tag and not part of the text flow. Also according to
-    '../html4.0.1/appendix/notes.html#h-B.3.1'  Problematic when NL sometimes
-    is \r\n and sometimes just \r (from Mac servers).  Perhaps an option
-    later?
-
-
-FEATURES THAT CAN WAIT
+TODO
 
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
