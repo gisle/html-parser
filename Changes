@@ -1,3 +1,17 @@
+2001-04-10   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.21
+
+     Fix a memory leak which occured when using filter methods.
+
+     Avoid a few compiler warnings (DEC C):
+        - Trailing comma found in enumerator list
+        - "unsigned char" is not compatible with "const char".
+
+     Doc update.
+
+
+
 2001-04-02   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.20
