@@ -73,13 +73,12 @@ package main;
 
 for (@tests) {
    $p = new P;
-   #$p->netscape_buggy_comment(1);
+   $p->strict_comment(1);
    print "-" x 50, "\n";
    print "$_\n";
    print "-" x 50, "\n";
    
-   $p->parse($_);
-   $p->eof;
+   $p->parse($_)->eof;
 
    print "\n";
 }
