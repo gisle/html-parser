@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.41 1999/11/25 11:59:52 gisle Exp $
+/* $Id: Parser.xs,v 2.42 1999/11/25 13:37:42 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1625,7 +1625,7 @@ accum(pstate,...)
     CODE:
         RETVAL = pstate->accum ? newRV_inc((SV*)pstate->accum)
 #if !(PATCHLEVEL == 4 && SUBVERSION == 5)
-			       : &PL_sv_undef
+			       : &PL_sv_undef;
 #else
          /* For perl5.004_05 returning PL_sv_undef will terminate
           * the program with the "Modification of a read-only value attempted"
