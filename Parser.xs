@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.36 1999/11/18 08:33:22 gisle Exp $
+/* $Id: Parser.xs,v 2.37 1999/11/18 08:59:44 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -22,6 +22,8 @@
  *   - direct method calls
  *   - avoid building start tag tokens when start tags are
  *     ignored.
+ *   - less need for leaving things in buf when unbroken_text
+ *     option is enabled.
  *
  * MINOR "BUGS" (alias FEATURES):
  *   - no way to clear "bool_attr_val" which gives the name of
