@@ -7,6 +7,10 @@
     been running HTML-Parser-XS trough more that 1 million urls that
     had been downloaded via LWP.
 
+    Handlers can now invoke $p->eof to request the parsing to terminate.
+    HTML::HeadParser has been simplified by taking advantage of this.
+    Also added a title-extraction-example that use this.
+
     Michael once again fixed my bad English in the HTML::Parser
     documentation.
 
