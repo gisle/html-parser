@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.00';  # $Date: 1999/12/14 11:13:33 $
+$VERSION = '3.00';  # $Date: 1999/12/14 22:31:21 $
 
 require HTML::Entities;
 
@@ -289,6 +289,10 @@ normally be read until EOF, but not closed.
 
 If an invoked event handler aborts parsing by calling $p->eof,
 then $p->parse_file() may not have read the entire file.
+
+On systems with multi-byte line terminators, the values passed for the
+offset and length argspecs may be too low if parse_file is called with
+a file handle that is not in binary mode.
 
 =item $p->eof
 
