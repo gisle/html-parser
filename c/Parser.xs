@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.22 1999/11/05 20:01:46 gisle Exp $
+/* $Id: Parser.xs,v 1.23 1999/11/05 22:04:56 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -18,6 +18,7 @@
  *        - start tags might end with "/" which should mark them
  *          as empty
  *        - unicode characters in names
+ *        - allow ":" and "_" as first char of names
  *   - marked sections?
  *   - unicode support
  */
@@ -416,19 +417,16 @@ html_parse_decl(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     if (*s == '>') {
       s++;
       html_decl(p_state, tokens, beg, s-1, cbdata);
-      if (tokens)
-	SvREFCNT_dec(tokens);
+      SvREFCNT_dec(tokens);
       return s;
     }
 
   ERROR:
-    if (tokens)
-      SvREFCNT_dec(tokens);
+    SvREFCNT_dec(tokens);
     return 0;
 
   PREMATURE:
-    if (tokens)
-      SvREFCNT_dec(tokens);
+    SvREFCNT_dec(tokens);
     return beg;
 
   } else if (*s == '-') {
@@ -622,8 +620,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     s++;
     /* done */
     html_start(p_state, beg+1, tag_end, tokens, beg, s, cbdata);
-    if (tokens)
-      SvREFCNT_dec(tokens);
+    SvREFCNT_dec(tokens);
 
     if (1) {
       /* find out if this start tag should put us into literal_mode
@@ -656,13 +653,12 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
     return s;
   }
-  if (tokens)
-    SvREFCNT_dec(tokens);
+  
+  SvREFCNT_dec(tokens);
   return 0;
 
  PREMATURE:
-  if (tokens)
-    SvREFCNT_dec(tokens);
+  SvREFCNT_dec(tokens);
   return beg;
 }
 
@@ -695,7 +691,7 @@ html_parse(PSTATE* p_state,
 
   if (!chunk || !SvOK(chunk)) {
     /* EOF */
-    if (p_state->buf) {
+    if (p_state->buf && SvOK(p_state_buf)) {
       /* flush it */
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
