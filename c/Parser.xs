@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.13 1999/11/04 22:44:19 gisle Exp $
+/* $Id: Parser.xs,v 1.14 1999/11/04 23:29:14 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -52,9 +52,21 @@ sv_lower(SV* sv)
 static void
 html_text(PSTATE* p_state, char* beg, char *end, SV* cbdata)
 {
+  AV *accum;
   SV *cb;
+
   if (beg == end)
     return;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    av_push(av, newSVpv("T", 1));
+    av_push(av, newSVpv(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
   cb = p_state->text_cb;
   if (cb) {
     dSP;
@@ -80,10 +92,26 @@ html_end(PSTATE* p_state,
 	 char *beg, char *end,
 	 SV* cbdata)
 {
-  SV *cb = p_state->end_cb;
-  SV *sv;
+  AV *accum;
+  SV *cb;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
+    if (!p_state->keep_case)
+      sv_lower(tag);
+    
+    av_push(av, newSVpv("E", 1));
+    av_push(av, tag);
+    av_push(av, newSVpv(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
+  cb = p_state->end_cb;
   if (cb) {
-    SV tagsv;
+    SV *sv;
     dSP;
     ENTER;
     SAVETMPS;
@@ -112,9 +140,28 @@ html_start(PSTATE* p_state,
 	   char *beg, char *end,
 	   SV* cbdata)
 {
-  SV *cb = p_state->start_cb;
-  SV *sv;
+  AV *accum;
+  SV *cb;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    SV* tag = newSVpv(tag_beg, tag_end - tag_beg);
+    if (!p_state->keep_case)
+      sv_lower(tag);
+    
+    av_push(av, newSVpv("S", 1));
+    av_push(av, tag);
+    av_push(av, (SV*)tokens);
+    SvREFCNT_inc(tokens);
+    av_push(av, newSVpv(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
+  cb = p_state->start_cb;
   if (cb) {
+    SV *sv;
     dSP;
     ENTER;
     SAVETMPS;
@@ -140,7 +187,19 @@ html_start(PSTATE* p_state,
 static void
 html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 {
-  SV *cb = p_state->pi_cb;
+  AV *accum;
+  SV *cb;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    av_push(av, newSVpv("P", 1));
+    av_push(av, newSVpvn(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
+  cb = p_state->pi_cb;
   if (cb) {
     dSP;
     ENTER;
@@ -162,7 +221,19 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
 static void
 html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 {
-  SV *cb = p_state->com_cb;
+  AV *accum;
+  SV *cb;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    av_push(av, newSVpv("C", 1));
+    av_push(av, newSVpvn(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
+  cb = p_state->com_cb;
   if (cb) {
     dSP;
     ENTER;
@@ -184,7 +255,21 @@ html_comment(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 static void
 html_decl(PSTATE* p_state, AV* tokens, char *beg, char *end, SV* cbdata)
 {
-  SV *cb = p_state->decl_cb;
+  AV *accum;
+  SV *cb;
+
+  accum = p_state->accum;
+  if (accum) {
+    AV* av = newAV();
+    av_push(av, newSVpv("D", 1));
+    av_push(av, (SV*)tokens);
+    SvREFCNT_inc(tokens);
+    av_push(av, newSVpv(beg, end - beg));
+    av_push(accum, (SV*)av);
+    return;
+  }
+
+  cb = p_state->decl_cb;
   if (cb) {
     dSP;
     ENTER;
