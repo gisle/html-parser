@@ -8,9 +8,15 @@ BEGIN {
     }
 }
 
-print "1..10\n";
-
 use HTML::Entities;
+
+unless (&HTML::Entities::UNICODE_SUPPORT) {
+    print "Unicode entities not selected\n";
+    print "1..0\n";
+    exit;
+}
+
+print "1..10\n";
 
 print "not " unless decode_entities("&euro") eq "\x{20AC}";
 print "ok 1\n";
