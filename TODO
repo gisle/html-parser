@@ -26,6 +26,7 @@ ISSUES
 
 FEATURES THAT CAN WAIT
 
+ - official interface to $self->{parse_file_stop}
  - remove 255 char limit on literal strings in argspec
  - report 'line'
  - unbroken_text option
