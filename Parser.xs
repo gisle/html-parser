@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.61 1999/12/01 13:10:25 gisle Exp $
+/* $Id: Parser.xs,v 2.62 1999/12/02 10:32:43 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -271,7 +271,7 @@ html_handle(PSTATE* p_state,
 	    char *beg, char *end,
 	    token_pos_t *tokens, int num_tokens,
 	    SV* self
-	    )
+	   )
 {
   struct p_handler *h = &p_state->handlers[event];
 
@@ -322,13 +322,22 @@ html_handle(PSTATE* p_state,
 
   if (1) {
     dSP;
+    AV *array;
     STRLEN my_na;
     char *attrspec = SvPV(h->attrspec, my_na);
     char *s;
 
-    ENTER;
-    SAVETMPS;
-    PUSHMARK(SP);
+    if (SvTYPE(h->cb) == SVt_PVAV) {
+      /* start sub-array for accumulator array */
+      array = newAV();
+    }
+    else {
+      array = 0;
+      /* start argument stack for callback */
+      ENTER;
+      SAVETMPS;
+      PUSHMARK(SP);
+    }
 
     for (s = attrspec; *s; s++) {
       SV* arg = 0;
@@ -368,14 +377,15 @@ html_handle(PSTATE* p_state,
       case 'n':
 	/* tagname */
 	if (num_tokens >= 1) {
-	  arg = sv_2mortal(newSVpvn(tokens[0].beg, tokens[0].end - tokens[0].beg));
+	  arg = sv_2mortal(newSVpvn(tokens[0].beg,
+				    tokens[0].end - tokens[0].beg));
 	  if (!p_state->xml_mode && *s == 'n')
 	    sv_lower(arg);
 	}
 	break;
 
       case 'a':
-	/* attr_hashref */
+	/* attr hashref */
 	if (event == E_START) {
 	  HV* hv = newHV();
 	  int i;
@@ -410,7 +420,8 @@ html_handle(PSTATE* p_state,
 	  AV* av = newAV();
 	  int i;
 	  for (i = 1; i < num_tokens; i += 2) {
-	    SV* attrname = newSVpvn(tokens[i].beg, tokens[i].end-tokens[i].beg);
+	    SV* attrname = newSVpvn(tokens[i].beg,
+				    tokens[i].end-tokens[i].beg);
 	    if (!p_state->xml_mode)
 	      sv_lower(attrname);
 	    av_push(av, attrname);
@@ -463,21 +474,33 @@ html_handle(PSTATE* p_state,
       if (!arg)
 	arg = &PL_sv_undef;
 
-      XPUSHs(arg);
+      if (array) {
+	/* MAC: have to fix mortality here or
+	   add mortality to XPUSHs after removing it from the switch cases */
+	av_push(array, SvREFCNT_inc(arg));
+      }
+      else {
+	XPUSHs(arg);
+      }
     }
 
-    PUTBACK;
-
-    if (*attrspec == 's' && !SvROK(h->cb)) {
-      char *method = SvPV(h->cb, my_na);
-      perl_call_method(method, G_DISCARD | G_VOID);
+    if (array) {
+      av_push((AV*)h->cb, newRV_noinc((SV*)array));
     }
     else {
-      perl_call_sv(h->cb, G_DISCARD | G_VOID);
-    }
+      PUTBACK;
 
-    FREETMPS;
-    LEAVE;
+      if (*attrspec == 's' && !SvROK(h->cb)) {
+	char *method = SvPV(h->cb, my_na);
+	perl_call_method(method, G_DISCARD | G_VOID);
+      }
+      else {
+	perl_call_sv(h->cb, G_DISCARD | G_VOID);
+      }
+
+      FREETMPS;
+      LEAVE;
+    }
   }
 }
 
@@ -1022,6 +1045,9 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
     s++;
     /* done */
     html_handle(p_state, E_START, beg, s, tokens, num_tokens, self);
+    /* MAC: empty end tag points to start tag text,
+       I expected (..., E_END, s, s, ...)
+       instead of (..., E_END, beg, s, ... */
     if (empty_tag)
       html_handle(p_state, E_END, beg, s, tokens, 1, self);
     FREE_TOKENS;
@@ -1188,7 +1214,7 @@ html_parse(PSTATE* p_state,
   while (1) {
     /*
      * At the start of this loop we will always be ready for eating text
-     * or a new tag.  We will never be inside some tag.  The 't' point
+     * or a new tag.  We will never be inside some tag.  The 't' points
      * to where we started and the 's' is advanced as we go.
      */
 
@@ -1516,7 +1542,7 @@ handler(pstate, name_sv,...)
 	  SV** svp;
 
 	  if (SvTYPE(sv) != SVt_PVAV)
-	    croak("Handler argument reference to something else than an array");
+	    croak("Handler argument reference is not an array");
 	  av = (AV*)sv;
 
 	  svp = av_fetch(av, 0, 0);
