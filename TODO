@@ -1,16 +1,12 @@
 BEFORE 3.00
 
+  - fix t/exit-via-next core dump
   - write more test scripts
   - documentation updates
       - more examples
       - ...
   - run more leak-tests
   - update README
-
-  - if there is only a single argument in argspec, then I think the stuff
-    should not be wrapped up in a array when event destination is an array.
-
-  - "IGNORE" as handler destination (similar to $SIG{IGNORE})
 
 ISSUES
 
@@ -38,6 +34,8 @@ FEATURES THAT CAN WAIT
    to parse PHP files.
  - <![%app1;[...]]> (parameter entities)
  - $p->ignore("script", "style");
+ - "IGNORE" as handler destination (similar to $SIG{IGNORE}) might
+   be more efficient than 'sub {}'
 
 
 SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
