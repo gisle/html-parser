@@ -1,6 +1,5 @@
 TODO
 
- - should never enter literal mode when xml_mode is enabled
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
  - report 'line'
