@@ -1,12 +1,12 @@
 package HTML::Parser;
 
-# $Id: Parser.pm,v 2.15 1998/04/02 09:33:46 aas Exp $
+# $Id: Parser.pm,v 2.16 1998/04/02 11:08:22 aas Exp $
 
 use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
 
 
 sub new
@@ -68,8 +68,9 @@ sub parse
 		# but leave it for parsing on the next round.
 		if ($text =~ s|(\s+)$||) {
 		    $$buf = $1;
-                # Same treatment for chopped up entites.
-		} elsif ($text =~ s/(&(?:(?:\#\d*)?|\w*))$//) {
+                # Same treatment for chopped up entites.  We must wait
+		# until we have it all.
+		} elsif ($text =~ s/(&[\#\w]*)$//) {
 		    $$buf = $1;
 		};
 		$self->text($text) if length $text;
