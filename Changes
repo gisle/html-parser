@@ -1,3 +1,21 @@
+2001-03-19   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.19_91
+
+     Array references can be passed to the filter methods.  Makes it easier
+     to use them as constructor options.
+
+     Example programs updated to use filters.
+
+     Reset ignored_element state on EOF.
+
+     Documentation updates.
+
+     The netscape_buggy_comment() method now generates mandatory warning
+     about its deprecation.
+
+
+
 2001-03-13   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.19_90
