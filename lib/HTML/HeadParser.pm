@@ -76,7 +76,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.20 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.21 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new
 
@@ -144,7 +144,7 @@ sub flush_text   # internal
     print "FLUSH $tag => '$text'\n"  if $DEBUG;
     if ($tag eq 'title') {
 	HTML::Entities::decode($text);
-	$self->{'header'}->header(Title => $text);
+	$self->{'header'}->push_header(Title => $text);
     }
     $self->{'tag'} = $self->{'text'} = '';
 }
@@ -173,11 +173,11 @@ sub start
 	$self->{'header'}->push_header($key => $attr->{content});
     } elsif ($tag eq 'base') {
 	return unless exists $attr->{href};
-	$self->{'header'}->header('Content-Base' => $attr->{href});
+	$self->{'header'}->push_header('Content-Base' => $attr->{href});
     } elsif ($tag eq 'isindex') {
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
-	$self->{'header'}->header(Isindex => $attr->{prompt} || '?');
+	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
     } elsif ($tag =~ /^(?:title|script|style)$/) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
