@@ -72,7 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.6 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
 
 my $FINISH = "HEAD PARSED\n";
 
@@ -120,6 +120,26 @@ sub parse
 	return '';
     }
     $self;
+}
+
+# more code duplication than I would like, but we need to treat the
+# return value from $self->parse as a signal to stop parsing.
+sub parse_file
+{
+    my($self, $file) = @_;
+    no strict 'refs';  # so that a symbol ref as $file works
+    local(*F);
+    unless (ref($file) || $file =~ /^\*[\w:]+$/) {
+        # Assume $file is a filename
+        open(F, $file) || die "Can't open $file: $!";
+        $file = \*F;
+    }
+    my $chunk = '';
+    while(read($file, $chunk, 512)) {
+        $self->parse($chunk) || last;
+    }
+    close($file);
+    $self->eof;
 }
 
 =item $hp->header;
