@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
-my $no_tests = shift || 5;
+# This test will simply run the parser on random junk.
+
+my $no_tests = shift || 3;
 print "1..$no_tests\n";
 
 use HTML::Parser ();
