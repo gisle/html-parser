@@ -14,6 +14,7 @@ lib/HTML/TokeParser.pm
 mkhctype
 mkpfunc
 t/cases.t
+t/default.t
 t/entities.t
 t/filter.t
 t/headparser.t
@@ -25,3 +26,4 @@ t/parser.t
 t/parsefile.t
 t/process.t
 t/tokeparser.t
+t/xml-mode.t
