@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.103 2004/11/17 14:06:58 gisle Exp $
+/* $Id: hparser.c,v 2.104 2004/11/17 14:09:41 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -514,7 +514,6 @@ report_event(PSTATE* p_state,
         case ARG_SKIPPED_TEXT:
 	    arg = sv_2mortal(p_state->skipped_text);
 	    p_state->skipped_text = newSVpvn("", 0);
-	    SvUTF8_off(p_state->skipped_text);
             break;
 
 	case ARG_OFFSET:
