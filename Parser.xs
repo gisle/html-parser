@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.57 1999/11/30 19:52:20 gisle Exp $
+/* $Id: Parser.xs,v 2.58 1999/11/30 19:53:58 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -296,6 +296,11 @@ html_handle(PSTATE* p_state,
 	     tokens[i].end - tokens[i].beg);
     }
   }
+
+#ifdef MARKED_SECTION
+  if (p_state->ms == MS_IGNORE)
+    return;
+#endif
 
   if (!h->cb || !SvOK(h->cb)) {
     event = E_DEFAULT;
