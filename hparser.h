@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.3 1999/12/04 12:46:22 gisle Exp $
+/* $Id: hparser.h,v 2.4 1999/12/04 13:10:52 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -66,7 +66,7 @@ struct p_handler {
 struct p_state {
   U32 magic;
   SV* buf;
-  STRLEN offset;
+  STRLEN chunk_offset;
 
   /* special parsing modes */
   char* literal_mode;

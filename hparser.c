@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.4 1999/12/04 12:45:23 gisle Exp $
+/* $Id: hparser.c,v 2.5 1999/12/04 13:10:52 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -52,6 +52,7 @@ report_event(PSTATE* p_state,
 	     event_id_t event,
 	     char *beg, char *end,
 	     token_pos_t *tokens, int num_tokens,
+	     STRLEN offset,
 	     SV* self
 	    )
 {
@@ -237,7 +238,7 @@ report_event(PSTATE* p_state,
       break;
 
     case '=':
-      arg = sv_2mortal(newSViv(p_state->offset));
+      arg = sv_2mortal(newSViv(p_state->chunk_offset + offset));
       break;
 
     case 'E':
@@ -377,7 +378,7 @@ attrspec_compile(SV* src)
 
 
 static char*
-parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_comment(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
   char *s = beg;
 
@@ -406,7 +407,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	report_event(p_state, E_COMMENT,
 		    beg - 4, s,
 		    tokens, num_tokens,
-		    self);
+		    offset, self);
 	FREE_TOKENS;
 
 	return s;
@@ -450,7 +451,8 @@ parse_comment(PSTATE* p_state, char *beg, char *end, SV* self)
 	if (*s == '>') {
 	  s++;
 	  /* yup */
-	  report_event(p_state, E_COMMENT, beg-4, s, &token_pos, 1, self);
+	  report_event(p_state, E_COMMENT, beg-4, s, &token_pos, 1,
+		       offset, self);
 	  return s;
 	}
       }
@@ -595,7 +597,7 @@ parse_marked_section(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_decl(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
   char *s = beg + 2;
 
@@ -613,7 +615,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
     /* yes, two dashes seen */
     s++;
 
-    tmp = parse_comment(p_state, s, end, self);
+    tmp = parse_comment(p_state, s, end, offset, self);
     return (tmp == s) ? beg : tmp;
   }
 
@@ -633,7 +635,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
     empty.beg = s;
     empty.end = s;
     s++;
-    report_event(p_state, E_COMMENT, beg, s, &empty, 1, self);
+    report_event(p_state, E_COMMENT, beg, s, &empty, 1, offset, self);
     return s;
   }
 
@@ -709,7 +711,8 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
       goto PREMATURE;
     if (*s == '>') {
       s++;
-      report_event(p_state, E_DECLARATION, beg, s, tokens, num_tokens, self);
+      report_event(p_state, E_DECLARATION, beg, s, tokens, num_tokens,
+		   offset, self);
       FREE_TOKENS;
       return s;
     }
@@ -728,7 +731,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_start(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
   char *s = beg;
   SV* attr;
@@ -832,9 +835,10 @@ parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
   if (*s == '>') {
     s++;
     /* done */
-    report_event(p_state, E_START, beg, s, tokens, num_tokens, self);
+    report_event(p_state, E_START, beg, s, tokens, num_tokens, offset, self);
     if (empty_tag)
-      report_event(p_state, E_END, s, s, tokens, 1, self);
+      report_event(p_state, E_END, s, s, tokens, 1,
+		   offset + (s - beg), self);
     FREE_TOKENS;
 
     if (1) {
@@ -879,7 +883,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_end(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
   char *s = beg+2;
   hctype_t name_first, name_char;
@@ -905,7 +909,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
       if (*s == '>') {
 	s++;
 	/* a complete end tag has been recognized */
-	report_event(p_state, E_END, beg, s, &tagname, 1, self);
+	report_event(p_state, E_END, beg, s, &tagname, 1, offset, self);
 	return s;
       }
     }
@@ -918,7 +922,8 @@ parse_end(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_process(PSTATE* p_state, char *beg, char *end,
+	      STRLEN offset, SV* self)
 {
   char *s = beg + 2;
   /* processing instruction */
@@ -940,7 +945,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
     }
 
     /* a complete processing instruction seen */
-    report_event(p_state, E_PROCESS, beg, s, &token_pos, 1, self);
+    report_event(p_state, E_PROCESS, beg, s, &token_pos, 1, offset, self);
     return s;
   }
   else {
@@ -951,7 +956,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, SV* self)
 
 
 static char*
-parse_null(PSTATE* p_state, char *beg, char *end, SV* self)
+parse_null(PSTATE* p_state, char *beg, char *end, STRLEN offset, SV* self)
 {
   return 0;
 }
@@ -975,8 +980,8 @@ parse(PSTATE* p_state,
       STRLEN len;
       char *s = SvPV(p_state->buf, len);
       assert(len);
-      report_event(p_state, E_TEXT, s, s+len, 0, 0, self);
-      p_state->offset += len;
+      report_event(p_state, E_TEXT, s, s+len, 0, 0, 0, self);
+      p_state->chunk_offset += len;
       SvREFCNT_dec(p_state->buf);
       p_state->buf = 0;
     }
@@ -1039,8 +1044,10 @@ parse(PSTATE* p_state,
 	  if (*s == '>') {
 	    s++;
 	    if (t != end_text)
-	      report_event(p_state, E_TEXT, t, end_text, 0, 0, self);
-	    report_event(p_state, E_END,  end_text, s, &end_token, 1, self);
+	      report_event(p_state, E_TEXT, t, end_text, 0, 0,
+			   t - beg, self);
+	    report_event(p_state, E_END,  end_text, s, &end_token, 1,
+			 end_text - beg, self);
 	    p_state->literal_mode = 0;
 	    t = s;
 	  }
@@ -1061,7 +1068,7 @@ parse(PSTATE* p_state,
 	    s++;
 	    /* marked section end */
 	    if (t != end_text)
-	      report_event(p_state, E_TEXT, t, end_text, 0, 0, self);
+	      report_event(p_state, E_TEXT, t, end_text, 0, 0, t - beg, self);
 	    t = s;
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);
@@ -1086,7 +1093,8 @@ parse(PSTATE* p_state,
 	  s++;
 	  if (*s == '>') {
 	    s++;
-	    report_event(p_state, E_TEXT, t, end_text, 0, 0, self);
+	    report_event(p_state, E_TEXT, t, end_text, 0, 0,
+			 t - beg, self);
 	    SvREFCNT_dec(av_pop(p_state->ms_stack));
 	    marked_section_update(p_state);    
 	    t = s;
@@ -1099,7 +1107,7 @@ parse(PSTATE* p_state,
     }
     if (s != t) {
       if (*s == '<') {
-	report_event(p_state, E_TEXT, t, s, 0, 0, self);
+	report_event(p_state, E_TEXT, t, s, 0, 0, t - beg, self);
 	t = s;
       }
       else {
@@ -1118,7 +1126,7 @@ parse(PSTATE* p_state,
 	}
 	s++;
 	if (s != t)
-	  report_event(p_state, E_TEXT, t, s, 0, 0, self);
+	  report_event(p_state, E_TEXT, t, s, 0, 0, beg - t, self);
 	break;
       }
     }
@@ -1129,7 +1137,7 @@ parse(PSTATE* p_state,
     /* next char is known to be '<' and pointed to by 't' as well as 's' */
     s++;
 
-    if ( (new_pos = parsefunc[*s](p_state, t, end, self))) {
+    if ( (new_pos = parsefunc[*s](p_state, t, end, t - beg, self))) {
       if (new_pos == t) {
 	/* no progress, need more data to know what it is */
 	s = t;
@@ -1146,7 +1154,7 @@ parse(PSTATE* p_state,
 
  DONE:
 
-  p_state->offset += (s - beg);
+  p_state->chunk_offset += (s - beg);
 
   if (s == end) {
     if (p_state->buf) {
