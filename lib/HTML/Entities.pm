@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.17 2000/09/17 00:16:10 gisle Exp $
+# $Id: Entities.pm,v 1.18 2000/09/17 00:49:21 gisle Exp $
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.17 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -358,7 +358,6 @@ for (0 .. 255) {
 
 my %subst;  # compiled encoding regexps
 
-
 sub decode_entities_old
 {
     my $array;
@@ -389,15 +388,19 @@ sub encode_entities
 	unless (exists $subst{$_[1]}) {
 	    # Because we can't compile regex we fake it with a cached sub
 	    $subst{$_[1]} =
-	      eval "sub {\$_[0] =~ s/([$_[1]])/\$char2entity{\$1}/g; }";
+	      eval "sub {\$_[0] =~ s/([$_[1]])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
 	    die $@ if $@;
 	}
 	&{$subst{$_[1]}}($$ref);
     } else {
 	# Encode control chars, high bit chars and '<', '&', '>', '"'
-	$$ref =~ s/([^\n\t !\#\$%\'-;=?-~])/$char2entity{$1}/g;
+	$$ref =~ s/([^\n\t !\#\$%\'-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
     }
     $$ref;
+}
+
+sub num_entity {
+    sprintf "&#x%X;", ord($_[0]);
 }
 
 # Set up aliases
