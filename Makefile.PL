@@ -3,7 +3,7 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my @extra;
-my $ans = prompt("Do you want to compile with support for marked sections?", "no");
+my $ans = prompt("Do you want to compile with support for marked sections?", "yes");
 if ($ans =~ /^y(es)?$/i) {
     push(@extra, "DEFINE" => "-DMARKED_SECTION");
 }
@@ -12,7 +12,7 @@ WriteMakefile(
     NAME	 => 'HTML::Parser',
     DISTNAME     => 'HTML-Parser-XS',
     VERSION_FROM => 'Parser.pm',
-    H            => [ "hctype.h", "pfunc.h" ],
+    H            => [ "hctype.h", "pfunc.h", "tokenpos.h" ],
     @extra,
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
 );
