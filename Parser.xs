@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.50 1999/11/30 13:50:53 gisle Exp $
+/* $Id: Parser.xs,v 2.51 1999/11/30 13:53:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -8,21 +8,17 @@
 
 /* TODO:
  *   - write test scritps
- *   - write documentation
- *   - callback parameter spec
+ *   - update/write documentation
+ *   - readable callback parameter spec
  *   - pic attribute (">" or "?>" are defaults)
- *   - count chars, line numbers
  *   - utf8 mode (entities expand to utf8 chars)
+ *   - count chars, line numbers
  *   - return partial text from literal/cdata mode
  *   - option to avoid attribute value decoding
- *
- * PLAIN BUGS:
- *   - unbroken_text does not handle cdata sections.
+ *   - unbroken_text option
  *
  * POSSIBLE OPTIMIZATIONS:
  *   - direct method calls
- *   - avoid building start tag tokens when start tags are
- *     ignored.
  *   - less need for leaving things in buf when unbroken_text
  *     option is enabled.
  *
