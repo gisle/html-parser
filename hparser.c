@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.46 2000/12/04 04:55:42 gisle Exp $
+/* $Id: hparser.c,v 2.47 2000/12/15 18:24:43 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -104,6 +104,7 @@ report_event(PSTATE* p_state,
   char *argspec;
   char *s;
 
+#if 0
   if (0) {  /* used for debugging at some point */
     char *s = beg;
     int i;
@@ -136,6 +137,7 @@ report_event(PSTATE* p_state,
 	     tokens[i].end - tokens[i].beg);
     }
   }
+#endif
 
 #ifdef MARKED_SECTION
   if (p_state->ms == MS_IGNORE)
