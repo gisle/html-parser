@@ -21,7 +21,7 @@ my %ignore_attr = map { $_ => 1} @ignore_attr;
 sub tag
 {
     my($pos, $text) = @_;
-    if (defined $pos && 4 <= @$pos) {
+    if (@$pos >= 4) {
 	# kill some attributes
 	my($k_offset, $k_len, $v_offset, $v_len) = @{$pos}[-4 .. -1];
 	my $next_attr = $v_offset ? $v_offset + $v_len : $k_offset + $k_len;
@@ -53,7 +53,6 @@ sub text
 
 HTML::Parser->new(api_version   => 3,
 		  start_h       => [\&tag,   "tokenpos, text"],
-		  end_h         => [\&tag,   "undef,    text"],
                   process_h     => ["", ""],
 		  comment_h     => ["", ""],
                   declaration_h => [\&decl,   "tagname, text"],
