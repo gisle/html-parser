@@ -3,8 +3,8 @@ HTML-Parser-XS
 
 This is an alpha release of a new XS based implementation of
 HTML::Parser.  It should be completely compatible with the old
-HTML-Parser-2.xx, but adds parsing speed as well as several new
-options that control how parsing takes place.
+HTML-Parser-2.xx, but improves parsing speed as well as adding several
+new options that control how parsing takes place.
 
 
 
