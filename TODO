@@ -25,8 +25,8 @@ FEATURES THAT CAN WAIT
  - "IGNORE" as handler destination (similar to $SIG{IGNORE}) might
    be more efficient than 'sub {}'  Empty string as handler is a
    nice way to do it I think.  $p->handler(start => "");
- - limit memory use of markup that never ends.   Perhaps by have
-   configuable limits on the length that markup can have and still
+ - limit the length of markup elements that never end.   Perhaps by
+   configurable limits on the length that markup can have and still
    be recongnized.
  - pic attribute (">" or "?>" are defaults)  useful where you want to
    have "?>" as pic, but don't want the rest of xml_mode. For instance

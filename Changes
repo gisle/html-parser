@@ -4,12 +4,12 @@
 
     Fixed core dump when "<" was followed by an 8-bit character.
     Spotted and test case provided by Doug MacEachern.  Doug had
-    been running HTML-Parser-XS trough more that 1 million urls that
+    been running HTML-Parser-XS through more that 1 million urls that
     had been downloaded via LWP.
 
     Handlers can now invoke $p->eof to request the parsing to terminate.
     HTML::HeadParser has been simplified by taking advantage of this.
-    Also added a title-extraction-example that use this.
+    Also added a title-extraction example that uses this.
 
     Michael once again fixed my bad English in the HTML::Parser
     documentation.

@@ -3,7 +3,7 @@ print "1..6\n";
 use strict;
 use HTML::TokeParser;
 
-# First we create an HTML document too test
+# First we create an HTML document to test
 
 my $file = "ttest$$.htm";
 die "$file already exists" if -e $file;

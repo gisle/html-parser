@@ -14,15 +14,15 @@ HTML-Parser
 
 This is a collection of modules that parse and extract information
 from HTML documents.  Bug reports and discussions about these modules
-can be sent to the <libwww@perl.org> mailing list.  Remember to take a
-look at the HTML-Tree package that create and extract information from
+can be sent to the <libwww@perl.org> mailing list.  Remember to
+look at the HTML-Tree package that creates and extracts information from
 HTML syntax trees.
 
 The modules present in this collection are:
 
   HTML::Parser - The parser base class.  It receives arbitrary sized
-        chunks of the HTML text and will recognize markup and
-        separate it from the plain text.  As different kinds of markup
+        chunks of the HTML text, recognizes markup elements, and
+        separates them from the plain text.  As different kinds of markup
         and text are recognized, the corresponding event handlers are
         invoked.
 
@@ -33,10 +33,10 @@ The modules present in this collection are:
         will need to make a subclass if you want it to do more than
         cat(1).  HTML::Filter is depreciated.
 
-  HTML::HeadParser - A lightweight HTML::Parser subclass that extract
+  HTML::HeadParser - A lightweight HTML::Parser subclass that extracts
         information from the <HEAD> section of an HTML document.
 
-  HTML::LinkExtor - An HTML::Parser subclass that extract links from
+  HTML::LinkExtor - An HTML::Parser subclass that extracts links from
         an HTML document.
 
   HTML::TokeParser - An alternative interface to the basic parser
@@ -49,7 +49,7 @@ PREREQUISITES
 
 In order to install and use this package you will need Perl version
 5.004 or better.  If you intend to use the HTML::HeadParser you need to
-have the libwww-perl distribution installed.
+have libwww-perl installed.
 
 
 

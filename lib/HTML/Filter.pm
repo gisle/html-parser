@@ -3,7 +3,7 @@ package HTML::Filter;
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 2.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
 
 sub declaration { $_[0]->output("<!$_[1]>")     }
 sub process     { $_[0]->output($_[2])          }
@@ -24,7 +24,7 @@ HTML::Filter - Filter HTML text through the parser
 
 =head1 NOTE
 
-This module is depreciated. C<HTML::Parser> now provide the
+This module is deprecated. C<HTML::Parser> now provides the
 functionally of C<HTML::Filter> much more efficiently with the the
 C<default> handler.
 
@@ -35,13 +35,13 @@ C<default> handler.
 
 =head1 DESCRIPTION
 
-The C<HTML::Filter> is an HTML parser that by default prints the
-original text parsed (a slow version of cat(1) basically).  You can
-override the callback methods to modify the filtering for some of the
+C<HTML::Filter> is an HTML parser that by default prints the
+original text of each HTML element (a slow version of cat(1) basically).
+The callback methods may be overridden to modify the filtering for some
 HTML elements and you can override output() method which is called to
 print the HTML text.
 
-The C<HTML::Filter> is a subclass of C<HTML::Parser>. This means that
+C<HTML::Filter> is a subclass of C<HTML::Parser>. This means that
 the document should be given to the parser by calling the $p->parse()
 or $p->parse_file() methods.
 
