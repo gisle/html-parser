@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.87 2000/03/06 13:33:01 gisle Exp $
+/* $Id: Parser.xs,v 2.88 2000/03/13 11:27:24 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -291,12 +291,12 @@ handler(pstate, eventname,...)
 
 	/* set up return value */
 	if (h->cb) {
-	    RETVAL = (SvTYPE(h->cb) == SVt_PVAV)
-	                 ? newRV_inc(h->cb)
-	                 : newSVsv(h->cb);
+	    ST(0) = (SvTYPE(h->cb) == SVt_PVAV)
+	                 ? sv_2mortal(newRV_inc(h->cb))
+	                 : sv_2mortal(newSVsv(h->cb));
 	}
         else {
-	    RETVAL = &PL_sv_undef;
+	    ST(0) = &PL_sv_undef;
         }
 
         /* update */
@@ -310,8 +310,6 @@ handler(pstate, eventname,...)
             h->cb = 0;
 	    h->cb = check_handler(ST(2));
 	}
-    OUTPUT:
-	RETVAL
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
