@@ -1,7 +1,7 @@
-/* $Id: hparser.h,v 2.10 2000/02/05 10:50:59 gisle Exp $
+/* $Id: hparser.h,v 2.11 2000/03/20 11:55:08 gisle Exp $
  *
- * Copyright 1999, Gisle Aas
- * Copyright 1999 Michael A. Chase
+ * Copyright 1999-2000, Gisle Aas
+ * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
