@@ -1,3 +1,17 @@
+2003-01-18   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.27
+
+     Typo fixes to the documentation.
+
+     HTML::Entities::escape_entities_numeric contributed
+     by Sean M. Burke <sburke@cpan.org>.
+
+     Included one more example program 'hlc' that show
+     how to downcase all tags in an HTML file.
+
+
+
 2002-03-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.26
