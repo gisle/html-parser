@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.17 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.18 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -95,12 +95,17 @@ sub start
                                : $attr->{$a});
     }
     return unless @links;
+    $self->_found_link($tag, @links);
+}
 
+sub _found_link
+{
+    my $self = shift;
     my $cb = $self->{extractlink_cb};
     if ($cb) {
-	&$cb($tag, @links);
+	&$cb(@_);
     } else {
-	push(@{$self->{'links'}}, [$tag, @links]);
+	push(@{$self->{'links'}}, [@_]);
     }
 }
 
