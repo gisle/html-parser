@@ -5,9 +5,8 @@ use strict;
 
 use HTML::Parser;
 
-my $p = HTML::Parser->new(api_version => 3);
+my $p = HTML::Parser->new(api_version => 3, ignore_tags => [qw(b i em tt)]);
 $p->ignore_elements("script");
-$p->ignore_tags(qw(b i em tt));
 $p->unbroken_text(1);
 
 $p->handler(default => [], "event, text");

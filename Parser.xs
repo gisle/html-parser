@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.103 2001/03/13 19:22:14 gisle Exp $
+/* $Id: Parser.xs,v 2.104 2001/03/15 00:54:50 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -318,7 +318,26 @@ ignore_tags(pstate,...)
 		*attr = newHV();
 
 	    for (i = 0; i < items; i++) {
-	        hv_store_ent(*attr, ST(i+1), newSViv(0), 0);
+		SV* sv = ST(i+1);
+		if (SvROK(sv)) {
+		    sv = SvRV(sv);
+		    if (SvTYPE(sv) == SVt_PVAV) {
+			AV* av = (AV*)sv;
+			STRLEN j;
+			STRLEN len = av_len(av) + 1;
+			for (j = 0; j < len; j++) {
+			    SV**svp = av_fetch(av, j, 0);
+			    if (svp) {
+				hv_store_ent(*attr, *svp, newSViv(0), 0);
+			    }
+			}
+		    }
+		    else
+			croak("Tag list must be plain scalars and arrays");
+		}
+		else {
+		    hv_store_ent(*attr, sv, newSViv(0), 0);
+		}
 	    }
 	}
 	else if (*attr) {
