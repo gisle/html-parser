@@ -39,8 +39,9 @@ Depreciated modules:
 PREREQUISITES
 
 In order to install and use this package you will need Perl version
-5.004 or better.  If you intend to use the HTML::HeadParser you need to
-have libwww-perl installed.
+5.004 or better.  The HTML::Tagset module should also be installed.
+If you intend to use the HTML::HeadParser you need to have libwww-perl
+installed.
 
 
 
