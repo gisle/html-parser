@@ -36,6 +36,7 @@ local($/) = undef;
 my $FILTERED = <HTML>;
 close(HTML);
 
+#print $FILTERED;
 print "not " unless $FILTERED eq $HTML;
 print "ok 1\n";
 
