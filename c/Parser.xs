@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.19 1999/11/05 13:04:02 gisle Exp $
+/* $Id: Parser.xs,v 1.20 1999/11/05 13:04:41 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -11,6 +11,7 @@
  *   - accum flags
  *   - specify which value boolean attributes takes
  *   - embed entity encode/decode
+ *   - return partial text from literal mode
  *   - <plaintext> should not end with </plaintext>
  *   - marked sections?
  */
