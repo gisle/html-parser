@@ -9,14 +9,14 @@ if ($ans =~ /^y(es)?$/i) {
     push(@define, "-DMARKED_SECTION");
 }
 
-if ($] >= 5.007) {
+if ($] >= 5.008) {
     print <<"EOT";
 
-Perl-5.7 provide experimental core support for Unicode strings.  You
-can compile HTML::Entities so that Unicode entities like &euro; and
-&#x20AC; are decoded into a string containing "\\x{20AC}".  If you
-select no to the question below such entities will be left alone and
-only entities in the Latin-1 range is decoded.
+Perl-5.8 provide core support for Unicode strings.  You can compile
+HTML::Entities so that Unicode entities like &euro; and &#x20AC; are
+decoded into a string containing "\\x{20AC}".  If you select no to
+the question below such entities will be left alone and only entities
+in the Latin-1 range is decoded.
 
 EOT
     my $ans = prompt("Do you want decoding on unicode entities?", "no");
