@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.20";  # $Date: 1998/07/08 13:07:39 $
+$VERSION = "2.21";  # $Date: 1998/11/13 21:38:23 $
 
 
 sub new
@@ -77,8 +77,8 @@ sub parse
 	    }
 
 	# Netscapes buggy comments are easy to handle
-	} elsif ($netscape_comment && $$buf =~ m|^<!--|) {
-	    if ($$buf =~ s|^<!--(.*?)-->||s) {
+	} elsif ($netscape_comment && $$buf =~ m|^<!\s*--|) {
+	    if ($$buf =~ s|^<!\s*--(.*?)--\s*>||s) {
 		$self->comment($1);
 	    } else {
 		last TOKEN;  # must wait until we see the end of it
