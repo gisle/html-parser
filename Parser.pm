@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.26';  # $Date: 2002/03/17 20:07:57 $
+$VERSION = '3.26';  # $Date: 2002/12/26 23:28:35 $
 
 require HTML::Entities;
 
@@ -433,7 +433,7 @@ By default, the C<attr> and C<@attr> argspecs will have general
 entities for attribute values decoded.  Enabling this attribute leaves
 entities alone.
 
-=item $p->case_sensititve( [$bool] )
+=item $p->case_sensitive( [$bool] )
 
 By default, tagnames and attribute names are down-cased.  Enabling this
 attribute leave them as found in the HTML source document.
