@@ -1,6 +1,6 @@
 package HTML::Parser;
 
-# Copyright 1996-2004, Gisle Aas.
+# Copyright 1996-2005, Gisle Aas.
 # Copyright 1999-2000, Michael A. Chase.
 #
 # This library is free software; you can redistribute it and/or
@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.44';  # $Date: 2004/12/28 14:04:40 $
+$VERSION = '3.45';  # $Date: 2005/01/06 09:02:27 $
 
 require HTML::Entities;
 
