@@ -4,7 +4,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.19";  # $Date: 1998/07/06 23:06:02 $
+$VERSION = "2.20";  # $Date: 1998/07/08 11:14:22 $
 
 
 sub new
@@ -422,8 +422,8 @@ times slower with a chunck size of 20K).
 
 =head1 SEE ALSO
 
-L<HTML::Entities>, L<HTML::Filter>, L<HTML::HeadParser>,
-L<HTML::LinkExtor>
+L<HTML::Entities>, L<HTML::TokeParser>, L<HTML::Filter>,
+L<HTML::HeadParser>, L<HTML::LinkExtor>
 
 L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
 
