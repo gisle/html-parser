@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_91;  # $Date: 1999/12/04 23:08:02 $
+$VERSION = 2.99_92;  # $Date: 1999/12/04 23:09:04 $
 
 require HTML::Entities;
 
@@ -268,6 +268,10 @@ since "LIST]" is not a legal name.
 This method sets the value reported for boolean attributes inside
 HTML start tags.  By default, the name of the attribute is also used as
 its value.
+
+Once $p->bool_attr_value has been set,
+there is no way to restore the default behaviour.
+
 
 =item $p->xml_mode( [$bool] )
 
