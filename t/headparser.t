@@ -53,6 +53,7 @@ my $HTML = <<'EOT';
 
 <script>
 
+   "</script>"
     ignore this
 
 </script>
