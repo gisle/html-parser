@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.04';  # $Date: 2000/01/15 15:47:23 $
+$VERSION = '3.04';  # $Date: 2000/01/15 16:09:41 $
 
 require HTML::Entities;
 
@@ -208,7 +208,8 @@ specifications from W3C.  Where there is disagreement there is often
 an option that you can enable to get the official behaviour.
 
 The document to be parsed may be supplied in arbitrary chunks.  This
-makes on-the-fly parsing as documents are received possible.
+makes on-the-fly parsing as documents are received from the network
+possible.
 
 If event driven parsing does not feel right for your application, you
 might want to use C<HTML::TokeParser>.  It is a
@@ -227,7 +228,7 @@ The following method is used to construct a new C<HTML::Parser> object:
 This class method creates a new C<HTML::Parser> object and
 returns it.  Key/value pair arguments may be provided to assign event
 handlers or initialize parser options.  The handlers and parser
-options can also be set or modified by method calls described later.
+options can also be set or modified later by method calls described below.
 
 If a top level key is in the form "<event>_h" (e.g., "text_h"} then it
 assigns a handler to that event, otherwise it initializes a parser
@@ -358,7 +359,8 @@ since "LIST]" is not a legal attribute name.
 
 This method sets the value reported for boolean attributes inside HTML
 start tags.  By default, the name of the attribute is also used as its
-value.  This affects the values reported for C<tokens> and C<attr>.
+value.  This affects the values reported for C<tokens> and C<attr>
+argspecs.
 
 =item $p->xml_mode( [$bool] )
 
