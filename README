@@ -18,10 +18,6 @@ The modules present in this collection are:
   HTML::Entities - Provides functions to encode and decode text with
         embedded HTML &lt;entities&gt;.
 
-  HTML::Filter - An HTML::Parser subclass that filters HTML text. You
-        will need to make a subclass if you want it to do more than
-        cat(1).  HTML::Filter is depreciated.
-
   HTML::HeadParser - A lightweight HTML::Parser subclass that extracts
         information from the <HEAD> section of an HTML document.
 
@@ -31,6 +27,12 @@ The modules present in this collection are:
   HTML::TokeParser - An alternative interface to the basic parser
         that does not require event driven programming.  Most simple
         parsing needs are probably best attacked with this module.
+
+Depreciated modules:
+
+  HTML::Filter - An HTML::Parser subclass that filters HTML text. You
+        will need to make a subclass if you want it to do more than
+        cat(1).
 
 
 
