@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.18 2001/03/30 08:10:36 gisle Exp $
+/* $Id: hparser.h,v 2.19 2001/04/06 20:03:24 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -38,7 +38,7 @@ enum event_id {
     E_DEFAULT,
     /**/
     EVENT_COUNT,
-    E_NONE,  /* used for reporting skipped text (non-events) */
+    E_NONE   /* used for reporting skipped text (non-events) */
 };
 typedef enum event_id event_id_t;
 

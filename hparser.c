@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.66 2001/03/30 08:10:36 gisle Exp $
+/* $Id: hparser.c,v 2.67 2001/04/06 20:03:24 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -51,7 +51,7 @@ enum argcode {
     ARG_LITERAL, /* Always keep last */
 
     /* extra flags always encoded first */
-    ARG_FLAG_FLAT_ARRAY,
+    ARG_FLAG_FLAT_ARRAY
 };
 
 char *argname[] = {
@@ -609,7 +609,7 @@ argspec_compile(SV* src, PSTATE* p_state)
 		    croak("Literal string is longer than 255 chars in argspec");
 		buf[0] = ARG_LITERAL;
 		buf[1] = len;
-		sv_catpvn(argspec, buf, 2);
+		sv_catpvn(argspec, (char*)buf, 2);
 		sv_catpvn(argspec, string_beg+1, len);
 		s++;
 	    }
