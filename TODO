@@ -21,7 +21,8 @@ ISSUES
     be part of that tag and not part of the text flow. According to
     '../html4.0.1/appendix/notes.html#h-B.3.1'  Problematic when NL sometimes
     is \r\n and sometimes just \r (from Mac servers)
-  - Should there be a way to get quotes into literal strings in argspec.
+  - Should there be a way to get both types of quotes into the same
+    literal strings in argspec (need some kind of escaping).
 
 
 FEATURES THAT CAN WAIT
