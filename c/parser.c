@@ -530,7 +530,7 @@ int main(int argc, char** argv, char** env)
   perl_construct(my_perl);
 
   memset(&p, 0, sizeof(p));
-  sv1 = newSVpv("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\nbar <a href='foo'>foo</a>   <!--foo", 0);
+  sv1 = newSVpv("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\nbar <a hreF='foo> &nbsp;Bar\"'>foo</a>   <!--foo", 0);
   sv2 = newSVpv("--><FONT size=+3 bar foo=> -><a href=\"", 0);
   sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
