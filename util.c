@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.17 2003/08/15 14:38:37 gisle Exp $
+/* $Id: util.c,v 2.18 2004/09/14 13:47:16 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  *
@@ -78,6 +78,11 @@ decode_entities(pTHX_ SV* sv, HV* entity2char)
     int repl_utf8;
 #else
     char buf[1];
+#endif
+
+#if defined(__GNUC__) && defined(UNICODE_ENTITIES)
+    /* gcc -Wall reports this variable as possibly used uninitialized */
+    repl_utf8 = 0;
 #endif
 
     while (s < end) {

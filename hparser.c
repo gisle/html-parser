@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.95 2004/04/01 11:56:37 gisle Exp $
+/* $Id: hparser.c,v 2.96 2004/09/14 13:47:16 gisle Exp $
  *
  * Copyright 1999-2002, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -321,7 +321,7 @@ report_event(PSTATE* p_state,
 	case ARG_TOKENS:
 	    if (num_tokens >= 1) {
 		AV* av = newAV();
-		SV* prev_token;
+		SV* prev_token = &PL_sv_undef;
 		int i;
 		av_extend(av, num_tokens);
 		for (i = 0; i < num_tokens; i++) {
@@ -384,8 +384,13 @@ report_event(PSTATE* p_state,
 		    hv = newHV();
 		    arg = sv_2mortal(newRV_noinc((SV*)hv));
 		}
-		else
+		else {
+#ifdef __GNUC__
+		    /* gcc -Wall reports this variable as possibly used uninitialized */
+		    hv = 0;
+#endif
 		    push_arg = 0;  /* deal with argument pushing here */
+		}
 
 		for (i = 1; i < num_tokens; i += 2) {
 		    SV* attrname = newSVpvn(tokens[i].beg,

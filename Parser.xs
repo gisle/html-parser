@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.120 2003/10/27 21:32:48 gisle Exp $
+/* $Id: Parser.xs,v 2.121 2004/09/14 13:47:16 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -401,7 +401,6 @@ handler(pstate, eventname,...)
 	PSTATE* pstate
 	SV* eventname
     PREINIT:
-	SV* self = ST(0);
 	STRLEN name_len;
 	char *name = SvPV(eventname, name_len);
         int event = -1;
