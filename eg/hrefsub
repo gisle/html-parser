@@ -62,4 +62,4 @@ $p->handler(start => sub {
 	    },
 	    "tagname, tokenpos, text");
 
-$p->parse_file($file) || die "Can't open file: $!";
+$p->parse_file($file) || die "Can't open file $file: $!\n";

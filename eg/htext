@@ -26,4 +26,4 @@ HTML::Parser->new(api_version => 3,
 				  text  => [\&text, "dtext"],
 				 ],
 		  marked_sections => 1,
-	)->parse_file(shift);
+	)->parse_file(shift) || die "Can't open file: $!\n";;

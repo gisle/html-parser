@@ -80,5 +80,5 @@ HTML::Parser->new(api_version   => 3,
                   declaration_h => [\&decl,   "token0, text"],
                   default_h     => [\&text,   "text"],
                  )
-    ->parse_file(shift);
+    ->parse_file(shift) || die "Can't open file: $!\n";
 
