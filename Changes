@@ -1,3 +1,18 @@
+2001-05-09   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.24
+
+     $p->parse(CODE)
+
+     New events: start_document, end_document
+
+     New argspecs: skipped_text, offset_end
+
+     The offset/line/column counters was not properly reset
+     after eof.
+
+
+
 2001-05-01   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.23
