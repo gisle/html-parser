@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.11 1999/12/05 20:53:38 gisle Exp $
+/* $Id: hparser.c,v 2.12 1999/12/05 21:09:00 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -169,8 +169,8 @@ report_event(PSTATE* p_state,
       }
       break;
 
-    case '1':
-      /* token1 */
+    case '0':
+      /* token0 */
       /* fall through */
     case 'n':
       /* tagname */
@@ -328,7 +328,7 @@ attrspec_compile(SV* src)
     names = newHV();
     hv_store(names, "self", 4,          newSVpvn("s", 1), 0);
     hv_store(names, "tokens", 6,        newSVpvn("t", 1), 0);
-    hv_store(names, "token1", 6,        newSVpvn("1", 1), 0);
+    hv_store(names, "token0", 6,        newSVpvn("0", 1), 0);
     hv_store(names, "tokenpos", 8,      newSVpvn("#", 1), 0);
     hv_store(names, "tagname", 7,       newSVpvn("n", 1), 0);
     hv_store(names, "attr", 4,          newSVpvn("a", 1), 0);

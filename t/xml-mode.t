@@ -23,7 +23,7 @@ $p->handler(end =>
 $p->handler(process => 
 	     sub {
 		 $text .= "PI[" . shift() . "]";
-	     }, "token1");
+	     }, "token0");
 $p->handler(text =>
 	     sub {
 		 $text .= shift;

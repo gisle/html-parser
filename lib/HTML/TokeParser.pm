@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.15 1999/12/03 12:58:29 gisle Exp $
+# $Id: TokeParser.pm,v 2.16 1999/12/05 21:09:00 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.15 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.16 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -27,7 +27,7 @@ sub new
     $self->handler(start =>   $accum, "'S',tagname,attr,attrseq,text");
     $self->handler(end =>     $accum, "'E',tagname,text");
     $self->handler(text =>    $accum, "'T',text,cdata_flag");
-    $self->handler(process => $accum, "'PI',token1,text");
+    $self->handler(process => $accum, "'PI',token0,text");
 
     # XXX The following two are not strictly V2 compatible.  We used
     # to return something that did not contain the "<!(--)?" and

@@ -10,7 +10,7 @@ $empty = "<IMG SRC='foo'/>";
 $proc = '<? something completely different ?>';
 
 my $attrspec = join ',',
-    qw( self offset event tagname token1
+    qw( self offset event tagname token0
 	text
 	cdata_flag dtext
 	tokens

@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_92;  # $Date: 1999/12/05 20:52:53 $
+$VERSION = 2.99_92;  # $Date: 1999/12/05 21:09:00 $
 
 require HTML::Entities;
 
@@ -34,7 +34,7 @@ sub new
 	# Set up method callbacks compatible with HTML-Parser-2.xx
 	$self->handler(text    => "text",    "self,text,cdata_flag");
 	$self->handler(end     => "end",     "self,tagname,text");
-	$self->handler(process => "process", "self,token1,text");
+	$self->handler(process => "process", "self,token0,text");
 	$self->handler(start   => "start",
 		                  "self,tagname,attr,attrseq,text");
 
@@ -417,9 +417,9 @@ C<text> and the second number is the length of the token.
 
 This passes undef if there are no tokens in the event (e.g., C<text>).
 
-=item token1
+=item token0
 
-Token1 causes the original text of the first token string to be passed.
+Token0 causes the original text of the first token string to be passed.
 
 For C<declaration> events, this is the declaration type.
 
@@ -429,7 +429,7 @@ This passes undef if there are no tokens in the event.
 
 =item tagname
 
-Tagname is identical to C<token1> except that
+Tagname is identical to C<token0> except that
 if $p->xml_mode is disabled, the tag name is forced to lower case.
 
 =item attr
@@ -584,7 +584,7 @@ This is equivilent to the following method calls:
 
    $p->handler(text    => "text",    "self,text,cdata_flag");
    $p->handler(end     => "end",     "self,tagname,text");
-   $p->handler(process => "process", "self,token1,text");
+   $p->handler(process => "process", "self,token0,text");
    $p->handler(start   => "start",   "self,tagname,attr,attrseq,text");
    $p->handler(comment =>
              sub {
