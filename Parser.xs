@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.49 1999/11/30 13:43:48 gisle Exp $
+/* $Id: Parser.xs,v 2.50 1999/11/30 13:50:53 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -96,7 +96,15 @@ enum marked_section_t {
   MS_CDATA,
   MS_IGNORE,
 };
+
+#define CDATA_MODE(p_state) ((p_state)->literal_mode || \
+			     (p_state)->ms == MS_CDATA)
+
+#else
+
+#define CDATA_MODE(p_state) ((p_state)->literal_mode)
 #endif
+
 
 struct p_handler {
   SV* cb;
@@ -401,8 +409,15 @@ html_handle(PSTATE* p_state,
 	/* decoded text */
 	if (event == E_TEXT) {
 	  arg = sv_2mortal(newSVpvn(beg, end - beg));
-	  if (!p_state->literal_mode || p_state->ms == MS_CDATA)
+	  if (!CDATA_MODE(p_state))
 	    decode_entities(arg, entity2char);
+	}
+	break;
+
+      case 'c':
+	/* cdata flag */
+	if (event == E_TEXT) {
+	  arg = boolSV(CDATA_MODE(p_state));
 	}
 	break;
 
