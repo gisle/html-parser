@@ -80,8 +80,8 @@ package main;
      '<!ENTITY nbsp   CDATA "&#160;" -- no-break space -->' =>
          ['DECLARATION[ENTITY nbsp   CDATA "&#160;" -- no-break space --]'],
      '<!-- comment -->' => ['COMMENT[ comment ]'],
-     '<!-- comment -- -- comment -->' =>
-         ['COMMENT[ comment ]', 'COMMENT[ comment ]'],
+     '<!-- comment -- --- comment -->' =>
+         ['COMMENT[ comment ]', 'COMMENT[- comment ]'],
      '<!-- comment <!-- not comment --> comment -->' =>
          ['COMMENT[ comment <!]', 'COMMENT[> comment ]'],
      '<!-- <a href="foo"> -->' => ['COMMENT[ <a href="foo"> ]'],
