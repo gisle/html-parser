@@ -4,18 +4,18 @@
 
 use strict;
 use HTML::Parser ();
-sub print { print @_ };
 
-sub start_handler
+sub title_handler
 {
-    return if shift ne "title";
     my $self = shift;
-    $self->handler(text => \&print, "dtext");
-    $self->handler(end  => sub { shift->eof if shift eq "title"; },
-		           "tagname,self");
+    $self->handler(text => sub { print @_ }, "dtext");
+    $self->handler(end  => "eof", "self");
 }
 
 my $p = HTML::Parser->new(api_version => 3,
-			  start_h => [\&start_handler, "tagname,self"]);
+			  start_h => [\&title_handler, "self"],
+			  report_only_tags => ['title'],
+			 );
 $p->parse_file(shift || die) || die $!;
 print "\n";
+
