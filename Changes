@@ -1,3 +1,23 @@
+2004-11-23   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.39_91
+
+     The HTML::HeadParser will skip Unicode BOM.  Previously it
+     would consider the <head> section done when it saw the BOM.
+
+     The parser will look for Unicode BOM and give appropriate
+     warnings if the form found indicate trouble.
+
+     If no matching end tag is found for <script>, <style>, <xmp>
+     <title>, <textarea> then generate one where the next tag
+     starts.
+
+     For <script> and <style> recognize quoted strings and don't
+     consider end element if the corresponding end tag is found
+     inside such a string.
+
+
+
 2004-11-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.39_90
