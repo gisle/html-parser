@@ -1,3 +1,14 @@
+2001-05-11   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.25
+
+     Minor tweaks for build failures on perl5.004_04, perl-5.6.0,
+     and for macro clash under Windows.
+
+     Improved parsing of <plaintext>...  :-)
+
+
+
 2001-05-09   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.24
