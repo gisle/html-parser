@@ -27,14 +27,14 @@ typedef struct token_pos token_pos_t;
    } STMT_END
 
 static void
-tokens_grow(token_pos_t **token_ptr, int *token_lim_ptr, bool realloc)
+tokens_grow(token_pos_t **token_ptr, int *token_lim_ptr, bool tokens_on_heap)
 {
   int new_lim = *token_lim_ptr;
   if (new_lim < 4)
     new_lim = 4;
   new_lim *= 2;
 
-  if (realloc) {
+  if (tokens_on_heap) {
     Renew(*token_ptr, new_lim, token_pos_t);
   }
   else {
