@@ -9,8 +9,8 @@ my $file = "ttest$$.htm";
 die "$file already exists" if -e $file;
 
 open(F, ">$file") or die "Can't create $file: $!";
+print F <<'EOT';  close(F);
 
-print F <<'EOT';
 <!--This is a test-->
 <html><head><title>
   This is the &lt;title&gt;
@@ -31,9 +31,7 @@ print F <<'EOT';
 
 EOT
 
-close(F);
-
-END { unlink($file); }
+END { unlink($file) || warn "Can't unlink $file: $!"; }
 
 
 my $p;
@@ -59,12 +57,14 @@ while (my $token = $p->get_token) {
     $ecount++ if $token->[0] eq "E";
 }
 undef($p);
+close F;
 
 # Test with glob
 open(F, $file) || die "Can't open $file: $!";
 $p = HTML::TokeParser->new(*F);
 $tcount++ while $p->get_tag;
 undef($p);
+close F;
 
 # Test with plain file name
 $p = HTML::TokeParser->new($file) || die;
