@@ -1,7 +1,7 @@
 # Test Unicode entities
 
 BEGIN {
-    if ($] < 5.006) {
+    if ($] < 5.008) {
 	print "1..0 # skipped: This perl does not support Unicode\n";
 	exit;
     }
