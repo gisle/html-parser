@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.19 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.20 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use vars qw(%LINK_ELEMENT);
@@ -58,8 +58,7 @@ callback is not provided, then links are just accumulated internally
 and can be retrieved by calling the $p->links() method.
 
 The $base is an optional base URL used to absolutize all URLs found.
-You need to have the I<URI::URL> module installed if you provide
-$base.
+You need to have the I<URI> module installed if you provide $base.
 
 The callback is called with the lowercase tag name as first argument,
 and then all link attributes as separate key/value pairs.  All
@@ -70,18 +69,21 @@ non-link attributes are removed.
 sub new
 {
     my($class, $cb, $base) = @_;
-    my $self = $class->SUPER::new;
+    my $self = $class->SUPER::new(start => \&_start_tag,
+				  pass_cbdata => 1,
+				 );
     $self->{extractlink_cb} = $cb;
     if ($base) {
-	require URI::URL;
-	$self->{extractlink_base} = URI::URL->new($base);
+	require URI;
+	$self->{extractlink_base} = URI->new($base);
     }
     $self;
 }
 
-sub start
+sub _start_tag
 {
-    my($self, $tag, $attr) = @_;  # $attr is reference to a HASH
+    my($self, $tag, $attr) = @_;
+    my %attr = @$attr;
     return unless exists $LINK_ELEMENT{$tag};
 
     my $base = $self->{extractlink_base};
@@ -91,9 +93,9 @@ sub start
     my @links;
     my $a;
     for $a (@$links) {
-	next unless exists $attr->{$a};
-	push(@links, $a, $base ? URI::URL->new($attr->{$a}, $base)->abs
-                               : $attr->{$a});
+	next unless exists $attr{$a};
+	push(@links, $a, $base ? URI->new($attr{$a}, $base)->abs($base)
+                               : $attr{$a});
     }
     return unless @links;
     $self->_found_link($tag, @links);
@@ -184,7 +186,7 @@ L<HTML::Parser>, L<LWP>, L<URI::URL>
 
 =head1 COPYRIGHT
 
-Copyright 1996-1998 Gisle Aas.
+Copyright 1996-1999 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
