@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.24 1999/11/05 22:16:14 gisle Exp $
+/* $Id: Parser.xs,v 1.25 1999/11/08 10:22:48 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -13,12 +13,6 @@
  *   - embed entity encode/decode
  *   - return partial text from literal mode
  *   - <plaintext> should not end with </plaintext>
- *   - XML mode
- *        - processing instructions ends with "?>" instead of ">"
- *        - start tags might end with "/" which should mark them
- *          as empty
- *        - unicode characters in names
- *        - allow ":" and "_" as first char of names
  *   - marked sections?
  *   - unicode support
  */
@@ -54,6 +48,7 @@ struct p_state {
   int strict_comment;
   int keep_case;
   int pass_cbdata;
+  int xml_mode;
 
   AV* accum;
 
@@ -185,6 +180,7 @@ static void
 html_start(PSTATE* p_state,
 	   char *tag_beg, char *tag_end,
 	   AV* tokens,
+	   int empty_tag,
 	   char *beg, char *end,
 	   SV* cbdata)
 {
@@ -202,6 +198,8 @@ html_start(PSTATE* p_state,
     av_push(av, tag);
     av_push(av, (SV*)tokens);
     SvREFCNT_inc(tokens);
+    if (p_state->xml_mode)
+      av_push(av, boolSV(empty_tag));
     av_push(av, newSVpv(beg, end - beg));
     av_push(accum, (SV*)av);
     return;
@@ -221,6 +219,8 @@ html_start(PSTATE* p_state,
       sv_lower(sv);
     XPUSHs(sv);
     XPUSHs(sv_2mortal(newRV_inc((SV*)tokens)));
+    if (p_state->xml_mode)
+      XPUSHs(boolSV(empty_tag));
     XPUSHs(sv_2mortal(newSVpvn(beg, end - beg)));
     PUTBACK;
 
@@ -241,7 +241,7 @@ html_process(PSTATE* p_state, char*beg, char *end, SV* cbdata)
   accum = p_state->accum;
   if (accum) {
     AV* av = newAV();
-    av_push(av, newSVpv("P", 1));
+    av_push(av, newSVpv("PI", 2));
     av_push(av, newSVpvn(beg, end - beg));
     av_push(accum, (SV*)av);
     return;
@@ -542,8 +542,9 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
   char *tag_end;
   AV* tokens = 0;
   SV* sv;
+  int empty_tag = 0;  /* XML feature */
 
-  assert(beg[0] == '<' && isALPHA(beg[1]) && end - beg > 2);
+  assert(beg[0] == '<' && isHALPHA(beg[1]) && end - beg > 2);
   s += 2;
 
   while (s < end && isHALNUM(*s))
@@ -556,7 +557,7 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
 
   tokens = newAV();
 
-  while (isALPHA(*s)) {
+  while (isHALPHA(*s)) {
     /* attribute */
     char *attr_beg = s;
     s++;
@@ -599,8 +600,11 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
       }
       else {
 	char *word_start = s;
-	while (s < end && !isSPACE(*s) && *s != '>')
+	while (s < end && !isSPACE(*s) && *s != '>') {
+	  if (p_state->xml_mode && *s == '/')
+	    break;
 	  s++;
+	}
 	if (s == end)
 	  goto PREMATURE;
 	av_push(tokens, newSVpv(word_start, s - word_start));
@@ -616,10 +620,17 @@ html_parse_start(PSTATE* p_state, char *beg, char *end, SV* cbdata)
     }
   }
 
+  if (p_state->xml_mode && *s == '/') {
+    s++;
+    if (s == end)
+      goto PREMATURE;
+    empty_tag = 1;
+  }
+
   if (*s == '>') {
     s++;
     /* done */
-    html_start(p_state, beg+1, tag_end, tokens, beg, s, cbdata);
+    html_start(p_state, beg+1, tag_end, tokens, empty_tag, beg, s, cbdata);
     SvREFCNT_dec(tokens);
 
     if (1) {
@@ -798,7 +809,7 @@ html_parse(PSTATE* p_state,
     /* next char is known to be '<' */
     s++;
 
-    if (isALPHA(*s)) {
+    if (isHALPHA(*s)) {
       /* start tag */
       char *new_pos = html_parse_start(p_state, t, end, cbdata);
       if (new_pos == t) {
@@ -811,7 +822,7 @@ html_parse(PSTATE* p_state,
     else if (*s == '/') {
       /* end tag */
       s++;
-      if (isALPHA(*s)) {
+      if (isHALPHA(*s)) {
 	char *tag_start = s;
 	char *tag_end;
 	s++;
@@ -850,13 +861,24 @@ html_parse(PSTATE* p_state,
     }
     else if (*s == '?') {
       /* processing instruction */
+      char *pi_end;
       s++;
+    FIND_PI_END:
       while (s < end && *s != '>')
 	s++;
       if (*s == '>') {
+	pi_end = s;
 	s++;
+
+	if (p_state->xml_mode) {
+	  /* XML processing instructions are ended by "?>" */
+	  if (s - t < 4 || s[-2] != '?')
+	    goto FIND_PI_END;
+	  pi_end = s - 2;
+	}
+
 	/* a complete processing instruction seen */
-	html_process(p_state, t+2, s-1, cbdata);
+	html_process(p_state, t+2, pi_end, cbdata);
 	t = s;
       }
       else {
@@ -990,6 +1012,16 @@ keep_case(pstate,...)
 	RETVAL = pstate->keep_case;
 	if (items > 1)
 	    pstate->keep_case = SvTRUE(ST(1));
+    OUTPUT:
+	RETVAL
+
+int
+xml_mode(pstate,...)
+	PSTATE* pstate
+    CODE:
+	RETVAL = pstate->xml_mode;
+	if (items > 1)
+	    pstate->xml_mode = SvTRUE(ST(1));
     OUTPUT:
 	RETVAL
 
