@@ -60,6 +60,68 @@ void html_process(struct p_state* p_state, char*beg, char *end)
   printf("]\n");
 }
 
+void html_comment(struct p_state* p_state, char *beg, char *end)
+{
+  printf(">> comment: [");
+  while (beg < end)
+    putchar(*beg++);
+  printf("]\n");
+}
+
+
+		      
+
+char* html_parse_decl(struct p_state* p_state, char *beg, char *end)
+{
+  char *s = beg;
+
+  if (*s == '-') {
+    s++;
+    /* comment? */
+    if (s == end)
+      return beg;
+
+    if (*s == '-') {
+      s++;
+      /* yes, it is really a comment */
+      
+      if (p_state->strict_comment) {
+	/* XXX */
+      }
+      else {
+	char *end_com;
+	/* try to locate /--\s*>/ which signals end-of-comment */
+      END_COM:
+	while (s < end && *s != '-')
+	  s++;
+	end_com = s - 1;
+	if (s < end) {
+	  s++;
+	  if (s < end && *s == '-') {
+	    s++;
+	    while (s < end && isSPACE(*s))
+	      s++;
+	    if (s < end && *s == '>') {
+	      s++;
+	      /* yup */
+	      html_comment(p_state, beg+2, end_com);
+	      return s;
+	    }
+	  }
+	  if (s < end) {
+	    s = end_com + 2;
+	    goto END_COM;
+	  }
+	}
+	
+	if (s == end)
+	  return beg;
+      }
+    }
+  }
+  return 0;
+}
+
 void html_parse(struct p_state* p_state,
 	       SV* chunk)
 {
@@ -179,6 +241,17 @@ void html_parse(struct p_state* p_state,
     }
     else if (*s == '!') {
       /* declaration or comment */
+      char *new_pos;
+      s++;
+      new_pos = html_parse_decl(p_state, s, end);
+      if (new_pos == s) {
+	/* no progress, need more */
+	s = t;
+	break;
+      }
+      else if (new_pos) {
+	t = s = new_pos;
+      }
     }
     else if (*s == '?') {
       /* processing instruction */
@@ -239,7 +312,7 @@ int main(int argc, char** argv, char** env)
 
   memset(&p, 0, sizeof(p));
   sv1 = newSVpv("bar <a href='foo'>foo</a>   <!--foo", 0);
-  sv2 = newSVpv("<font size=+3> --><a href=\"", 0);
+  sv2 = newSVpv("<font size=+3> -> --- --><a href=\"", 0);
   sv3 = newSVpv("'>'\">bar</A><?</fo", 0);
   sv4 = newSVpv("NT>foo &bar", 0);
   
