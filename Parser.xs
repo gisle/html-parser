@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.104 2001/03/15 00:54:50 gisle Exp $
+/* $Id: Parser.xs,v 2.105 2001/03/26 22:05:38 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -155,7 +155,7 @@ free_pstate(PSTATE* pstate)
 	SvREFCNT_dec(pstate->handlers[i].argspec);
     }
 
-    SvREFCNT_dec(pstate->report_only_tags);
+    SvREFCNT_dec(pstate->report_tags);
     SvREFCNT_dec(pstate->ignore_tags);
     SvREFCNT_dec(pstate->ignore_elements);
     SvREFCNT_dec(pstate->ignoring_element);
@@ -293,7 +293,7 @@ void
 ignore_tags(pstate,...)
 	PSTATE* pstate
     ALIAS:
-	HTML::Parser::report_only_tags = 1
+	HTML::Parser::report_tags = 1
 	HTML::Parser::ignore_tags = 2
 	HTML::Parser::ignore_elements = 3
     PREINIT:
@@ -301,9 +301,9 @@ ignore_tags(pstate,...)
 	int i;
     CODE:
 	switch (ix) {
-	case  1: attr = &pstate->report_only_tags;  break;
-	case  2: attr = &pstate->ignore_tags;       break;
-	case  3: attr = &pstate->ignore_elements;   break;
+	case  1: attr = &pstate->report_tags;     break;
+	case  2: attr = &pstate->ignore_tags;     break;
+	case  3: attr = &pstate->ignore_elements; break;
 	default:
 	    croak("Unknown tag-list attribute (%d)", ix);
 	}

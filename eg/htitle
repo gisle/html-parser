@@ -14,7 +14,7 @@ sub title_handler
 
 my $p = HTML::Parser->new(api_version => 3,
 			  start_h => [\&title_handler, "self"],
-			  report_only_tags => ['title'],
+			  report_tags => ['title'],
 			 );
 $p->parse_file(shift || die) || die $!;
 print "\n";

@@ -25,7 +25,7 @@ parser by calling the $p->parse() or $p->parse_file() methods.
 
 require HTML::Parser;
 @ISA = qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 1.30 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.31 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use HTML::Tagset ();
@@ -57,7 +57,7 @@ sub new
     my($class, $cb, $base) = @_;
     my $self = $class->SUPER::new(
                     start_h => ["_start_tag", "self,tagname,attr"],
-		    report_only_tags => [keys %HTML::Tagset::linkElements],
+		    report_tags => [keys %HTML::Tagset::linkElements],
 	       );
     $self->{extractlink_cb} = $cb;
     if ($base) {

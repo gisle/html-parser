@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.1992';  # $Date: 2001/03/26 07:39:45 $
+$VERSION = '3.1992';  # $Date: 2001/03/26 22:05:38 $
 
 require HTML::Entities;
 
@@ -492,7 +492,7 @@ The following methods control filters:
 Any C<start> and C<end> events involving any of the tags given are
 suppressed.
 
-=item $p->report_only_tags( TAG, ... )
+=item $p->report_tags( TAG, ... )
 
 Any C<start> and C<end> events involving any of the tags I<not> given
 are suppressed.

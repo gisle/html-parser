@@ -35,7 +35,7 @@ print "ok 1\n";
 #------------------------------------------------------
 
 $p = HTML::Parser->new(api_version => 3);
-$p->report_only_tags("a");
+$p->report_tags("a");
 $p->handler(start => sub {
 		my($tagname, %attr) = @_;
 		print "not " unless $tagname eq "a" && $attr{href} eq "#a";

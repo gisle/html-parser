@@ -7,7 +7,7 @@ use HTML::Parser;
 
 my $p = HTML::Parser->new(api_version => 3,
      start_h => [\&a_start_handler, "self,tagname,attr"],
-     report_only_tags => [qw(a img)],
+     report_tags => [qw(a img)],
     );
 $p->parse_file(shift || die) || die $!;
 
