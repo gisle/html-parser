@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.21 2001/03/19 23:42:30 gisle Exp $
+# $Id: TokeParser.pm,v 2.22 2001/03/25 20:22:46 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.21 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.22 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -13,7 +13,7 @@ use HTML::Entities qw(decode_entities);
 my %DEF_ARG =
 (
  # event        # argspec ('|' marks start of user changeable stuff)
- start       => "'S',tagname|attr,attrseq,text",
+ start       => "'S',tagname,attr|attrseq,text",
  end         => "'E',tagname|text",
  text        => "'T',text,is_cdata",
  process     => "'PI'|token0,text",
