@@ -117,18 +117,18 @@ print "ok 2\n";
 
 # Try reading it from a file
 print "\n\n#### Parsing from file\n\n";
-my $file = "hp-test$$.html";
+my $file = "hptest$$.html";
 die "$file already exists" if -e $file;
 
 open(FILE, ">$file") or die "Can't create $file: $!";
 print FILE $HTML;
 print FILE "<p>This is more content...</p>\n" x 2000;
 print FILE "<title>Buuuh!</title>\n" x 200;
-#unlink($file);
+close FILE or die "Can't close $file: $!";
 
 $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
-unlink($file);
+unlink($file) or warn "Can't unlink $file: $!";
 
 print $p->as_string;
 
