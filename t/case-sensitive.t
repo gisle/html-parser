@@ -30,7 +30,7 @@ my $html = <<'EOT';
 <tAg aRg="Value" arg="other value"></tAg>
 EOT
 my $cs = 'S[tAg aRg=Value arg=other value Order: aRg arg]E[tAg]';
-my $ci = 'S[tag arg=other value Order: arg arg]E[tag]';
+my $ci = 'S[tag arg=Value Order: arg arg]E[tag]';
 
 $p->parse($html)->eof;
 print "not " unless $text eq $cs;  print "ok 1\n";
@@ -57,7 +57,7 @@ $html = <<'EOT';
 EOT
 $p->ignore_tags('ignore');
 $cs = 'S[tAg aRg=Value arg=other value Order: aRg arg]E[tAg]S[iGnOrE]';
-$ci = 'S[tag arg=other value Order: arg arg]E[tag]';
+$ci = 'S[tag arg=Value Order: arg arg]E[tag]';
 
 $text = "";
 $p->case_sensitive(0);
