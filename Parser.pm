@@ -4,7 +4,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.17";  # $Date: 1998/04/28 06:40:16 $
+$VERSION = "2.17";  # $Date: 1998/04/28 06:49:54 $
 
 
 sub new
@@ -229,7 +229,7 @@ sub parse_file
 	$file = \*F;
     }
     my $chunk = '';
-    while(read($file, $chunk, 1024)) {
+    while(read($file, $chunk, 512)) {
 	$self->parse($chunk);
     }
     close($file);
