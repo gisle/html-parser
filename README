@@ -28,6 +28,9 @@ The modules present in this collection are:
   HTML::LinkExtor - An HTML::Parser subclass that extract links from
         an HTML document.
 
+  HTML::TokeParser - An alternative interface to the basic parser
+        that does not require subclassing.
+
 
 
 PREREQUISITES
@@ -150,6 +153,11 @@ DESCRIPTION
         HTML::Entities::decode($text) before you process the text
         any further.
 
+        A sequence of text in the HTML document can be broken
+        between several invokations of $self->text. The parser will
+        make sure that it does not break a word or a sequence of
+        spaces between two invokations of $self->text().
+
     $self->comment($comment)
         This method is called as comments are recognized. The
         leading and trailing "--" sequences have been stripped off
@@ -174,8 +182,9 @@ EFFICIENCY
     size of 20K).
 
 SEE ALSO
-    the HTML::Entities manpage, the HTML::Filter manpage, the
-    HTML::HeadParser manpage, the HTML::LinkExtor manpage
+    the HTML::Entities manpage, the HTML::TokeParser manpage, the
+    HTML::Filter manpage, the HTML::HeadParser manpage, the
+    HTML::LinkExtor manpage
 
     the HTML::TreeBuilder manpage (part of the *HTML-Tree*
     distribution)
