@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.45 1999/11/30 06:26:10 gisle Exp $
+/* $Id: Parser.xs,v 2.46 1999/11/30 07:11:12 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -100,6 +100,11 @@ enum marked_section_t {
 };
 #endif
 
+struct p_handler {
+  SV* cb;
+  SV* attrspec;
+};
+
 struct p_state {
   U32 magic;
 
@@ -129,16 +134,7 @@ struct p_state {
 
   /* various */
   SV* bool_attr_val;
-  AV* accum;
-
-  /* callbacks */
-  SV* text_cb;
-  SV* start_cb;
-  SV* end_cb;
-  SV* decl_cb;
-  SV* com_cb;
-  SV* pi_cb;
-  SV* default_cb;
+  struct p_handler handlers[EVENT_COUNT];
 };
 typedef struct p_state PSTATE;
 
@@ -1542,6 +1538,8 @@ _alloc_pstate(self)
 void
 DESTROY(pstate)
 	PSTATE* pstate
+    PREINIT:
+        int i;
     CODE:
 	SvREFCNT_dec(pstate->buf);
 	SvREFCNT_dec(pstate->pending_text);
@@ -1549,14 +1547,11 @@ DESTROY(pstate)
         SvREFCNT_dec(pstate->ms_stack);
 #endif
         SvREFCNT_dec(pstate->bool_attr_val);
-        SvREFCNT_dec(pstate->accum);
-	SvREFCNT_dec(pstate->text_cb);
-	SvREFCNT_dec(pstate->start_cb);
-	SvREFCNT_dec(pstate->end_cb);
-	SvREFCNT_dec(pstate->decl_cb);
-	SvREFCNT_dec(pstate->com_cb);
-	SvREFCNT_dec(pstate->pi_cb);
-	SvREFCNT_dec(pstate->default_cb);
+        for (i = 0; i < EVENT_COUNT; i++) {
+          SvREFCNT_dec(pstate->handlers[i].cb);
+          SvREFCNT_dec(pstate->handlers[i].attrspec);
+        }
+
 	Safefree(pstate);
 
 
@@ -1625,76 +1620,67 @@ bool_attr_value(pstate,...)
     OUTPUT:
 	RETVAL
 
-SV*
-accum(pstate,...)
-	PSTATE* pstate
-    CODE:
-        RETVAL = pstate->accum ? newRV_inc((SV*)pstate->accum)
-#if !(PATCHLEVEL == 4 && SUBVERSION == 5)
-			       : &PL_sv_undef;
-#else
-         /* For perl5.004_05 returning PL_sv_undef will terminate
-          * the program with the "Modification of a read-only value attempted"
-          * message if its reference count happen to be incremented.
-          * Returning a copy is then better.
-          */
-	                       : newSVsv(&PL_sv_undef);
-#endif
-        if (items > 1) {
-	    SV* aref = ST(1);
-            AV* av = (AV*)SvRV(aref);
-            if (!av || SvTYPE(av) != SVt_PVAV)
-		croak("accum argument is not an array reference");
-	    SvREFCNT_dec(pstate->accum);
-	    pstate->accum = av;
-	    (void)SvREFCNT_inc(pstate->accum);
-        }
-    OUTPUT:
-	RETVAL
-
 void
-callback(pstate, name_sv, cb)
+handler(pstate, name_sv,...)
 	PSTATE* pstate
 	SV* name_sv
-	SV* cb
     PREINIT:
 	STRLEN name_len;
 	char *name = SvPV(name_sv, name_len);
-	SV** svp = 0;
+        int event = -1;
+        struct p_handler *h;
+        int return_count;
     CODE:
 	switch (name_len) {
 	case 3:
 	    if (strEQ(name, "end"))
-		svp = &pstate->end_cb;
+	      event = E_END;
 	    break;
 	case 4:
 	    if (strEQ(name, "text"))
-		svp = &pstate->text_cb;
+	      event = E_TEXT;
 	    break;
 	case 5:
 	    if (strEQ(name, "start"))
-		svp = &pstate->start_cb;
+	      event = E_START;
 	    break;
 	case 7:
 	    if (strEQ(name, "comment"))
-		svp = &pstate->com_cb;
+	      event = E_COMMENT;
 	    if (strEQ(name, "process"))
-		svp = &pstate->pi_cb;
+	      event = E_PROCESS;
 	    if (strEQ(name, "default"))
-		svp = &pstate->default_cb;
+	      event = E_DEFAULT;
 	    break;
 	case 11:
 	    if (strEQ(name, "declaration"))
-		svp = &pstate->decl_cb;
+	      event = E_DECLARATION;
 	    break;
 	}
 
-	if (svp) {
-	    SvREFCNT_dec(*svp);
-	    *svp = SvOK(cb) ? SvREFCNT_inc(cb) : 0;
+        if (event < 0)
+	    croak("No %s handler", name);
+
+	h = &pstate->handlers[event];
+        ST(0) = h->attrspec;
+        return_count = 1;
+        if (GIMME_V == G_ARRAY) {
+	  return_count = 2;
+	  ST(1) = h->cb;
+        }
+
+        /* update */
+        if (items > 2) {
+	  SvREFCNT_dec(h->attrspec);
+	  h->attrspec = SvREFCNT_inc(ST(2));
+	  if (items > 3) {
+	    SvREFCNT_dec(h->cb);
+	    h->cb = SvREFCNT_inc(ST(3));
+	    /* XXX should check for CODE reference */
+	  }
 	}
-	else
-	    croak("Can't access %s callback", name);
+
+        XSRETURN(return_count);
 
 
 MODULE = HTML::Parser		PACKAGE = HTML::Entities
