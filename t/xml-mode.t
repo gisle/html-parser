@@ -6,26 +6,25 @@ my $p = HTML::Parser->new(xml_mode => 1,
 			 );
 
 my $text = "";
-$p->callback(start =>
-	     sub {
+$p->handler(start => "tagname,attr",
+	    sub {
 		 my($tag, $attr) = @_;
 		 $text .= "S[$tag";
-		 while (@$attr) {
-		     my $k = shift @$attr;
-		     my $v = shift @$attr;
+		 for my $k (sort keys %$attr) {
+		     my $v =  $attr->{$k};
 		     $text .= " $k=$v";
 		 }
 		 $text .= "]";
 	     });
-$p->callback(end =>
+$p->handler(end => "tagname",
 	     sub {
 		 $text .= "E[" . shift() . "]";
 	     });
-$p->callback(process =>
+$p->handler(process => "token1",
 	     sub {
 		 $text .= "PI[" . shift() . "]";
 	     });
-$p->callback(text =>
+$p->handler(text => "origtext",
 	     sub {
 		 $text .= shift;
 	     });
