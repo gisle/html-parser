@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.96 2001/02/01 04:27:44 gisle Exp $
+/* $Id: Parser.xs,v 2.97 2001/02/01 06:01:38 gisle Exp $
  *
  * Copyright 1999-2000, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -51,10 +51,6 @@ newSVpvn(char *s, STRLEN len)
 #endif /* not perl5.004_05 */
 #endif /* perl5.004_XX */
 
-#if 0 /* Makefile.PL option now */ && (PATCHLEVEL >= 6)
-#define UNICODE_ENTITIES /**/
-#endif /* perl-5.6 or better */
-
 #ifndef dNOOP
    #define dNOOP extern int errno
 #endif
@@ -66,6 +62,11 @@ newSVpvn(char *s, STRLEN len)
 
 #ifndef MEMBER_TO_FPTR
    #define MEMBER_TO_FPTR(x) (x)
+#endif
+
+#ifndef INT2PTR
+   #define INT2PTR(any,d)  (any)(d)
+   #define PTR2IV(p)       (IV)(p)
 #endif
 
 /*
