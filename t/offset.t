@@ -10,6 +10,7 @@ my $HTML = <<'EOT';
 
 <foo bar baz=3>heisan</foo> <?process>
 <!-- comment -->
+<xmp>xmp</xmp>
 
 EOT
 
