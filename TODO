@@ -1,16 +1,14 @@
 ISSUES FOR THE 3.0 RELEASE
 
   - Should we rename 'process'?     (candidates: 'pi', 'proc',...)
-  - Should token0 go away? No!
-  - Should we report tokens for 'text'?  If all you want is to know
-    the length of a text segment, then 'tokenpos' could be used instead
-    of asking for 'text' and then applying length($text).
+  - Should we report tokens for 'text'?
   - Should some '\n' be part of markup instead of text.  The SGML standard
     has a few things to say about this.  A '\n' following a start tag should
     be considered part of that tag.  A '\n' preceeding an end tag should
-    be part of that tag and not part of the text flow. According to
+    be part of that tag and not part of the text flow. Also according to
     '../html4.0.1/appendix/notes.html#h-B.3.1'  Problematic when NL sometimes
-    is \r\n and sometimes just \r (from Mac servers)
+    is \r\n and sometimes just \r (from Mac servers).  Perhaps an option
+    later?
   - Should there be a way to get both types of quotes into the same
     literal strings in argspec (need some kind of escaping).
 
