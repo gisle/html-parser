@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.10 1999/11/09 15:52:21 gisle Exp $
+/* $Id: Parser.xs,v 2.11 1999/11/09 15:53:24 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -14,6 +14,7 @@
  *   - marked sections?
  *   - unicode support (whatever that means)
  *   - unicode character entities
+ *   - count chars, line numbers
  *
  * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
