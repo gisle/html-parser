@@ -8,7 +8,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '2.99_12';  # $Date: 1999/11/18 08:21:53 $
+$VERSION = '2.99_12';  # $Date: 1999/11/18 08:25:19 $
 
 require HTML::Entities;
 
@@ -43,7 +43,7 @@ sub new
     }
     else {
 	# Set up method callbacks for compatibility with HTML-Parser-2.xx
-	$self->pass_cbdata(1);  # get back $self as first argument
+	$self->pass_self(1);    # get back $self as first argument
 	$self->v2_compat(1);    # fix start parameters
 
 	$self->callback(text        => sub { shift->text(@_)});
