@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.07';  # $Date: 2000/03/13 11:27:50 $
+$VERSION = '3.07';  # $Date: 2000/04/13 21:18:49 $
 
 require HTML::Entities;
 
@@ -113,7 +113,7 @@ sub netscape_buggy_comment  # legacy
     my $self = shift;
     if ($^W) {
 	require Carp;
-	Carp::carp("netscape_buggy_comment() is depreciated.  " .
+	Carp::carp("netscape_buggy_comment() is deprecated.  " .
 	    "Please use the strict_comment() method instead");
     }
     my $old = !$self->strict_comment;
