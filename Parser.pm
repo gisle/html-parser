@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities ();
 
 use vars qw($VERSION);
-$VERSION = "2.23";  # $Date: 1999/06/09 10:27:16 $
+$VERSION = "2.24";  # $Date: 1999/10/29 11:09:48 $
 
 
 sub new
@@ -223,18 +223,19 @@ sub eof
 sub parse_file
 {
     my($self, $file) = @_;
-    no strict 'refs';  # so that a symbol ref as $file works
-    local(*F);
-    unless (ref($file) || $file =~ /^\*[\w:]+$/) {
+    my $opened;
+    if (!ref($file) && ref(\$file) ne "GLOB") {
 	# Assume $file is a filename
+        local(*F);
 	open(F, $file) || die "Can't open $file: $!";
-	$file = \*F;
+	$opened++;
+	$file = *F;
     }
     my $chunk = '';
     while(read($file, $chunk, 512)) {
 	$self->parse($chunk);
     }
-    close($file);
+    close($file) if $opened;
     $self->eof;
 }
 
