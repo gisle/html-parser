@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 1.14 1999/11/04 23:29:14 gisle Exp $
+/* $Id: Parser.xs,v 1.15 1999/11/05 09:02:44 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -16,7 +16,17 @@ extern "C" {
 }
 #endif
 
-#define isHALNUM(c) (isALNUM(c) || (c) == '.' || (c) == '-')
+/* This is used to classify "letters" that can make up an HTML identifier
+ * (tagname or attribute name) after the first strict ALFA char.  In addition
+ * to what is allowed according to the SGML reference syntax we allow "_"
+ * and ":".   The underscore is known to be used in Netscape bookmarks.html
+ * files.  MicroSoft Excel use ":" in their HTML exports:
+ *
+ *  <A HREF="http://www.britannica.com/" ADD_DATE="940656492" LAST_VISIT="941139558" LAST_MODIFIED="940656487">Welcome to Britannica.com</A>
+ *  <div id="TSOH499L_24029" align=center x:publishsource="Excel">
+ */
+
+#define isHALNUM(c) (isALNUM(c) || (c) == '.' || (c) == '-' || (c) == ':')
 
 
 struct p_state {
