@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.04';  # $Date: 2000/01/15 16:09:41 $
+$VERSION = '3.05';  # $Date: 2000/01/21 12:15:19 $
 
 require HTML::Entities;
 
@@ -365,19 +365,21 @@ argspecs.
 =item $p->xml_mode( [$bool] )
 
 Enabling this attribute changes the parser to allow some XML
-constructs such as empty element tags and XML processing instructions.
-It also disables forcing tag and attribute names to lower case when they
-are reported by the C<tagname> and C<attr> argspecs.
+constructs such as I<empty element tags> and I<XML processing
+instructions>.  It disables forcing tag and attribute names to lower
+case when they are reported by the C<tagname> and C<attr> argspecs,
+and suppress special treatment of elements that are parsed as CDATA
+for HTML.
 
-Empty element tags look like start tags, but end with the character
-sequence "/>".  When recognized by HTML::Parser they cause an
-artificial end event in addition to the start event.  The
-C<text> for the artificial end event will be empty
-and the C<tokenpos> array will be undefined even though
-the only element in the token array will have the correct tag name.
+I<Empty element tags> look like start tags, but end with the character
+sequence "/>".  When recognized by C<HTML::Parser> they cause an
+artificial end event in addition to the start event.  The C<text> for
+the artificial end event will be empty and the C<tokenpos> array will
+be undefined even though the only element in the token array will have
+the correct tag name.
 
-XML processing instructions are terminated by "?>" instead of a simple
-">" as is the case for HTML.
+I<XML processing instructions> are terminated by "?>" instead of a
+simple ">" as is the case for HTML.
 
 =item $p->unbroken_text( [$bool] )
 
