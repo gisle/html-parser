@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.69 1999/12/03 22:29:18 gisle Exp $
+/* $Id: Parser.xs,v 2.70 1999/12/04 12:45:37 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -216,7 +216,6 @@ DESTROY(pstate)
         int i;
     CODE:
 	SvREFCNT_dec(pstate->buf);
-	SvREFCNT_dec(pstate->pending_text);
 #ifdef MARKED_SECTION
         SvREFCNT_dec(pstate->ms_stack);
 #endif
