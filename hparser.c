@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.26 1999/12/09 15:40:28 gisle Exp $
+/* $Id: hparser.c,v 2.27 1999/12/09 19:07:33 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1022,8 +1022,8 @@ parse(PSTATE* p_state,
   char *s, *t, *beg, *end, *new_pos;
   STRLEN len;
 
-  if (!chunk || !SvOK(chunk)) {
-    /* EOF */
+  if (!chunk) {
+    /* flush */
     if (p_state->buf && SvOK(p_state->buf)) {
       /* flush it */
       STRLEN len;
@@ -1052,7 +1052,7 @@ parse(PSTATE* p_state,
   t = beg;
   end = s + len;
 
-  while (1) {
+  while (!p_state->eof) {
     /*
      * At the start of this loop we will always be ready for eating text
      * or a new tag.  We will never be inside some tag.  The 't' points
@@ -1203,7 +1203,7 @@ parse(PSTATE* p_state,
 
   p_state->chunk_offset += (s - beg);
 
-  if (s == end) {
+  if (s == end || p_state->eof) {
     if (p_state->buf) {
       SvOK_off(p_state->buf);
     }

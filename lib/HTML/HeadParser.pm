@@ -72,9 +72,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.13 $ =~ /(\d+)\.(\d+)/);
-
-my $FINISH = "HEAD PARSED\n";
+$VERSION = sprintf("%d.%02d", q$Revision: 2.14 $ =~ /(\d+)\.(\d+)/);
 
 =item $hp = HTML::HeadParser->new( [$header] )
 
@@ -102,30 +100,6 @@ sub new
     $self->{'text'} = '';  # the accumulated text associated with the element
     $self;
 }
-
-=item $hp->parse( $text )
-
-Parses some HTML text (see HTML::Parser->parse()).  Returns
-FALSE as soon as parsing should end.
-
-=cut
-
-sub parse
-{
-    my $self = shift;
-    eval {
-	local $SIG{__DIE__};
-	$self->SUPER::parse(@_)
-    };
-    if ($@) {
-        print $@ if $DEBUG;
-	$self->{'_buf'} = '';  # flush rest of buffer
-	$self->{parse_file_stop}++;  # signal to $self->parse_file()
-	return '';
-    }
-    $self;
-}
-
 
 =item $hp->header;
 
@@ -172,7 +146,7 @@ sub flush_text   # internal
 #
 # <!ENTITY % head.content "TITLE & ISINDEX? & BASE? & STYLE? &
 #                            SCRIPT* & META* & LINK*">
-# 
+#
 # <!ELEMENT HEAD O O  (%head.content)>
 
 
@@ -209,7 +183,8 @@ sub start
     } elsif ($tag eq 'head' || $tag eq 'html') {
 	# ignore
     } else {
-	die $FINISH;
+	 # stop parsing
+	$self->eof;
     }
 }
 
@@ -218,7 +193,7 @@ sub end
     my($self, $tag) = @_;
     print "END[$tag]\n" if $DEBUG;
     $self->flush_text if $self->{'tag'};
-    die $FINISH if $tag eq 'head';
+    $self->eof if $tag eq 'head';
 }
 
 sub text
@@ -228,7 +203,8 @@ sub text
     my $tag = $self->{tag};
     if (!$tag && $text =~ /\S/) {
 	# Normal text means start of body
-	die $FINISH;
+        $self->eof;
+	return;
     }
     return if $tag ne 'title';  # optimize skipping of <script> and <style>
     HTML::Entities::decode($text);
@@ -260,7 +236,7 @@ package.
 
 =head1 COPYRIGHT
 
-Copyright 1996-1998 Gisle Aas. All rights reserved.
+Copyright 1996-1999 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

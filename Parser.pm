@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = 2.99_95;  # $Date: 1999/12/09 15:29:59 $
+$VERSION = 2.99_95;  # $Date: 1999/12/09 19:07:33 $
 
 require HTML::Entities;
 
@@ -74,12 +74,6 @@ sub new
 }
 
 
-sub eof
-{
-    shift->parse(undef);
-}
-
-
 sub parse_file
 {
     my($self, $file) = @_;
@@ -93,9 +87,8 @@ sub parse_file
         $file = *F;
     }
     my $chunk = '';
-    while(read($file, $chunk, 512)) {
-        $self->parse($chunk);
-	last if delete $self->{parse_file_stop};
+    while (read($file, $chunk, 512)) {
+	$self->parse($chunk) || last;
     }
     close($file) if $opened;
     $self->eof;
@@ -271,13 +264,9 @@ to the C<HTML::Parser> object:
 =item $p->parse( $string )
 
 Parse $string as the next chunk of the HTML document.  The return
-value is a reference to the parser object (i.e. $p).
-
-=item $p->eof
-
-Signals the end of the HTML document.  Calling the eof() method will
-flush any remaining buffered text.  The return value is a reference to
-the parser object.
+value is normally a reference to the parser object (i.e. $p).  If some
+of the handlers invoked aborts parsing by calling $p->eof, then
+$p->parse() will return a FALSE value.
 
 =item $p->parse_file( $file )
 
@@ -291,6 +280,18 @@ Otherwise the return value is a reference to the parser object.
 
 If a file handle is passed as the $file argument, then the file will
 be read until EOF, but not closed.
+
+=item $p->eof
+
+Signals the end of the HTML document.  Calling the eof() method
+outside a handler callback will flush any remaining buffered text
+(trigger the C<text> event).
+
+Calling $p->eof inside a handler will terminate parsing at that point
+and $p->parse will return a FALSE value.  This will also terminate
+parsing by $p->parse_file() at that point.
+
+The return value is a reference to the parser object.
 
 =back
 
@@ -413,6 +414,11 @@ is left unchanged since last update.
 
 The return value from $p->handle is the old callback routine or a
 reference to the accumulator array.
+
+Any return values from the handler callback routine/method are always
+ignored.  A handler callback can request parsing to be aborted by
+invoking the $p->eof method.  A handler callback is not allowed to
+invoke $p->parse() or $p->parse_file().
 
 Examples:
 

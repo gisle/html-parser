@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.80 1999/12/09 15:25:26 gisle Exp $
+/* $Id: Parser.xs,v 2.81 1999/12/09 19:07:33 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  * Copyright 1999, Michael A. Chase.
@@ -164,15 +164,33 @@ DESTROY(pstate)
 	Safefree(pstate);
 
 
-void
+SV*
 parse(self, chunk)
 	SV* self;
 	SV* chunk
     PREINIT:
-	PSTATE* pstate = get_pstate(self);
-    PPCODE:
-	parse(pstate, chunk, self);
-	XSRETURN(1); /* self */
+	PSTATE* p_state = get_pstate(self);
+    CODE:
+	if (p_state->parsing)
+    	    croak("Parse loop not allowed");
+        p_state->parsing = 1;
+	parse(p_state, chunk, self);
+        p_state->parsing = 0;
+	if (p_state->eof) {
+	    p_state->eof = 0;
+            ST(0) = sv_newmortal();
+        }
+
+SV*
+eof(self)
+	SV* self;
+    PREINIT:
+	PSTATE* p_state = get_pstate(self);
+    CODE:
+        if (p_state->parsing)
+            p_state->eof = 1;
+        else
+	    parse(p_state, 0, self); /* flush */
 
 SV*
 strict_comment(pstate,...)
