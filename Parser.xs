@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.3 1999/11/08 15:09:35 gisle Exp $
+/* $Id: Parser.xs,v 2.4 1999/11/08 23:15:00 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -13,11 +13,14 @@
  *   - return partial text from literal mode
  *   - marked sections?
  *   - unicode support (whatever that means)
+ *   - unicode character entities
  *
  * MINOR "BUGS":
  *   - no way to clear "bool_attr_val" which gives the name of
  *     the attribute as value.  Perhaps not really a problem.
  *   - <plaintext> should not end with </plaintext>
+ *   - xml_mode should imply keep_case
+ *   - xml_mode should demand ";" at end of entity references
  */
 
 #ifdef __cplusplus
