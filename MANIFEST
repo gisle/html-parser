@@ -55,6 +55,7 @@ t/parser.t		Test HTML::Parser subclassing
 t/parsefile.t		Test the $p->parse_file() method
 t/pullparser.t		Test HTML::PullParser
 t/process.t		Test process instruction support
+t/textarea.t	        Test handling of <textarea>
 t/tokeparser.t		Test HTML::TokeParser
 t/uentities.t           Test encoding/decoding of Unicode entities
 t/unbroken-text.t       Test unbroken_text option

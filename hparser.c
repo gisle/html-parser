@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.69 2001/04/10 20:10:58 gisle Exp $
+/* $Id: hparser.c,v 2.70 2001/04/18 02:26:07 gisle Exp $
  *
  * Copyright 1999-2001, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -19,14 +19,16 @@ static
 struct literal_tag {
     int len;
     char* str;
+    int is_cdata;
 }
 literal_mode_elem[] =
 {
-    {6, "script"},
-    {5, "style"},
-    {3, "xmp"},
-    {9, "plaintext"},
-    {0, 0}
+    {6, "script", 1},
+    {5, "style", 1},
+    {3, "xmp", 1},
+    {9, "plaintext", 1},
+    {8, "textarea", 0},
+    {0, 0, 0}
 };
 
 enum argcode {
@@ -1179,7 +1181,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, SV* self)
 			if (!--len) {
 			    /* found it */
 			    p_state->literal_mode = literal_mode_elem[i].str;
-			    p_state->is_cdata = 1;
+			    p_state->is_cdata = literal_mode_elem[i].is_cdata;
 			    /* printf("Found %s\n", p_state->literal_mode); */
 			    goto END_OF_LITERAL_SEARCH;
 			}
