@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.24 1999/12/09 07:02:45 gisle Exp $
+/* $Id: hparser.c,v 2.25 1999/12/09 12:21:56 gisle Exp $
  *
  * Copyright 1999, Gisle Aas.
  *
@@ -1181,7 +1181,7 @@ parse(PSTATE* p_state,
     /* next char is known to be '<' and pointed to by 't' as well as 's' */
     s++;
 
-    if ( (new_pos = parsefunc[*s](p_state, t, end, t - beg, self))) {
+    if ( (new_pos = parsefunc[(unsigned char)*s](p_state, t, end, t - beg, self))) {
       if (new_pos == t) {
 	/* no progress, need more data to know what it is */
 	s = t;
