@@ -1,3 +1,12 @@
+2000-08-22   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.11
+
+     HTML::LinkExtor and eg/hrefsub now obtain %linkElements from
+     the HTML::Tagset module.
+
+
+
 2000-06-29   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.10
