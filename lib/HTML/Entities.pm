@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.29 2004/11/23 15:06:16 gisle Exp $
+# $Id: Entities.pm,v 1.30 2005/06/03 14:31:24 gisle Exp $
 
 =head1 NAME
 
@@ -17,7 +17,7 @@ HTML::Entities - Encode or decode strings with HTML entities
 For example, this:
 
  $input = "vis-à-vis Beyoncé's naïve\npapier-mâché résumé";
- print encode_entities($in), "\n"
+ print encode_entities($input), "\n"
 
 Prints this out:
 
@@ -130,7 +130,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.30 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
