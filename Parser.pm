@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.45';  # $Date: 2005/01/06 09:02:27 $
+$VERSION = '3.45';  # $Date: 2005/06/21 07:12:57 $
 
 require HTML::Entities;
 
@@ -585,14 +585,27 @@ I<well formed>.
 =item $p->ignore_tags( @tags )
 
 Any C<start> and C<end> events involving any of the tags given are
-suppressed.
+suppressed.  To reset the filter (i.e. don't suppress any C<start> and
+C<end> events), call C<ignore_tags> without an argument.
 
 =item $p->report_tags( @tags )
 
 Any C<start> and C<end> events involving any of the tags I<not> given
-are suppressed.
+are suppressed.  To reset the filter (i.e. report all C<start> and
+C<end> events), call C<report_tags> without an argument.
 
 =back
+
+Internally, the system has two filter lists, one for C<report_tags>
+and one for C<ignore_tags>, and both filters are applied.  This
+effectivly gives C<ignore_tags> precendence over C<report_tags>.
+
+Examples:
+
+   $p->ignore_tags(qw(style));
+   $p->report_tags(qw(script style));
+
+results in only C<script> events being reported.
 
 =head2 Argspec
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-print "1..3\n";
+use Test::More tests => 11;
 use strict;
 
 use HTML::Parser;
@@ -22,14 +22,13 @@ This is an <i>italic</i> and <b>bold</b> text.
 EOT
 
 my $t = join("||", map join("|", @$_), @{$p->handler("default")});
-#print "$t\n";
+#diag "$t\n";
 
-print "not " unless $t eq "start_document|||start|<html>||start|<head>||start|<title>||text|foo||end|</title>||start|<body>||text|
+is($t, "start_document|||start|<html>||start|<head>||start|<title>||text|foo||end|</title>||start|<body>||text|
 This is an italic and bold text.
 ||end|</body>||text|
 ||end|</html>||text|
-||end_document|";
-print "ok 1\n";
+||end_document|", 'ignore_elements');
 
 
 #------------------------------------------------------
@@ -38,13 +37,11 @@ $p = HTML::Parser->new(api_version => 3);
 $p->report_tags("a");
 $p->handler(start => sub {
 		my($tagname, %attr) = @_;
-		print "not " unless $tagname eq "a" && $attr{href} eq "#a";
-                print "ok 2\n";
+		ok($tagname eq "a" && $attr{href} eq "#a", 'report_tags start');
             }, 'tagname, @attr');
 $p->handler(end => sub {
 		my $tagname = shift;
-		print "not " unless $tagname eq "a";
-                print "ok 3\n";
+		is($tagname, "a", 'report_tags end');
             }, 'tagname');
 
 $p->parse(<<EOT)->eof;
@@ -54,3 +51,145 @@ $p->parse(<<EOT)->eof;
 This is <a href="#a">very nice</a> example.
 
 EOT
+
+
+#------------------------------------------------------
+
+my @tags;
+$p = HTML::Parser->new(api_version => 3);
+$p->report_tags(qw(a em));
+$p->ignore_tags(qw(em));
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+
+This is <em>yet another</em> <a href="#a">very nice</a> example.
+
+EOT
+is(join('|', @tags), 'a', 'report_tags followed by ignore_tags');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->report_tags(qw(h1));
+$p->report_tags();
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+
+EOT
+is(join('|', @tags), 'h1|h2', 'reset report_tags filter');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->report_tags(qw(h1 h2));
+$p->ignore_tags(qw(h2));
+$p->report_tags(qw(h1 h2));
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+
+EOT
+is(join('|', @tags), 'h1', 'report_tags does not reset ignore_tags');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->report_tags(qw(h1 h2));
+$p->ignore_tags(qw(h2));
+$p->report_tags();
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+
+EOT
+is(join('|', @tags), 'h1', 'reset report_tags does no reset ignore_tags');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->report_tags(qw(h1 h2));
+$p->report_tags(qw(h3));
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+<h3>Next example</h3>
+
+EOT
+is(join('|', @tags), 'h3', 'report_tags replaces filter');
+
+
+#------------------------------------------------------
+
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->ignore_tags(qw(h1 h2));
+$p->ignore_tags(qw(h3));
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+<h3>Next example</h3>
+
+EOT
+is(join('|', @tags), 'h1|h2', 'ignore_tags replaces filter');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->ignore_tags(qw(h2));
+$p->ignore_tags();
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+
+EOT
+is(join('|', @tags), 'h1|h2', 'reset ignore_tags filter');
+
+
+#------------------------------------------------------
+
+@tags = ();
+$p = HTML::Parser->new(api_version => 3);
+$p->ignore_tags(qw(h2));
+$p->report_tags(qw(h1 h2));
+$p->handler(end => sub {push @tags, @_;}, 'tagname');
+
+$p->parse(<<EOT)->eof;
+
+<h1>Next example</h1>
+<h2>Next example</h2>
+
+EOT
+is(join('|', @tags), 'h1', 'ignore_tags before report_tags');
