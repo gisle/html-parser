@@ -57,6 +57,7 @@ t/offset.t		Test attrspec offset
 t/options.t             Test set/get for various parser options
 t/parsefile.t		Test the $p->parse_file() method
 t/parser.t		Test HTML::Parser subclassing
+t/pod.t			Test pod correctness
 t/plaintext.t		Test parsing of <plaintext>
 t/process.t		Test process instruction support
 t/pullparser.t		Test HTML::PullParser

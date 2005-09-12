@@ -1,10 +1,10 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.7 2003/10/10 09:56:18 gisle Exp $
+# $Id: PullParser.pm,v 2.8 2005/09/12 14:26:17 gisle Exp $
 
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.8 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -189,6 +189,8 @@ during C<HTML::PullParser> construction.
 
 If you find out you have read too many tokens you can push them back,
 so that they are returned again the next time $p->get_token is called.
+
+=back
 
 =head1 EXAMPLES
 
