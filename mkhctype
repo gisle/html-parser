@@ -33,7 +33,7 @@ for my $c (0 .. 255) {
 
     local $_ = chr($c);
     my $v = 0;
-    if (/^\s$/ || $c == 0xa0) { # isSPACE
+    if (/^\s$/) { # isSPACE
 	$v |= 0x1
     }
     elsif ($_ ne ">") {
