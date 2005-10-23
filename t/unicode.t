@@ -11,7 +11,7 @@ use strict;
 use Test qw(plan ok skip);
 use HTML::Parser;
 
-plan tests => 97;
+plan tests => 100;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -24,14 +24,14 @@ my $p = HTML::Parser->new(
   default_h => [\@parsed, 'event, text, dtext, offset, length, offset_end, column, tokenpos, attr'],
 );
 
-my $doc = "<title>\x{263A}</title><h1 id=\x{2600} f>Smile &#x263a</h1>";
-ok(length($doc), 45);
+my $doc = "<title>\x{263A}</title><h1 id=\x{2600} f>Smile &#x263a</h1>\x{0420}";
+ok(length($doc), 46);
 
 $p->parse($doc)->eof;
 
 #use Data::Dump; Data::Dump::dump(@parsed);
 
-ok(@parsed, 8);
+ok(@parsed, 9);
 ok($parsed[0][0], "start_document");
 
 ok($parsed[1][0], "start");
@@ -62,22 +62,26 @@ ok($parsed[5][0], "text");
 ok($parsed[5][1], "Smile &#x263a");
 ok($parsed[5][2], "Smile \x{263A}");
 
-ok($parsed[7][0], "end_document");
-ok($parsed[7][3], length($doc));
-ok($parsed[7][5], length($doc));
-ok($parsed[7][6], length($doc));
+ok($parsed[7][0], "text");
+ok($parsed[7][1], "\x{0420}");
+ok($parsed[7][2], "\x{0420}");
+
+ok($parsed[8][0], "end_document");
+ok($parsed[8][3], length($doc));
+ok($parsed[8][5], length($doc));
+ok($parsed[8][6], length($doc));
 ok(@warn, 0);
 
 # Try to parse it as an UTF8 encoded string
 utf8::encode($doc);
-ok(length($doc), 49);
+ok(length($doc), 51);
 
 @parsed = ();
 $p->parse($doc)->eof;
 
 #use Data::Dump; Data::Dump::dump(@parsed);
 
-ok(@parsed, 8);
+ok(@parsed, 9);
 ok($parsed[0][0], "start_document");
 
 ok($parsed[1][0], "start");
@@ -109,10 +113,10 @@ ok($parsed[5][0], "text");
 ok($parsed[5][1], "Smile &#x263a");
 ok($parsed[5][2], "Smile \x{263A}");
 
-ok($parsed[7][0], "end_document");
-ok($parsed[7][3], length($doc));
-ok($parsed[7][5], length($doc));
-ok($parsed[7][6], length($doc));
+ok($parsed[8][0], "end_document");
+ok($parsed[8][3], length($doc));
+ok($parsed[8][5], length($doc));
+ok($parsed[8][6], length($doc));
 
 ok(@warn, 1);
 ok($warn[0] =~ /^Parsing of undecoded UTF-8 will give garbage when decoding entities/);
