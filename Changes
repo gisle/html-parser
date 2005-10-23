@@ -1,3 +1,21 @@
+2005-10-24   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.46
+     
+     Don't try to treat an literal &nbsp; as space.
+     This breaks Unicode parsing.
+     https://rt.cpan.org/Ticket/Display.html?id=15068
+
+     Improved report/ignore_tags documentation by
+     Norbert Kiesel <nkiesel@tbdnetworks.com>.
+
+     Fix HTML::Entities typo spotted by
+     Stefan Funke <bundy@adm.arcor.net>.
+
+     Fixed POD markup errors in some of the modules.
+
+
+
 2005-01-06   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.45
