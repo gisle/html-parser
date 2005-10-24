@@ -9,14 +9,12 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.46';  # $Date: 2005/10/23 22:04:06 $
+$VERSION = '3.46';  # $Date: 2005/10/24 11:17:49 $
 
 require HTML::Entities;
 
-require DynaLoader;
-@ISA=qw(DynaLoader);
-HTML::Parser->bootstrap($VERSION);
-
+require XSLoader;
+XSLoader::load('HTML::Parser', $VERSION);
 
 sub new
 {

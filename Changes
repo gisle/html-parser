@@ -18,6 +18,8 @@
      Fix HTML::Entities typo spotted by
      Stefan Funke <bundy@adm.arcor.net>.
 
+     Faster load time with XSLoader (perl-5.6 or better now required).
+
      Fixed POD markup errors in some of the modules.
 
 
