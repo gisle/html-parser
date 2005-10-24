@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 11;
 
 { package H;
   sub new { bless {}, shift; }
@@ -83,24 +83,20 @@ $| = 1;
 require HTML::HeadParser;
 my $p = HTML::HeadParser->new( H->new );
 
-my $bad = 0;
-
 if ($p->parse($HTML)) {
-    $bad++;
-    diag "Need more data which should not happen";
+    fail("Need more data which should not happen");
 } else {
     #diag $p->as_string;
+    pass();
 }
 
-$p->header('Title') =~ /Å være eller å ikke være/ or $bad++;
-$p->header('Expires') eq 'Soon' or $bad++;
-$p->header('Content-Base') eq 'http://www.sn.no' or $bad++;
-$p->header('Link') =~ /<mailto:gisle\@aas.no>/ or $bad++;
+like($p->header('Title'), qr/Å være eller å ikke være/);
+is($p->header('Expires'), 'Soon');
+is($p->header('Content-Base'), 'http://www.sn.no');
+like($p->header('Link'), qr/<mailto:gisle\@aas.no>/);
 
 # This header should not be present because the head ended
-$p->header('Isindex') and $bad++;
-
-ok(!$bad);
+ok(!$p->header('Isindex'));
 
 
 # Try feeding one char at a time
