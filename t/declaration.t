@@ -28,8 +28,6 @@ $p->parse(<<EOT)->eof;
 <!row --> foo
 EOT
 
-diag $res;
-
 is($res, <<EOT);
 [<DOCTYPE>
 <HTML>

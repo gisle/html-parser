@@ -16,7 +16,5 @@ Normal text starts here.
 EOT
 $h = $p->header;
 undef $p;
-diag $h->title;   # should print "Stupid example"
-
 is($h->title, "Stupid example");
 }

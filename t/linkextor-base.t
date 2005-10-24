@@ -29,7 +29,6 @@ is(@p, 4);
 
 for (@p) {
     ($t, %attr) = @$_ if $_->[0] eq 'img';
-    diag @$_;
 }
 
 is($t, 'img');

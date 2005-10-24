@@ -128,10 +128,6 @@ while (@tests) {
     my($html, $expected) = splice @tests, 0, 2;
     ++$i;
 
-    diag "-" x 50, " $i";
-    diag $html;
-    diag "-" x 50, " $i";
-
     @result = ();
     $p->parse($html)->eof;
 
@@ -142,7 +138,6 @@ while (@tests) {
     foreach (@$expected) {
 	my $want = string_tag($_);
 	my $got = string_tag(shift @result);
-	#diag "          $got";
 	if ($want ne $got) {
            is($want, $got);
            next TEST;

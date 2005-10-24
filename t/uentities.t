@@ -43,14 +43,8 @@ my $err;
 for ([32, 48], [120, 169], [240, 250], [250, 260], [965, 975], [3000, 3005]) {
     my $a = join("", map chr, $_->[0] .. $_->[1]);
 
-    #diag join(", ", unpack("U*", $a));
-
     my $e = encode_entities($a);
     my $d = decode_entities($e);
-
-    diag "\n$_->[0] .. $_->[1]";
-    #diag $a;
-    diag $e;
 
     unless ($d eq $a) {
 	diag "Wrong decoding in range $_->[0] .. $_->[1]";

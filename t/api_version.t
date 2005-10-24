@@ -1,4 +1,4 @@
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use strict;
 use HTML::Parser ();
@@ -12,7 +12,7 @@ eval {
    my $p = HTML::Parser->new(api_version => 4);
    $failed++;
 };
-diag $@;
+like($@, qr/^API version 4 not supported/);
 ok(!$failed, "API version 4");
 
 $p = HTML::Parser->new(api_version => 2);

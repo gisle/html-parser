@@ -32,24 +32,20 @@ while (<DATA>) {
     $ent .= "&$1;";
     $plain .= chr($2);
 }
-diag ">>>>$ent\n>>>>$plain";
 
 $a = $ent;
 decode_entities($a);
-diag "DDD>$a";
 is($a, $plain);
 
 # Try decoding when the ";" are left out
 $a = $ent,
 $a =~ s/;//g;
 decode_entities($a);
-diag ";;;>$a";
 is($a, $plain);
 
 
 $a = $plain;
 encode_entities($a);
-diag "EEE>$a";
 is($a, $ent);
 
 

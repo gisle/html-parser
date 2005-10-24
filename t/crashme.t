@@ -22,12 +22,12 @@ for (1..$no_tests) {
     }
     close(JUNK);
 
-    diag "Parse @{[-s $file]} bytes of junk";
+    #diag "Parse @{[-s $file]} bytes of junk";
 
     HTML::Parser->new->parse_file($file);
-    pass;
+    pass();
 
-    print_mem();
+    #print_mem();
 }
 
 unlink($file);

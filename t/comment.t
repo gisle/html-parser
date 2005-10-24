@@ -20,5 +20,4 @@ $p->parse("<!3453><!-3456><!FOO>");
 $p->eof;
 
 my $com = join(":", @com);
-diag $com;
 is($com, "start_document[]:start[<foo>]::-:><!-::-:--:+:foo-:foo--:foo---:text[-->]:start[<foo>]:3453:-3456:FOO:end_document[]");

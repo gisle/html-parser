@@ -46,5 +46,4 @@ $p->handler(default => []);
 eval {
    $p->parse(sub { die "Hi" });
 };
-diag "ERRSV: $@";
 like($@, qr/^Hi/);

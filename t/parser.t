@@ -103,9 +103,9 @@ HTML
 for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 #for $chunksize (1) {
     if ($chunksize =~ /^file/) {
-        diag "Parsing from $chunksize";
+        #print "Parsing from $chunksize";
     } else {
-        diag "Parsing using $chunksize byte chunks";
+        #print "Parsing using $chunksize byte chunks";
     }
     my $p = P->new;
 

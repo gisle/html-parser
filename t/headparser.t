@@ -85,12 +85,11 @@ my $p = HTML::HeadParser->new( H->new );
 
 my $bad = 0;
 
-diag "\n#### Parsing full text...";
 if ($p->parse($HTML)) {
     $bad++;
     diag "Need more data which should not happen";
 } else {
-    diag $p->as_string;
+    #diag $p->as_string;
 }
 
 $p->header('Title') =~ /Å være eller å ikke være/ or $bad++;
@@ -105,22 +104,19 @@ ok(!$bad);
 
 
 # Try feeding one char at a time
-diag "\n\n#### Parsing one char at a time...";
 my $expected = $p->as_string;
 my $nl = 1;
 $p = HTML::HeadParser->new(H->new);
 while ($HTML =~ /(.)/sg) {
-    print STDERR '#' if $nl;
-    print STDERR $1;
+    #print STDERR '#' if $nl;
+    #print STDERR $1;
     $nl = $1 eq "\n";
     $p->parse($1) or last;
 }
-diag "«««« Enough!!";
 is($p->as_string, $expected);
 
 
 # Try reading it from a file
-diag "\n\n#### Parsing from file\n\n";
 my $file = "hptest$$.html";
 die "$file already exists" if -e $file;
 
@@ -134,19 +130,15 @@ $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
 unlink($file) or warn "Can't unlink $file: $!";
 
-diag $p->as_string;
-
 is($p->header("Title"), "Å være eller å ikke være");
 
 
 # We got into an infinite loop on data without tags and no EOL.
 # This was actually a HTML::Parser bug.
-diag "\n\n#### Try to reproduce bug with empty file\n\n";
 open(FILE, ">$file") or die "Can't create $file: $!";
 print FILE "Foo";
 close(FILE);
 
-diag "\n\n#### BOM";
 $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
 unlink($file) or warn "Can't unlink $file: $!";

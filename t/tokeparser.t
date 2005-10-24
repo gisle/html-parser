@@ -75,8 +75,7 @@ $p = HTML::TokeParser->new($file) || die;
 $tcount++ while $p->get_tag;
 undef($p);
 
-diag "Number of tokens found: $tcount/2 = $scount + $ecount";
-diag "Number of process instruction found: $pcount";
+#diag "Number of tokens found: $tcount/2 = $scount + $ecount";
 is($tcount, 32);
 is($scount, 9);
 is($ecount, 7);
@@ -91,7 +90,6 @@ $p->get_tag("a");
 my $atext = $p->get_text;
 undef($p);
 
-#diag "ATEXT: $atext";
 is($atext, "Perl\240Institute");
 
 # test parsing of embeded document
@@ -112,13 +110,13 @@ my $doc = "<a href='foo'>foo is bar</a>\n\n\n" x 2022;
 #use Time::HiRes qw(time);
 my $start = time;
 $p = HTML::TokeParser->new(\$doc);
-diag "Construction time: ", time - $start;
+#diag "Construction time: ", time - $start;
 
 my $count;
 while (my $t = $p->get_token) {
     $count++ if $t->[0] eq "S";
 }
-diag "Parse time: ", time - $start;
+#diag "Parse time: ", time - $start;
 
 is($count, 2022);
 

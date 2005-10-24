@@ -28,7 +28,6 @@ $SIG{__WARN__} =
 	local $_ = shift;
 	$seen_buggy_comment_warning++
 	    if /^netscape_buggy_comment\(\) is deprecated/;
-        diag $_;
     };
 
 ok(!$p->strict_comment(1));

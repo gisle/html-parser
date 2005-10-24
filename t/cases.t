@@ -8,10 +8,8 @@ my @result;
 sub start
 {
     my($self, $tag, $attr) = @_;
-    Test::More::diag "START[$tag]";
     push @result, "START[$tag]";
     for (sort keys %$attr) {
-	Test::More::diag "\t$_: $attr->{$_}";
         push @result, "\t$_: " . $attr->{$_};
     }
     $start++;
@@ -20,7 +18,6 @@ sub start
 sub end
 {
     my($self, $tag) = @_;
-    Test::More::diag "END[$tag]";
     push @result, "END[$tag]";
     $end++;
 }
@@ -28,7 +25,6 @@ sub end
 sub text
 {
     my $self = shift;
-    Test::More::diag "TEXT[$_[0]]";
     push @result, "TEXT[$_[0]]";
     $text++;
 }
@@ -36,7 +32,6 @@ sub text
 sub comment
 {
     my $self = shift;
-    Test::More::diag "COMMENT[$_[0]]";
     push @result, "COMMENT[$_[0]]";
     $comment++;
 }
@@ -44,7 +39,6 @@ sub comment
 sub declaration
 {
     my $self = shift;
-    Test::More::diag "DECLARATION[$_[0]]";
     push @result, "DECLARATION[$_[0]]";
     $declaration++;
 }
@@ -96,9 +90,6 @@ TEST:
 while (@tests) {
     ++$i;
     my ($html, $expected) = splice @tests, 0, 2;
-    diag "-" x 50, " $i";
-    diag $html;
-    diag "-" x 50, " $i";
     @result = ();
 
     $p = new P;

@@ -18,7 +18,7 @@ $links = "";
 $p = HTML::LinkExtor->new(
   sub {
       my($tag, %links) = @_;
-      diag "$tag @{[%links]}";
+      #diag "$tag @{[%links]}";
       $links .= "$tag @{[%links]}\n";
   });
 

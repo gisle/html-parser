@@ -26,7 +26,7 @@ $p->handler(default =>
 		my $copy = $text;
 		$copy =~ s/\n/\\n/g;
 		substr($copy, 30) = "..." if length($copy) > 32;
-		diag sprintf ">>> %d.%d %s", $line, $col, $copy;
+		#diag sprintf ">>> %d.%d %s", $line, $col, $copy;
 		if ($offset != $sum_len) {
 		   diag "offset mismatch $offset vs $sum_len";
 		   $err++;

@@ -33,7 +33,6 @@ $p->parse("<! \"<>\" >");
 $p->parse("<!--comment>text<!--comment><p");
 $p->eof;
 
-diag $TEXT;
 is($TEXT, <<'EOT');
 [start_document,<undef>,]
 [start,a,<a>]
@@ -54,7 +53,6 @@ $TEXT = "";
 $p->parse("<!comment>");
 $p->eof;
 
-diag $TEXT;
 is($TEXT, <<'EOT');
 [start_document,<undef>,]
 [comment,comment,<!comment>]
