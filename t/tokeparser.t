@@ -1,4 +1,4 @@
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 use strict;
 use HTML::TokeParser;
@@ -40,6 +40,7 @@ my $p;
 
 
 $p = HTML::TokeParser->new($file) || die "Can't open $file: $!";
+ok($p->unbroken_text);
 if ($p->get_tag("foo", "title")) {
     my $title = $p->get_trimmed_text;
     #diag "Title: $title";

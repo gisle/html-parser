@@ -6,6 +6,9 @@
      This breaks Unicode parsing.
      https://rt.cpan.org/Ticket/Display.html?id=15068
 
+     The unbroken_text option is now by default on
+     for HTML::TokeParser.
+
      Improved report/ignore_tags documentation by
      Norbert Kiesel <nkiesel@tbdnetworks.com>.
 

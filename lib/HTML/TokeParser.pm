@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.30 2004/11/23 11:40:56 gisle Exp $
+# $Id: TokeParser.pm,v 2.31 2005/10/24 09:54:32 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.30 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.31 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -19,6 +19,9 @@ my %ARGS =
  process     => "'PI',token0,text",
  comment     => "'C',text",
  declaration => "'D',text",
+
+ # options
+ unbroken_text => 1,
 );
 
 
@@ -351,7 +354,7 @@ L<HTML::PullParser>, L<HTML::Parser>
 
 =head1 COPYRIGHT
 
-Copyright 1998-2001 Gisle Aas.
+Copyright 1998-2005 Gisle Aas.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
