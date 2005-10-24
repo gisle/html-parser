@@ -21,7 +21,7 @@ $SIG{__WARN__} = sub {
 $p->parse("\xEF\xBB\xBF<head>Hi there</head>");
 $p->eof;
 
-use Encode;
+#use Encode;
 $p->parse("\xEF\xBB\xBF<head>Hi there</head>" . chr(0x263A));
 $p->eof;
 

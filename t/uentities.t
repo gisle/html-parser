@@ -6,7 +6,7 @@ use Test::More tests => 25;
 
 SKIP: {
 skip "This perl does not support Unicode or Unicode entities not selected",
-  14 if $] < 5.008 || !&HTML::Entities::UNICODE_SUPPORT;
+  25 if $] < 5.008 || !&HTML::Entities::UNICODE_SUPPORT;
 
 is(decode_entities("&euro"), "\x{20AC}");
 
