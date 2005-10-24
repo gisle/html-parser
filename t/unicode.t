@@ -30,7 +30,7 @@ is($parsed[0][0], "start_document");
 
 is($parsed[1][0], "start");
 is($parsed[1][1], "<title>");
-S1: { skip "no utf8::is_utf8", 1 if !defined(&utf8::is_utf8); ok(utf8::is_utf8($parsed[1][1]), "is_utf8") };
+SKIP: { skip "no utf8::is_utf8", 1 if !defined(&utf8::is_utf8); ok(utf8::is_utf8($parsed[1][1]), "is_utf8") };
 is($parsed[1][3], 0);
 is($parsed[1][4], 7);
 
@@ -80,7 +80,7 @@ is($parsed[0][0], "start_document");
 
 is($parsed[1][0], "start");
 is($parsed[1][1], "<title>");
-S2: { skip "no utf8::is_utf8", 1 if !defined(&utf8::is_utf8); ok(!utf8::is_utf8($parsed[1][1]), "!is_utf8") };
+SKIP: { skip "no utf8::is_utf8", 1 if !defined(&utf8::is_utf8); ok(!utf8::is_utf8($parsed[1][1]), "!is_utf8") };
 is($parsed[1][3], 0);
 is($parsed[1][4], 7);
 
