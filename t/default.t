@@ -1,5 +1,5 @@
 use strict;
-print "1..3\n";
+use Test::More tests => 3;
 
 my $text = "";
 use HTML::Parser ();
@@ -19,8 +19,7 @@ EOT
 
 $p->parse($html)->eof;
 
-print "not " unless $text eq $html;
-print "ok 1\n";
+is($text, $html);
 
 $text = "";
 $p->handler(start => sub { }, "");
@@ -32,8 +31,7 @@ $html2 = $html;
 $html2 =~ s/<title>//;
 $html2 =~ s/<!DOCTYPE[^>]*>//;
 
-print "not " unless $text eq $html2;
-print "ok 2\n";
+is($text, $html2);
 
 $text = "";
 $p->handler(start => undef);
@@ -42,5 +40,4 @@ $p->parse($html)->eof;
 $html2 = $html;
 $html2 =~ s/<!DOCTYPE[^>]*>//;
 
-print "not " unless $text eq $html2;
-print "ok 3\n";
+is($text, $html2);

@@ -1,17 +1,14 @@
 # This test that HTML::LinkExtor really absolutize links correctly
 # when a base URL is given to the constructor.
 
+use Test::More tests => 5;
+require HTML::LinkExtor;
+
+SKIP: {
 eval {
    require URI;
 };
-if ($@) {
-   print "1..0\n";
-   print $@;
-   exit;
-}
-
-print "1..5\n";
-require HTML::LinkExtor;
+skip $@, 5 if $@;
 
 # Try with base URL and the $p->links interface.
 $p = HTML::LinkExtor->new(undef, "http://www.sn.no/foo/foo.html");
@@ -28,23 +25,18 @@ HTML
 @p = $p->links;
 
 # There should be 4 links in the document
-print "not " if @p != 4;
-print "ok 1\n";
+is(@p, 4);
 
 for (@p) {
     ($t, %attr) = @$_ if $_->[0] eq 'img';
-    print "@$_\n";
+    diag @$_;
 }
 
-$t eq 'img' || print "not ";
-print "ok 2\n";
+is($t, 'img');
 
-delete $attr{src} eq "http://www.sn.no/foo/img.jpg" || print "not ";
-print "ok 3\n";
+is(delete $attr{src}, "http://www.sn.no/foo/img.jpg");
 
-delete $attr{lowsrc} eq "http://www.sn.no/foo/img.gif" || print "not ";
-print "ok 4\n";
+is(delete $attr{lowsrc}, "http://www.sn.no/foo/img.gif");
 
-scalar(keys %attr) && print "not "; # there should be no more attributes
-print "ok 5\n";
-
+ok(!scalar(keys %attr)); # there should be no more attributes
+}

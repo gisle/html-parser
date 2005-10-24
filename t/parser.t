@@ -1,4 +1,4 @@
-print "1..7\n";
+use Test::More tests => 7;
 
 $HTML = <<'HTML';
 
@@ -100,14 +100,12 @@ HTML
     }
 }
 
-my $testno = 1;
 for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
 #for $chunksize (1) {
-    print "\n";
     if ($chunksize =~ /^file/) {
-        print "Parsing from $chunksize\n";
+        diag "Parsing from $chunksize";
     } else {
-        print "Parsing using $chunksize byte chunks\n";
+        diag "Parsing using $chunksize byte chunks";
     }
     my $p = P->new;
 
@@ -146,7 +144,7 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
     
     # Then we start looking for things that should not happen
     if ($res =~ /\s\|\s/) {
-	print "broken space\n";
+	diag "broken space";
 	$bad++;
     }
     for (
@@ -162,28 +160,25 @@ for $chunksize (64*1024, 64, 13, 3, 1, "file", "filehandle") {
         )
    {
         if (index($res, $_) < 0) {
-	    print "Can't find '$_' in parsed document\n";
+	    diag "Can't find '$_' in parsed document";
 	    $bad++;
         }
     }
 
-    print $res if $bad || $ENV{PRINT_RESULTS};
+    diag $res if $bad || $ENV{PRINT_RESULTS};
 
     # And we check that we get the same result all the time
     $res =~ s/\|//g;  # remove all break marks
     if ($last_res && $res ne $last_res) {
-        print "The result is not the same as last time\n";
-        $bad++
+        diag "The result is not the same as last time";
+        $bad++;
     }
     $last_res = $res;
 
     unless ($res =~ /Various entities/) {
-	print "Some text must be missing\n";
+	diag "Some text must be missing";
 	$bad++;
     }
 
-    print "\nnot " if $bad;
-    print "ok $testno\n";
-    $testno++;
-
+    ok(!$bad);
 }

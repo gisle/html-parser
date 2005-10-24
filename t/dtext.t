@@ -1,9 +1,7 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok);
-
-plan tests => 2;
+use Test::More tests => 2;
 
 use HTML::Parser ();
 
@@ -47,8 +45,8 @@ EOT
 
 $p->parse($doc)->eof;
 
-ok($text, $doc);
-ok($dtext, <<"EOT")
+is($text, $doc);
+is($dtext, <<"EOT");
 <title>е</title>
 <a href="foo&aring">ееAA<A>AA</a>
 <?&aring>

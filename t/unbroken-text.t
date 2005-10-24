@@ -1,7 +1,7 @@
 use strict;
 use HTML::Parser;
 
-print "1..3\n";
+use Test::More tests => 3;
 
 my $text = "";
 sub text
@@ -30,16 +30,14 @@ $p->parse("</foo>");
 $p->parse("<xmp>xmp</xmp>");
 $p->parse("atend");
 
-#print "$text\n";
-print "not " unless $text eq "[TEXT:0:1.0:foo bar ]<foo>[TEXT:13:1.13:bar\n]</foo><xmp>[CDATA:28:2.11:xmp]</xmp>";
-print "ok 1\n";
+#diag $text;
+is($text, "[TEXT:0:1.0:foo bar ]<foo>[TEXT:13:1.13:bar\n]</foo><xmp>[CDATA:28:2.11:xmp]</xmp>");
 
 $text = "";
 $p->eof;
 
-#print "$text\n";
-print "not " unless $text eq "[TEXT:37:2.20:atend]";
-print "ok 2\n";
+#diag $text;
+is($text, "[TEXT:37:2.20:atend]");
 
 
 $p = HTML::Parser->new(unbroken_text => 1,
@@ -56,8 +54,7 @@ $p->parse("</xmp");
 $p->parse(">bar");
 $p->eof;
 
-#print "$text\n";
-print "not " unless $text eq "[TEXT:0:1.0:foobar\nfoo][CDATA:20:2.8:xmp][TEXT:29:2.17:bar]";
-print "ok 3\n";
+#diag $text;
+is($text, "[TEXT:0:1.0:foobar\nfoo][CDATA:20:2.8:xmp][TEXT:29:2.17:bar]");
 
 

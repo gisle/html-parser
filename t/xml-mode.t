@@ -1,5 +1,5 @@
 use strict;
-print "1..3\n";
+use Test::More tests => 4;
 
 use HTML::Parser ();
 my $p = HTML::Parser->new(xml_mode => 1,
@@ -44,7 +44,7 @@ EOT
 
 $p->parse($xml)->eof;
 
-print "not " unless $text eq <<'EOT';  print "ok 1\n";
+is($text, <<'EOT');
 PI[xml version="1.0"]
 PI[IS10744:arch name="html"]
 S[DOC]
@@ -61,7 +61,7 @@ $text = "";
 $p->xml_mode(0);
 $p->parse($xml)->eof;
 
-print "not " unless $text eq <<'EOT';  print "ok 2\n";
+is($text, <<'EOT');
 PI[xml version="1.0"?]
 PI[IS10744:arch name="html"?]
 S[doc]
@@ -81,7 +81,7 @@ $p = HTML::Parser->new(api_version => 3,
 $p->handler("end" =>
 	    sub {
 		my($tagname, $text) = @_;
-		print "not " unless $tagname eq "Xyzzy" && !length($text);
-		print "ok 3\n";
+		is($tagname, "Xyzzy");
+	        ok(!length($text));
 	    }, "tagname,text");
 $p->parse("<Xyzzy foo=bar/>and some more")->eof;

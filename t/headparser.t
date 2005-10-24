@@ -1,8 +1,7 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok skip);
-plan tests => 6;
+use Test::More tests => 6;
 
 { package H;
   sub new { bless {}, shift; }
@@ -86,12 +85,12 @@ my $p = HTML::HeadParser->new( H->new );
 
 my $bad = 0;
 
-print "\n#### Parsing full text...\n";
+diag "\n#### Parsing full text...";
 if ($p->parse($HTML)) {
     $bad++;
-    print "Need more data which should not happen\n";
+    diag "Need more data which should not happen";
 } else {
-    print $p->as_string;
+    diag $p->as_string;
 }
 
 $p->header('Title') =~ /Å være eller å ikke være/ or $bad++;
@@ -106,19 +105,22 @@ ok(!$bad);
 
 
 # Try feeding one char at a time
-print "\n\n#### Parsing once char at a time...\n";
+diag "\n\n#### Parsing one char at a time...";
 my $expected = $p->as_string;
+my $nl = 1;
 $p = HTML::HeadParser->new(H->new);
 while ($HTML =~ /(.)/sg) {
-    print $1;
+    print STDERR '#' if $nl;
+    print STDERR $1;
+    $nl = $1 eq "\n";
     $p->parse($1) or last;
 }
-print "«««« Enough!!\n";
-ok($p->as_string, $expected);
+diag "«««« Enough!!";
+is($p->as_string, $expected);
 
 
 # Try reading it from a file
-print "\n\n#### Parsing from file\n\n";
+diag "\n\n#### Parsing from file\n\n";
 my $file = "hptest$$.html";
 die "$file already exists" if -e $file;
 
@@ -132,35 +134,32 @@ $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
 unlink($file) or warn "Can't unlink $file: $!";
 
-print $p->as_string;
+diag $p->as_string;
 
-ok($p->header("Title"), "Å være eller å ikke være");
+is($p->header("Title"), "Å være eller å ikke være");
 
 
 # We got into an infinite loop on data without tags and no EOL.
 # This was actually a HTML::Parser bug.
-print "\n\n#### Try to reproduce bug with empty file\n\n";
+diag "\n\n#### Try to reproduce bug with empty file\n\n";
 open(FILE, ">$file") or die "Can't create $file: $!";
 print FILE "Foo";
 close(FILE);
 
-print "\n\n#### BOM\n";
+diag "\n\n#### BOM";
 $p = HTML::HeadParser->new(H->new);
 $p->parse_file($file);
 unlink($file) or warn "Can't unlink $file: $!";
 
 ok(!$p->as_string);
 
-if ($] < 5.008) {
-    for (1..2) {
-	skip("Need Unicode support", 1);
-    }
-}
-else {
-    # Test that the Unicode BOM does not confuse us?
-    $p = HTML::HeadParser->new(H->new);
-    ok($p->parse("\x{FEFF}\n<title>Hi <foo></title>"));
-    $p->eof;
+SKIP: {
+  skip "Need Unicode support", 2 if $] < 5.008;
 
-    ok($p->header("title"), "Hi <foo>");
+  # Test that the Unicode BOM does not confuse us?
+  $p = HTML::HeadParser->new(H->new);
+  ok($p->parse("\x{FEFF}\n<title>Hi <foo></title>"));
+  $p->eof;
+
+  is($p->header("title"), "Hi <foo>");
 }

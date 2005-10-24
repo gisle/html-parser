@@ -3,7 +3,8 @@
 # This test will simply run the parser on random junk.
 
 my $no_tests = shift || 3;
-print "1..$no_tests\n";
+use Test::More;
+plan tests => $no_tests;
 
 use HTML::Parser ();
 
@@ -21,10 +22,10 @@ for (1..$no_tests) {
     }
     close(JUNK);
 
-    print "Parse @{[-s $file]} bytes of junk\n";
+    diag "Parse @{[-s $file]} bytes of junk";
 
     HTML::Parser->new->parse_file($file);
-    print "ok $_\n";
+    pass;
 
     print_mem();
 }
@@ -37,6 +38,6 @@ sub print_mem
     # this probably only works on Linux
     open(STAT, "/proc/self/status") || return;
     while (<STAT>) {
-        print if /^VmSize/;
+        diag $_ if /^VmSize/;
     }
 }

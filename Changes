@@ -9,6 +9,9 @@
      Improved report/ignore_tags documentation by
      Norbert Kiesel <nkiesel@tbdnetworks.com>.
 
+     Test suite now use Test::More, by
+     Norbert Kiesel <nkiesel@tbdnetworks.com>.
+
      Fix HTML::Entities typo spotted by
      Stefan Funke <bundy@adm.arcor.net>.
 

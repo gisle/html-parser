@@ -95,8 +95,9 @@ my @tests =
 			  [2, 1],
 			  undef, undef ]],
       );
-my $n = @tests / 2;
-print "1..$n\n";
+
+use Test::More;
+plan tests => @tests / 2;
 
 sub string_tag {
     my (@pieces) = @_;
@@ -122,14 +123,14 @@ sub string_tag {
 }
 
 my $i = 0;
-my ($got, $want);
+TEST:
 while (@tests) {
     my($html, $expected) = splice @tests, 0, 2;
     ++$i;
 
-    print "-" x 50, " $i\n";
-    print "$html\n";
-    print "-" x 50, " $i\n";
+    diag "-" x 50, " $i";
+    diag $html;
+    diag "-" x 50, " $i";
 
     @result = ();
     $p->parse($html)->eof;
@@ -139,15 +140,14 @@ while (@tests) {
 
     # Compare results for each element expected
     foreach (@$expected) {
-	$want = string_tag($_);
-	$got = string_tag(shift @result);
-	print "          $got\n";
+	my $want = string_tag($_);
+	my $got = string_tag(shift @result);
+	#diag "          $got";
 	if ($want ne $got) {
-	    print "Expected: $want\n";
-	    print( "not " );
-	    last;
-	}
+           is($want, $got);
+           next TEST;
+        }
     }
 
-    print "ok $i\n";
+    pass;
 }

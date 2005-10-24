@@ -1,5 +1,5 @@
 use strict;
-print "1..8\n";
+use Test::More tests => 8;
 
 use HTML::Parser ();
 my $p = HTML::Parser->new();
@@ -33,23 +33,23 @@ my $cs = 'S[tAg aRg=Value arg=other value Order: aRg arg]E[tAg]';
 my $ci = 'S[tag arg=Value Order: arg arg]E[tag]';
 
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 1\n";
+is($text, $cs);
 
 $text = "";
 $p->case_sensitive(0);
 $p->parse($html)->eof;
-print "not " unless $text eq $ci;  print "ok 2\n";
+is($text, $ci);
 
 $text = "";
 $p->case_sensitive(1);
 $p->xml_mode(1);
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 3\n";
+is($text, $cs);
 
 $text = "";
 $p->case_sensitive(0);
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 4\n";
+is($text, $cs);
 
 $html = <<'EOT';
 <tAg aRg="Value" arg="other value"></tAg>
@@ -63,24 +63,23 @@ $text = "";
 $p->case_sensitive(0);
 $p->xml_mode(0);
 $p->parse($html)->eof;
-print "not " unless $text eq $ci;  print "ok 5\n";
+is($text, $ci);
  
 $text = "";
 $p->case_sensitive(1);
 $p->xml_mode(0);
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 6\n";
- 
+is($text, $cs);
 
 $text = "";
 $p->case_sensitive(0);
 $p->xml_mode(1);
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 7\n";
+is($text, $cs);
  
 $text = "";
 $p->case_sensitive(1);
 $p->xml_mode(1);
 $p->parse($html)->eof;
-print "not " unless $text eq $cs;  print "ok 8\n";
+is($text, $cs);
  

@@ -3,7 +3,7 @@
 use strict;
 use HTML::Parser;
 
-print "1..2\n";
+use Test::More tests => 2;
 
 my $TEXT = "";
 sub h
@@ -33,8 +33,8 @@ $p->parse("<! \"<>\" >");
 $p->parse("<!--comment>text<!--comment><p");
 $p->eof;
 
-print $TEXT;
-print "not " unless $TEXT eq <<'EOT'; print "ok 1\n";
+diag $TEXT;
+is($TEXT, <<'EOT');
 [start_document,<undef>,]
 [start,a,<a>]
 [end,a,</a f>]
@@ -54,8 +54,8 @@ $TEXT = "";
 $p->parse("<!comment>");
 $p->eof;
 
-print $TEXT;
-print "not " unless $TEXT eq <<'EOT'; print "ok 2\n";
+diag $TEXT;
+is($TEXT, <<'EOT');
 [start_document,<undef>,]
 [comment,comment,<!comment>]
 [end_document,<undef>,]

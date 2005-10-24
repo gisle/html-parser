@@ -1,4 +1,4 @@
-print "1..2\n";
+use Test::More tests => 3;
 
 my $HTML = <<EOT;
 
@@ -39,8 +39,7 @@ my $FILTERED = <HTML>;
 close(HTML);
 
 #print $FILTERED;
-print "not " unless $FILTERED eq $HTML;
-print "ok 1\n";
+is($FILTERED, $HTML);
 
 {
     package MyFilter;
@@ -53,9 +52,9 @@ print "ok 1\n";
 my $f2 = MyFilter->new->parse_file($tmpfile)->filtered_html;
 unlink($tmpfile) or warn "Can't unlink $tmpfile: $!";
 
-#print $f2;
+#diag $f2;
 
-print "not " unless $f2 !~ /Foo/ && $f2 =~ /Bar/;
-print "ok 2\n";
+unlike($f2, qr/Foo/);
+like($f2, qr/Bar/);
 
 

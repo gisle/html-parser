@@ -9,64 +9,53 @@ my $p = HTML::Parser->new(start_h => [sub { $tag = shift  }, "tagname"],
 	                  text_h  => [sub { $text .= shift }, "dtext"],
                          );
 
+
+use Test::More tests => 12;
+
+SKIP: {
 eval {
     $p->marked_sections(1);
 };
-if ($@) {
-    print $@;
-    print "1..0\n";
-    exit;
-}
-
-print "1..11\n";
+skip $@, 12 if $@;
 
 $p->parse("<![[foo]]>");
-print "not " unless $text eq "foo";
-print "ok 1\n";
+is($text, "foo");
 
 $p->parse("<![TEMP INCLUDE[bar]]>");
-print "not " unless $text eq "foobar";
-print "ok 2\n";
+is($text, "foobar");
 
 $p->parse("<![ INCLUDE -- IGNORE -- [foo<![IGNORE[bar]]>]]>\n<br>");
-print "not " unless $text eq "foobarfoo\n";
-print "ok 3\n";
+is($text, "foobarfoo\n");
 
 $text = "";
 $p->parse("<![  CDATA   [&lt;foo");
 $p->parse("<![IGNORE[bar]]>,bar&gt;]]><br>");
-print "not " unless $text eq "&lt;foo<![IGNORE[bar,bar>]]>";
-print "ok 4\n";
+is($text, "&lt;foo<![IGNORE[bar,bar>]]>");
 
 $text = "";
 $p->parse("<![ RCDATA [&aring;<a>]]><![CDATA[&aring;<a>]]>&aring;<a><br>");
-print "not " unless $text eq "å<a>&aring;<a>å" && $tag eq "br";
-print "ok 5\n";
+is($text, "å<a>&aring;<a>å");
+is($tag, "br");
 
 $text = "";
 $p->parse("<![INCLUDE RCDATA CDATA IGNORE [foo&aring;<a>]]><br>");
-print "not " unless $text eq "";
-print "ok 6\n";
+is($text,  "");
 
 $text = "";
 $p->parse("<![INCLUDE RCDATA CDATA [foo&aring;<a>]]><br>");
-print "not " unless $text eq "foo&aring;<a>";
-print "ok 7\n";
+is($text, "foo&aring;<a>");
 
 $text = "";
 $p->parse("<![INCLUDE RCDATA [foo&aring;<a>]]><br>");
-print "not " unless $text eq "fooå<a>";
-print "ok 8\n";
+is($text, "fooå<a>");
 
 $text = "";
 $p->parse("<![INCLUDE [foo&aring;<a>]]><br>");
-print "not " unless $text eq "fooå";
-print "ok 9\n";
+is($text, "fooå");
 
 $text = "";
 $p->parse("<![[foo&aring;<a>]]><br>");
-print "not " unless $text eq "fooå";
-print "ok 10\n";
+is($text, "fooå");
 
 # offsets/line/column numbers
 $p = HTML::Parser->new(default_h => [\&x, "line,column,offset,event,text"],
@@ -92,8 +81,8 @@ sub x {
     push(@x, "$line.$col:$offset $event \"$text\"\n");
 }
 
-#print @x;
-print "not " unless join("", @x) eq <<'EOT';
+#diag @x;
+is(join("", @x), <<'EOT');
 1.0:0 start_document ""
 1.0:0 start "<title>"
 1.7:7 text "Test"
@@ -109,4 +98,4 @@ print "not " unless join("", @x) eq <<'EOT';
 9.15:82 text "\n"
 10.0:83 end_document ""
 EOT
-print "ok 11\n";
+}

@@ -1,4 +1,4 @@
-print "1..2\n";
+use Test::More tests => 2;
 
 use strict;
 use HTML::Parser;
@@ -18,13 +18,12 @@ for (@a) {
 
 my $doc = join(":", @a);
 
-#print "$doc\n";
+#diag $doc;
 
-print "not " unless $doc eq "start_document:::start:<xmp>::text:<foo>:1:end:</xmp>::text:x::start:<plaintext>::text:<foo>
+is($doc, "start_document:::start:<xmp>::text:<foo>:1:end:</xmp>::text:x::start:<plaintext>::text:<foo>
 </plaintext>
 foo
-:1:end_document::";
-print "ok 1\n";
+:1:end_document::");
 
 @a = ();
 $p->closing_plaintext('yep, emulate gecko');
@@ -39,9 +38,8 @@ for (@a) {
 
 $doc = join(":", @a);
 
-#warn "$doc\n";
+#diag $doc;
 
-print "not " unless $doc eq "start_document:::start:<plaintext>::text:<foo>
+is($doc, "start_document:::start:<plaintext>::text:<foo>
 :1:end:</plaintext>::text:foo::start:<b>::end:</b>::text:
-::end_document::";
-print "ok 2\n";
+::end_document::");

@@ -1,7 +1,6 @@
-print "1..1\n";
-
 use strict;
 use HTML::Parser ();
+use Test::More tests => 1;
 
 my $HTML = <<'EOT';
 
@@ -27,21 +26,21 @@ $p->handler(default =>
 		my $copy = $text;
 		$copy =~ s/\n/\\n/g;
 		substr($copy, 30) = "..." if length($copy) > 32;
-		printf ">>> %d.%d %s\n", $line, $col, $copy;
+		diag sprintf ">>> %d.%d %s", $line, $col, $copy;
 		if ($offset != $sum_len) {
-		   print "offset mismatch $offset vs $sum_len\n";
+		   diag "offset mismatch $offset vs $sum_len";
 		   $err++;
                 }
 		if ($offset_end != $offset + $length) {
-		   print "offset_end $offset_end wrong\n";
+		   diag "offset_end $offset_end wrong";
 		   $err++;
                 }
 		if ($length != length($text)) {
-		   print "length mismatch\n";
+		   diag "length mismatch";
 		   $err++;
 		}
                 if (substr($HTML, $offset, $length) ne $text) {
-		   print "content mismatch\n";
+		   diag "content mismatch";
 		   $err++;
 		}
 		$sum_len += $length;
@@ -54,7 +53,6 @@ for (split(//, $HTML)) {
 }
 $p->eof;
 
-print "not " unless $count > 5 && !$err;
-print "ok 1\n";
+ok($count > 5 && !$err);
 
 

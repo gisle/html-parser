@@ -1,4 +1,4 @@
-print "1..3\n";
+use Test::More tests => 3;
 
 use strict;
 use HTML::Parser;
@@ -25,7 +25,7 @@ sub a_handler {
 }
 
 
-print "not " unless join("", @doc) eq <<'EOT'; print "ok 1\n";
+is(join("", @doc), <<'EOT');
 <title>hi</title>
 <h1><A HREF="FOO">link</a></h1>
 and <A FOO="">some</a> text.
@@ -45,9 +45,8 @@ $p = HTML::Parser->new(api_version => 3);
 $p->handler(comment => "");
 $p->handler(end_document => sub {
 		                my $stripped = shift;
-				#print $stripped;
-	                        print "not " unless $stripped eq $expected;
-                                print "ok 2\n";
+				#diag $stripped;
+	                        is($stripped, $expected);
 			    }, "skipped_text");
 for (split(//, $doc)) {
     $p->parse($_);
@@ -70,7 +69,6 @@ for (split(//, $doc)) {
 }
 $p->eof;
 
-#print join(":", @x), "\n";
-print "not " unless join(":", @x) eq "X::a a:X:<a>:b bc c:X:<x>:d de:Y:";
-print "ok 3\n";
+#diag join(":", @x);
+is(join(":", @x), "X::a a:X:<a>:b bc c:X:<x>:d de:Y:");
 

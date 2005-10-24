@@ -1,6 +1,6 @@
 # Test handler method
 
-print "1..11\n";
+use Test::More tests => 11;
 
 my $testno;
 
@@ -9,15 +9,15 @@ use HTML::Parser;
     package MyParser;
     use vars qw(@ISA);
     @ISA=(HTML::Parser);
-
+    
     sub foo
     {
-	print "ok $_[1]{testno}\n";
+	Test::More::is($_[1]{testno}, Test::More->builder->current_test + 1);
     }
 
     sub bar
     {
-	print "ok $_[1]\n";
+	Test::More::is($_[1], Test::More->builder->current_test + 1);
     }
 }
 
@@ -27,18 +27,15 @@ eval {
     $p->handler(foo => "foo", "foo");
 };
 
-print "not " unless $@ && $@ =~ /^No handler for foo events/;
-print "ok 1\n";
+like($@, qr/^No handler for foo events/);
 
 eval {
    $p->handler(start => "foo", "foo");
 };
-print "not " unless $@ && $@ =~ /^Unrecognized identifier foo in argspec/;
-print "ok 2\n";
+like($@, qr/^Unrecognized identifier foo in argspec/);
 
 my $h = $p->handler(start => "foo", "self,tagname");
-print "not " if defined($h);
-print "ok 3\n";
+ok(!defined($h));
 
 $x = \substr("xfoo", 1);
 $p->handler(start => $$x, "self,attr");
@@ -56,19 +53,15 @@ $p->parse("<a>");
 eval {
     $p->handler(start => {}, "self");
 };
-print "not " unless $@ && $@ =~ /^Only code or array references allowed as handler/;
-print "ok 8\n";
+like($@, qr/^Only code or array references allowed as handler/);
 
 $a = [];
 $p->handler(start => $a);
 $h = $p->handler("start");
-print "not " unless $p->handler("start", "foo") == $a;
-print "ok 9\n";
+is($p->handler("start", "foo"), $a);
 
-print "not " unless $p->handler("start", \&MyParser::foo, "") eq "foo";
-print "ok 10\n";
+is($p->handler("start", \&MyParser::foo, ""), "foo");
 
-print "not " unless $p->handler("start") == \&MyParser::foo;
-print "ok 11\n";
+is($p->handler("start"), \&MyParser::foo);
 
 

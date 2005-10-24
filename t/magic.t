@@ -1,7 +1,7 @@
 # Check that the magic signature at the top of struct p_state works and that we
 # catch modifications to _hparser_xs_state gracefully
 
-print "1..5\n";
+use Test::More tests => 5;
 
 use HTML::Parser;
 
@@ -13,8 +13,7 @@ $p->xml_mode(1);
 eval {
     ${$p->{_hparser_xs_state}} += 4;
 };
-print "not " unless $@ && $@ =~ /^Modification of a read-only value attempted/;
-print "ok 1\n";
+like($@, qr/^Modification of a read-only value attempted/);
 
 
 my $x = delete $p->{_hparser_xs_state};
@@ -22,25 +21,21 @@ my $x = delete $p->{_hparser_xs_state};
 eval {
     $p->xml_mode(1);
 };
-print "not " unless $@ && $@ =~ /^Can't find '_hparser_xs_state'/;
-print "ok 2\n";
+like($@, qr/^Can't find '_hparser_xs_state'/);
 
 $p->{_hparser_xs_state} = \($$x + 16);
 
 eval {
     $p->xml_mode(1);
 };
-print "not " unless $@ && $@ =~ /^Bad signature in parser state object/;
-print "ok 3\n";
+like($@, qr/^Bad signature in parser state object/);
 
 $p->{_hparser_xs_state} = 33;
 eval {
     $p->xml_mode(1);
 };
-print "not " unless $@ && $@ =~ /^_hparser_xs_state element is not a reference/;
-print "ok 4\n";
+like($@,  qr/^_hparser_xs_state element is not a reference/);
 
 $p->{_hparser_xs_state} = $x;
 
-print "not " unless $p->xml_mode(0);
-print "ok 5\n";
+ok($p->xml_mode(0));

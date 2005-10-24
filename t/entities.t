@@ -1,28 +1,28 @@
 use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
 
-print "1..11\n";
+use Test::More tests => 12;
 
 $a = "V&aring;re norske tegn b&oslash;r &#230res";
 
 decode_entities($a);
 
-print "ok 1\n" if $a eq "Våre norske tegn bør æres";
+is($a, "Våre norske tegn bør æres");
 
 encode_entities($a);
 
-print "ok 2\n" if $a eq "V&aring;re norske tegn b&oslash;r &aelig;res";
+is($a, "V&aring;re norske tegn b&oslash;r &aelig;res");
 
 decode_entities($a);
 encode_entities_numeric($a);
 
-print "ok 3\n" if $a eq "V&#xE5;re norske tegn b&#xF8;r &#xE6;res";
+is($a, "V&#xE5;re norske tegn b&#xF8;r &#xE6;res");
 
 $a = "<&>";
-print "ok 4\n" if encode_entities($a) eq "&lt;&amp;&gt;";
-print "ok 5\n" if encode_entities_numeric($a) eq "&#x3C;&#x26;&#x3E;";
+is(encode_entities($a), "&lt;&amp;&gt;");
+is(encode_entities_numeric($a), "&#x3C;&#x26;&#x3E;");
 
 $a = "abcdef";
-print "ok 6\n" if encode_entities($a, 'a-c') eq "&#97;&#98;&#99;def";
+is(encode_entities($a, 'a-c'), "&#97;&#98;&#99;def");
 
 
 # See how well it does against rfc1866...
@@ -32,28 +32,25 @@ while (<DATA>) {
     $ent .= "&$1;";
     $plain .= chr($2);
 }
-print ">>>>$ent\n>>>>$plain\n";
+diag ">>>>$ent\n>>>>$plain";
 
 $a = $ent;
 decode_entities($a);
-print "DDD>$a\n";
-print "not " if $a ne $plain;
-print "ok 7\n";
+diag "DDD>$a";
+is($a, $plain);
 
 # Try decoding when the ";" are left out
 $a = $ent,
 $a =~ s/;//g;
 decode_entities($a);
-print ";;;>$a\n";
-print "not " if $a ne $plain;
-print "ok 8\n";
+diag ";;;>$a";
+is($a, $plain);
 
 
 $a = $plain;
 encode_entities($a);
-print "EEE>$a\n";
-print "not " if $a ne $ent;
-print "ok 9\n";
+diag "EEE>$a";
+is($a, $ent);
 
 
 # From: Bill Simpson-Young <bill.simpson-young@cmis.csiro.au>
@@ -67,14 +64,11 @@ print "ok 9\n";
 # in the process of encoding then decoding special entities.  Eg, what goes 
 # in as "abc&def&ghi" comes out as "abc&def;&ghi;".
 
-print "not " unless decode_entities("abc&def&ghi&abc;&def;") eq
-                                    "abc&def&ghi&abc;&def;";
-print "ok 10\n";
+is(decode_entities("abc&def&ghi&abc;&def;"), "abc&def&ghi&abc;&def;");
 
 # Decoding of &apos;
-print "not " unless decode_entities("&apos;") eq "'" &&
-                    encode_entities("'", "'") eq "&#39;";
-print "ok 11\n";
+is(decode_entities("&apos;"), "'");
+is(encode_entities("'", "'"), "&#39;");
 
 
 __END__

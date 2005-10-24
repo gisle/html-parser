@@ -1,4 +1,4 @@
-print "1..47\n";
+use Test::More tests => 47;
 
 use strict;
 use HTML::Parser;
@@ -18,19 +18,15 @@ EOT
 $p->parse($doc)->eof;
 #use Data::Dump; Data::Dump::dump(@expected);
 
-my $testno = 1;
-
 for my $i (1..length($doc)) {
      my @t;
      $p->handler(default => \@t);
      $p->parse(chunk($doc, $i));
 
      # check that we got the same stuff
-     #print "X:", join(":", @t), "\n";
-     #print "Y:", join(":", @expected), "\n";
-     print "not " unless join(":", @t) eq join(":", @expected);
-     print "ok $testno\n";
-     $testno++;
+     #diag "X:", join(":", @t);
+     #diag "Y:", join(":", @expected);
+     is(join(":", @t), join(":", @expected));
 }
 
 sub chunk {
@@ -38,7 +34,7 @@ sub chunk {
     my $size = shift || 1;
     sub {
 	my $res = substr($str, 0, $size);
-        #print "...$res\n";
+        #diag "...$res";
         substr($str, 0, $size) = "";
 	$res;
     }
@@ -50,15 +46,5 @@ $p->handler(default => []);
 eval {
    $p->parse(sub { die "Hi" });
 };
-print "ERRSV: $@";
-print "not " unless $@ && $@ =~ /^Hi/;
-print "ok $testno\n";
-$testno++;
-
-
-
-
-
-
-
-
+diag "ERRSV: $@";
+like($@, qr/^Hi/);

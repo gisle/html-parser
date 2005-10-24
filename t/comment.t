@@ -1,4 +1,4 @@
-print "1..1\n";
+use Test::More tests => 1;
 
 use strict;
 use HTML::Parser;
@@ -20,6 +20,5 @@ $p->parse("<!3453><!-3456><!FOO>");
 $p->eof;
 
 my $com = join(":", @com);
-print "$com\n";
-print "not " unless $com eq "start_document[]:start[<foo>]::-:><!-::-:--:+:foo-:foo--:foo---:text[-->]:start[<foo>]:3453:-3456:FOO:end_document[]";
-print "ok 1\n";
+diag $com;
+is($com, "start_document[]:start[<foo>]::-:><!-::-:--:+:foo-:foo--:foo---:text[-->]:start[<foo>]:3453:-3456:FOO:end_document[]");

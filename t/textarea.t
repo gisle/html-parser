@@ -1,4 +1,4 @@
-print "1..1\n";
+use Test::More tests => 1;
 
 use strict;
 use HTML::Parser;
@@ -40,9 +40,9 @@ sub tdump {
 my $p = HTML::Parser->new(default_h => [\&tdump, "event,text,dtext,is_cdata"]);
 $p->parse($html)->eof;
 
-#print $dump;
+#diag $dump;
 
-print "not " unless $dump eq <<'EOT'; print "ok 1\n";
+is($dump, <<'EOT');
 start_document||<undef>|<undef>
 start|<html>|<undef>|<undef>
 text|\n|\n|

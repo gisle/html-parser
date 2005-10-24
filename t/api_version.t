@@ -1,23 +1,22 @@
-print "1..3\n";
+use Test::More tests => 3;
 
 use strict;
 use HTML::Parser ();
 
 my $p = HTML::Parser->new(api_version => 3);
 
-print "not " if $p->handler("start");
-print "ok 1\n";
+ok(!$p->handler("start"), "API version 3");
 
+my $failed;
 eval {
    my $p = HTML::Parser->new(api_version => 4);
-   print "not ";
+   $failed++;
 };
-print $@;
-print "ok 2\n";
+diag $@;
+ok(!$failed, "API version 4");
 
 $p = HTML::Parser->new(api_version => 2);
 
-print "not " unless $p->handler("start") eq "start";
-print "ok 3\n";
+is($p->handler("start"), "start", "API version 2");
 
 

@@ -1,4 +1,4 @@
-print "1..2\n";
+use Test::More tests => 3;
 
 use HTML::PullParser;
 
@@ -24,8 +24,8 @@ my $p = HTML::PullParser->new(doc   => $doc,
 			     );
 
 my $t = $p->get_token;
-print "not " unless $t->[0] eq "start" && $t->[1] eq "title";
-print "ok 1\n";
+is($t->[0], "start");
+is($t->[1], "title");
 $p->unget_token($t);
 
 my @a;
@@ -37,8 +37,8 @@ while (my $t = $p->get_token) {
 }
 
 my $res = join("\n", @a, "");
-#print $res;
-print "not " unless $res eq <<'EOT';  print "ok 2\n";
+#diag $res;
+is($res, <<'EOT');
 start|title
 text|Title
 end|title

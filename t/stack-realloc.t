@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1\n";
+use Test::More tests => 1;
 
 use HTML::Parser;
 my $x = HTML::Parser->new(api_version => 3);
@@ -14,4 +14,4 @@ my @row;
 $x->handler(end => sub { push(@row, (1) x 505); 1 },   "tagname");
 $x->parse("</TD>");
 
-print "ok 1\n";
+pass;

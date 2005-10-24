@@ -1,35 +1,33 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok);
-
-plan tests => 9;
+use Test::More tests => 9;
 
 use HTML::Entities qw(_decode_entities);
 
 eval {
     _decode_entities("&lt;", undef);
 };
-ok($@ && $@ =~ /^Can't inline decode readonly string/);
+like($@, qr/^Can't inline decode readonly string/);
 
 eval {
     my $a = "";
     _decode_entities($a, $a);
 };
-ok($@ && $@ =~ /^2nd argument must be hash reference/);
+like($@, qr/^2nd argument must be hash reference/);
 
 eval {
     my $a = "";
     _decode_entities($a, []);
 };
-ok($@ && $@ =~ /^2nd argument must be hash reference/);
+like($@, qr/^2nd argument must be hash reference/);
 
 $a = "&lt;";
 _decode_entities($a, undef);
-ok($a, "&lt;");
+is($a, "&lt;");
 
 _decode_entities($a, { "lt" => "<" });
-ok($a, "<");
+is($a, "<");
 
 my $x = "x" x 20;
 
@@ -41,7 +39,7 @@ for (":", ":a", "a:", "a:a", "a:a:a", "a:::a") {
     $b =~ s/:/$x/g;
     _decode_entities($a, { "a" => $x });
     if ($a ne $b) {
-	print "Something went wrong with '$_'\n";
+	diag "Something went wrong with '$_'";
 	$err++;
     }
 }
@@ -49,11 +47,11 @@ ok(!$err);
 
 $a = "foo&nbsp;bar";
 _decode_entities($a, \%HTML::Entities::entity2char);
-ok($a, "foo\xA0bar");
+is($a, "foo\xA0bar");
 
 $a = "foo&nbspbar";
 _decode_entities($a, \%HTML::Entities::entity2char);
-ok($a, "foo&nbspbar");
+is($a, "foo&nbspbar");
 
 _decode_entities($a, \%HTML::Entities::entity2char, 1);
-ok($a, "foo\xA0bar");
+is($a, "foo\xA0bar");

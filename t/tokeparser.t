@@ -1,4 +1,4 @@
-print "1..11\n";
+use Test::More tests => 16;
 
 use strict;
 use HTML::TokeParser;
@@ -42,9 +42,8 @@ my $p;
 $p = HTML::TokeParser->new($file) || die "Can't open $file: $!";
 if ($p->get_tag("foo", "title")) {
     my $title = $p->get_trimmed_text;
-    #print "Title: $title\n";
-    print "not " unless $title eq "This is the <title>";
-    print "ok 1\n";
+    #diag "Title: $title";
+    is($title, "This is the <title>");
 }
 undef($p);
 
@@ -75,15 +74,15 @@ $p = HTML::TokeParser->new($file) || die;
 $tcount++ while $p->get_tag;
 undef($p);
 
-print "Number of tokens found: $tcount/2 = $scount + $ecount\n";
-print "Number of process instruction found: $pcount\n";
-print "not " unless $tcount == 32 &&
-                    $scount == 9 && $ecount == 7 &&
-                    $pcount == 1;
-print "ok 2\n";
+diag "Number of tokens found: $tcount/2 = $scount + $ecount";
+diag "Number of process instruction found: $pcount";
+is($tcount, 32);
+is($scount, 9);
+is($ecount, 7);
+is($pcount, 1);
+is($tcount/2, $scount + $ecount);
 
-print "not " if HTML::TokeParser->new("/noT/thEre/$$");
-print "ok 3\n";
+ok(!HTML::TokeParser->new("/noT/thEre/$$"));
 
 
 $p = HTML::TokeParser->new($file) || die;
@@ -91,9 +90,8 @@ $p->get_tag("a");
 my $atext = $p->get_text;
 undef($p);
 
-#print "ATEXT: $atext\n";
-print "not " unless $atext eq "Perl\240Institute";
-print "ok 4\n";
+#diag "ATEXT: $atext";
+is($atext, "Perl\240Institute");
 
 # test parsing of embeded document
 $p = HTML::TokeParser->new(\<<HTML);
@@ -103,8 +101,8 @@ Heading
 </h1>
 HTML
 
-print "not " unless $p->get_tag("h1") && $p->get_trimmed_text eq "Heading";
-print "ok 5\n";
+ok($p->get_tag("h1"));
+is($p->get_trimmed_text, "Heading");
 undef($p);
 
 # test parsing of large embedded documents
@@ -113,16 +111,15 @@ my $doc = "<a href='foo'>foo is bar</a>\n\n\n" x 2022;
 #use Time::HiRes qw(time);
 my $start = time;
 $p = HTML::TokeParser->new(\$doc);
-print "Contruction time: ", time - $start, "\n";
+diag "Construction time: ", time - $start;
 
 my $count;
 while (my $t = $p->get_token) {
     $count++ if $t->[0] eq "S";
 }
-print "Parse time: ", time - $start, "\n";
+diag "Parse time: ", time - $start;
 
-print "not " unless $count == 2022;
-print "ok 6\n";
+is($count, 2022);
 
 $p = HTML::TokeParser->new(\<<'EOT');
 <H1>This is a heading</H1>
@@ -136,14 +133,12 @@ EOT
 $p->get_tag("/h1");
 
 my $t = $p->get_trimmed_text("br", "p");
-print "not " unless $t eq "This is some text.";
-print "ok 7\n";
+is($t, "This is some text.");
 
 $p->get_tag;
 
 $t = $p->get_trimmed_text("br", "p");
-print "not " unless $t eq "This is some more text.";
-print "ok 8\n";
+is($t,"This is some more text.");
 
 undef($p);
 
@@ -157,18 +152,15 @@ EOT
 $p->get_tag("h1");
 
 $t = $p->get_phrase;
-print "not " unless $t eq "This is a bold heading";
-print "ok 9\n";
+is($t, "This is a bold heading");
 
 $t = $p->get_phrase;
-print "not " unless $t eq "";
-print "ok 10\n";
+is($t, "");
 
 $p->get_tag;
 
 $t = $p->get_phrase;
-print "not " unless $t eq "This is some italic text. This is some more text.";
-print "ok 11\n";
+is($t, "This is some italic text. This is some more text.");
 
 undef($p);
 

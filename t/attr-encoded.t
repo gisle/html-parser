@@ -1,5 +1,5 @@
 use strict;
-print "1..2\n";
+use Test::More tests => 2;
 
 use HTML::Parser ();
 my $p = HTML::Parser->new();
@@ -23,10 +23,10 @@ EOT
 
 $p->parse($html)->eof;
 
-print "not " unless $text eq 'S[tag arg=&amp;&lt;&gt]';  print "ok 1\n";
+is($text, 'S[tag arg=&amp;&lt;&gt]');
 
 $text = "";
 $p->attr_encoded(0);
 $p->parse($html)->eof;
 
-print "not " unless $text eq 'S[tag arg=&<>]';  print "ok 2\n";
+is($text, 'S[tag arg=&<>]');

@@ -1,9 +1,7 @@
 #!perl -w
 
 use strict;
-use Test qw(plan ok);
-
-plan tests => 1;
+use Test::More tests => 1;
 
 use HTML::Parser;
 
@@ -27,7 +25,7 @@ my $p = HTML::Parser->new(default_h => [\&h, "event,tagname,text"]);
 $p->parse(q(<tr><td align="center" height="100"><SCRIPT language="JavaScript1.1">bust = Math.floor(1000000*Math.random());document.write('<SCR' + 'IPT LANGUAGE="JavaScript1.1" SRC="http://adv.virgilio.it/js.ng/site=virg&adsize=728x90&subsite=mail&sez=comfree&pos=43&bust='+bust+'?">\n');document.write('</SCR' + 'IPT>\n');</SCRIPT></td></tr>));
 $p->eof;
 
-ok($TEXT, <<'EOT');
+is($TEXT, <<'EOT');
 [start_document,<undef>,]
 [start,tr,<tr>]
 [start,td,<td align="center" height="100">]

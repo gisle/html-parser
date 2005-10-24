@@ -1,15 +1,12 @@
+use Test::More tests => 1;
+
 eval {
    require HTML::HeadParser;
    $p = HTML::HeadParser->new;
 };
-if ($@) {
-   print "1..0\n" if $@ =~ /^Can't locate HTTP/;
-   print $@;
-   exit;
-}
 
-print "1..1\n";
-
+SKIP: {
+skip $@, 1 if $@ =~ /^Can't locate HTTP/;
 
 $p = HTML::HeadParser->new($h);
 $p->parse(<<EOT);
@@ -19,9 +16,7 @@ Normal text starts here.
 EOT
 $h = $p->header;
 undef $p;
-print $h->title;   # should print "Stupid example"
-print "\n";
+diag $h->title;   # should print "Stupid example"
 
-print "not " unless $h->title eq "Stupid example";
-print "ok 1\n";
-
+is($h->title, "Stupid example");
+}

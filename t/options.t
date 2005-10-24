@@ -1,6 +1,6 @@
 # Test option setting methods
 
-print "1..5\n";
+use Test::More tests => 10;
 
 use strict;
 use HTML::Parser ();
@@ -10,19 +10,17 @@ my $p = HTML::Parser->new(api_version => 3,
 my $old;
 
 $old = $p->boolean_attribute_value("foo");
-print "not " if defined $old;
-print "ok 1\n";
+ok(!defined $old);
 
 $old = $p->boolean_attribute_value();
-print "not " unless $old eq "foo";
-print "ok 2\n";
+is($old, "foo");
 
 $old = $p->boolean_attribute_value(undef);
-print "not " unless $old eq "foo" && !defined($p->boolean_attribute_value);
-print "ok 3\n";
+is($old, "foo");
+ok(!defined($p->boolean_attribute_value));
 
-print "not " unless $p->xml_mode(0) && !$p->xml_mode;
-print "ok 4\n";
+ok($p->xml_mode(0));
+ok(!$p->xml_mode);
 
 my $seen_buggy_comment_warning;
 $SIG{__WARN__} =
@@ -30,11 +28,10 @@ $SIG{__WARN__} =
 	local $_ = shift;
 	$seen_buggy_comment_warning++
 	    if /^netscape_buggy_comment\(\) is deprecated/;
-        print;
+        diag $_;
     };
 
-print "not " if $p->strict_comment(1) ||
-                !$p->strict_comment   ||
-                $p->netscape_buggy_comment ||
-                !$seen_buggy_comment_warning;
-print "ok 5\n";
+ok(!$p->strict_comment(1));
+ok($p->strict_comment);
+ok(!$p->netscape_buggy_comment);
+ok($seen_buggy_comment_warning);

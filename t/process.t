@@ -1,6 +1,6 @@
 use strict;
 
-print "1..6\n";
+use Test::More tests => 12;
 
 my $pi;
 my $orig;
@@ -12,32 +12,32 @@ my $p = HTML::Parser->new(process_h => [sub { $pi = shift; $orig = shift; },
 
 $p->parse("<a><?foo><a>");
 
-print "not " unless $pi eq "foo" && $orig eq "<?foo>";
-print "ok 1\n";
+is($pi, "foo");
+is($orig, "<?foo>");
 
 $p->parse("<a><?><a>");
-print "not " unless $pi eq "" && $orig eq "<?>";
-print "ok 2\n";
+is($pi, "");
+is($orig, "<?>");
 
 $p->parse("<a><?
 foo
 ><a>");
-print "not "  unless $pi eq "\nfoo\n" && $orig eq "<?\nfoo\n>";
-print "ok 3\n";
+is($pi, "\nfoo\n");
+is($orig, "<?\nfoo\n>");
 
 for (qw(< a > < ? b a r > < a >)) {
    $p->parse($_);
 }
 
-print "not " unless $pi eq "bar" && $orig eq "<?bar>";
-print "ok 4\n";
+is($pi, "bar");
+is($orig, "<?bar>");
 
 $p->xml_mode(1);
 
 $p->parse("<a><?foo>bar??><a>");
-print "not " unless $pi eq "foo>bar?" && $orig eq "<?foo>bar??>";
-print "ok 5\n";
+is($pi, "foo>bar?");
+is($orig, "<?foo>bar??>");
 
 $p->parse("<a><??></a>");
-print "not " unless $pi eq "" && $orig eq "<??>";
-print "ok 6\n";
+is($pi, "");
+is($orig, "<??>");

@@ -1,4 +1,4 @@
-print "1..2\n";
+use Test::More tests => 2;
 
 use strict;
 use HTML::Parser;
@@ -14,10 +14,8 @@ Hi
 <a href="abc">Foo</a><b>:-)</b>
 EOT
 
-print "not " unless "@start" eq "a href abc b";
-print "ok 1\n";
+is("@start", "a href abc b");
 
-print "not " unless join("", @text) eq "Hi\nFoo:-)\n";
-print "ok 2\n";
+is(join("", @text), "Hi\nFoo:-)\n");
 
 

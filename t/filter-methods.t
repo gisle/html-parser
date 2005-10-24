@@ -22,7 +22,7 @@ This is an <i>italic</i> and <b>bold</b> text.
 EOT
 
 my $t = join("||", map join("|", @$_), @{$p->handler("default")});
-#diag "$t\n";
+#diag $t;
 
 is($t, "start_document|||start|<html>||start|<head>||start|<title>||text|foo||end|</title>||start|<body>||text|
 This is an italic and bold text.
