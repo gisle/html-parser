@@ -9,6 +9,8 @@
      The unbroken_text option is now by default on
      for HTML::TokeParser.
 
+     HTML::Entities::encode will no encode "'" by default.
+
      Improved report/ignore_tags documentation by
      Norbert Kiesel <nkiesel@tbdnetworks.com>.
 

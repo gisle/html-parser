@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.31 2005/10/24 11:26:48 gisle Exp $
+# $Id: Entities.pm,v 1.32 2005/10/24 12:08:13 gisle Exp $
 
 =head1 NAME
 
@@ -71,7 +71,7 @@ This routine replaces unsafe characters in $string with their entity
 representation. A second argument can be given to specify which
 characters to consider unsafe (i.e., which to escape). The default set
 of characters to encode are control chars, high-bit chars, and the
-C<< < >>, C<< & >>, C<< > >>, and C<< " >>
+C<< < >>, C<< & >>, C<< > >>, C<< ' >> and C<< " >>
 characters.  But this, for example, would encode I<just> the
 C<< < >>, C<< & >>, C<< > >>, and C<< " >> characters:
 
@@ -130,7 +130,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.31 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.32 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
@@ -454,8 +454,8 @@ sub encode_entities
 	}
 	&{$subst{$_[1]}}($$ref);
     } else {
-	# Encode control chars, high bit chars and '<', '&', '>', '"'
-	$$ref =~ s/([^\n\r\t !\#\$%\'-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
+	# Encode control chars, high bit chars and '<', '&', '>', ''' and '"'
+	$$ref =~ s/([^\n\r\t !\#\$%\(-;=?-~])/$char2entity{$1} || num_entity($1)/ge;
     }
     $$ref;
 }

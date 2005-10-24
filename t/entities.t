@@ -17,9 +17,9 @@ encode_entities_numeric($a);
 
 is($a, "V&#xE5;re norske tegn b&#xF8;r &#xE6;res");
 
-$a = "<&>";
-is(encode_entities($a), "&lt;&amp;&gt;");
-is(encode_entities_numeric($a), "&#x3C;&#x26;&#x3E;");
+$a = "<&>\"'";
+is(encode_entities($a), "&lt;&amp;&gt;&quot;&#39;");
+is(encode_entities_numeric($a), "&#x3C;&#x26;&#x3E;&#x22;&#x27;");
 
 $a = "abcdef";
 is(encode_entities($a, 'a-c'), "&#97;&#98;&#99;def");
