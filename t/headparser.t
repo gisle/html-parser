@@ -117,6 +117,7 @@ my $file = "hptest$$.html";
 die "$file already exists" if -e $file;
 
 open(FILE, ">$file") or die "Can't create $file: $!";
+binmode(FILE);
 print FILE $HTML;
 print FILE "<p>This is more content...</p>\n" x 2000;
 print FILE "<title>Buuuh!</title>\n" x 200;
