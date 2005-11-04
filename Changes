@@ -6,10 +6,10 @@
      This breaks Unicode parsing.
      https://rt.cpan.org/Ticket/Display.html?id=15068
 
-     The unbroken_text option is now by default on
+     The unbroken_text option is now on by default
      for HTML::TokeParser.
 
-     HTML::Entities::encode will no encode "'" by default.
+     HTML::Entities::encode will now encode "'" by default.
 
      Improved report/ignore_tags documentation by
      Norbert Kiesel <nkiesel@tbdnetworks.com>.
