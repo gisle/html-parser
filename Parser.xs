@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.132 2005/02/28 19:45:40 gisle Exp $
+/* $Id: Parser.xs,v 2.133 2005/11/15 10:08:11 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -323,6 +323,8 @@ strict_comment(pstate,...)
 	HTML::Parser::strict_end = 8
 	HTML::Parser::closing_plaintext = 9
         HTML::Parser::utf8_mode = 10
+        HTML::Parser::empty_element_tag = 11
+        HTML::Parser::xml_pic = 12
     PREINIT:
 	bool *attr;
     CODE:
@@ -346,6 +348,8 @@ strict_comment(pstate,...)
 #else
 	case 10: croak("The utf8_mode does not work with this perl; perl-5.8 or better required");
 #endif
+	case 11: attr = &pstate->empty_element_tag;    break;
+        case 12: attr = &pstate->xml_pic;              break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }

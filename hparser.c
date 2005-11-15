@@ -1,6 +1,6 @@
-/* $Id: hparser.c,v 2.119 2004/12/28 13:47:44 gisle Exp $
+/* $Id: hparser.c,v 2.120 2005/11/15 10:08:11 gisle Exp $
  *
- * Copyright 1999-2004, Gisle Aas
+ * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
@@ -87,6 +87,10 @@ char *argname[] = {
 
 #define CASE_SENSITIVE(p_state) \
          ((p_state)->xml_mode || (p_state)->case_sensitive)
+#define STRICT_NAMES(p_state) \
+         ((p_state)->xml_mode || (p_state)->strict_names)
+#define ALLOW_EMPTY_TAG(p_state) \
+         ((p_state)->xml_mode || (p_state)->empty_element_tag)
 
 static void flush_pending_text(PSTATE* p_state, SV* self);
 
@@ -1126,9 +1130,9 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 
 	/* just hardcode a few names as the recognized declarations */
 	if (!((decl_id_len == 7 &&
-	       strnEQx(decl_id, "DOCTYPE", 7, !p_state->xml_mode)) ||
+	       strnEQx(decl_id, "DOCTYPE", 7, !CASE_SENSITIVE(p_state))) ||
 	      (decl_id_len == 6 &&
-	       strnEQx(decl_id, "ENTITY",  6, !p_state->xml_mode))
+	       strnEQx(decl_id, "ENTITY",  6, !CASE_SENSITIVE(p_state)))
 	    )
 	    )
 	{
@@ -1239,13 +1243,13 @@ static char*
 parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     char *s = beg;
-    int empty_tag = 0;  /* XML feature */
+    int empty_tag = 0;
     dTOKENS(16);
 
     hctype_t tag_name_first, tag_name_char;
     hctype_t attr_name_first, attr_name_char;
 
-    if (p_state->strict_names || p_state->xml_mode) {
+    if (STRICT_NAMES(p_state)) {
 	tag_name_first = attr_name_first = HCTYPE_NAME_FIRST;
 	tag_name_char  = attr_name_char  = HCTYPE_NAME_CHAR;
     }
@@ -1309,8 +1313,12 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    else {
 		char *word_start = s;
 		while (s < end && isHNOT_SPACE_GT(*s)) {
-		    if (p_state->xml_mode && *s == '/')
-			break;
+		    if (ALLOW_EMPTY_TAG(p_state) && *s == '/') {
+			if ((s + 1) < end && *(s + 1) == '>')
+			    break;
+			if ((s + 1) == end)
+			    goto PREMATURE;
+		    }
 		    s++;
 		}
 		if (s == end)
@@ -1327,7 +1335,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	}
     }
 
-    if (p_state->xml_mode && *s == '/') {
+    if (ALLOW_EMPTY_TAG(p_state) && *s == '/') {
 	s++;
 	if (s == end)
 	    goto PREMATURE;
@@ -1391,7 +1399,7 @@ parse_end(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
     char *s = beg+2;
     hctype_t name_first, name_char;
 
-    if (p_state->strict_names || p_state->xml_mode) {
+    if (STRICT_NAMES(p_state)) {
 	name_first = HCTYPE_NAME_FIRST;
 	name_char  = HCTYPE_NAME_CHAR;
     }
@@ -1457,7 +1465,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    token_pos.end = s;
 	    s++;
 
-	    if (p_state->xml_mode) {
+	    if (p_state->xml_mode || p_state->xml_pic) {
 		/* XML processing instructions are ended by "?>" */
 		if (s - beg < 4 || s[-2] != '?')
 		    continue;

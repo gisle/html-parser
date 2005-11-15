@@ -1,6 +1,6 @@
-/* $Id: hparser.h,v 2.31 2004/11/23 20:38:27 gisle Exp $
+/* $Id: hparser.h,v 2.32 2005/11/15 10:08:11 gisle Exp $
  *
- * Copyright 1999-2004, Gisle Aas
+ * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
@@ -106,6 +106,8 @@ struct p_state {
     bool case_sensitive;
     bool closing_plaintext;
     bool utf8_mode;
+    bool empty_element_tag;
+    bool xml_pic;
 
     /* other configuration stuff */
     SV* bool_attr_val;

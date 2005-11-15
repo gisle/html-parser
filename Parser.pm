@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.46';  # $Date: 2005/10/24 11:17:49 $
+$VERSION = '3.46';  # $Date: 2005/11/15 10:08:11 $
 
 require HTML::Entities;
 
@@ -353,6 +353,20 @@ behaviour is what at least MSIE does.  Enabling this attribute makes
 closing "</plaintext>" tag effective and the parsing process will resume
 after seeing this tag.  This emulates gecko-based browsers.
 
+=item $p->empty_element_tag
+
+=item $p->empty_element_tag( $bool )
+
+By default, empty element tags are not recognized.  Enabling this
+attribute make C<HTML::Parser> recognize these.
+
+I<Empty element tags> look like start tags, but end with the character
+sequence "/>".  When recognized by C<HTML::Parser> they cause an
+artificial end event in addition to the start event.  The C<text> for
+the artificial end event will be empty and the C<tokenpos> array will
+be undefined even though the only element in the token array will have
+the correct tag name.
+
 =item $p->marked_sections
 
 =item $p->marked_sections( $bool )
@@ -475,6 +489,14 @@ the correct tag name.
 
 I<XML processing instructions> are terminated by "?>" instead of a
 simple ">" as is the case for HTML.
+
+=item $p->xml_pic
+
+=item $p->xml_pic( $bool )
+
+By default, I<processing instructions> are terminated by ">". When
+this attribute is enabled, processing instructions are terminated by
+"?>".
 
 =back
 
@@ -1211,7 +1233,7 @@ be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
- Copyright 1996-2004 Gisle Aas. All rights reserved.
+ Copyright 1996-2005 Gisle Aas. All rights reserved.
  Copyright 1999-2000 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
