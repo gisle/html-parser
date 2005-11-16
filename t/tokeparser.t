@@ -26,7 +26,7 @@ print F <<'EOT';  close(F);
 
     And this is a link to the <a href="http://www.perl.com"><img src="camel.gif" alt="Perl">&nbsp;<!--nice isn't it-->Institute</a>
 
-   <? process instruction >
+   <br/><? process instruction >
 
 </body>
 </html>
@@ -76,9 +76,9 @@ $tcount++ while $p->get_tag;
 undef($p);
 
 #diag "Number of tokens found: $tcount/2 = $scount + $ecount";
-is($tcount, 32);
-is($scount, 9);
-is($ecount, 7);
+is($tcount, 36);
+is($scount, 10);
+is($ecount, 8);
 is($pcount, 1);
 is($tcount/2, $scount + $ecount);
 
