@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.46';  # $Date: 2005/11/15 10:08:11 $
+$VERSION = '3.46';  # $Date: 2005/11/16 11:35:23 $
 
 require HTML::Entities;
 
@@ -357,15 +357,17 @@ after seeing this tag.  This emulates gecko-based browsers.
 
 =item $p->empty_element_tag( $bool )
 
-By default, empty element tags are not recognized.  Enabling this
-attribute make C<HTML::Parser> recognize these.
+By default, empty element tags are not recognized as such and the "/"
+before ">" is just treated like a nomal name character (unless
+C<strict_names> is enabled).  Enabling this attribute make
+C<HTML::Parser> recognize these tags.
 
-I<Empty element tags> look like start tags, but end with the character
-sequence "/>".  When recognized by C<HTML::Parser> they cause an
-artificial end event in addition to the start event.  The C<text> for
-the artificial end event will be empty and the C<tokenpos> array will
-be undefined even though the only element in the token array will have
-the correct tag name.
+Empty element tags look like start tags, but end with the character
+sequence "/>" instead of ">".  When recognized by C<HTML::Parser> they
+cause an artificial end event in addition to the start event.  The
+C<text> for the artificial end event will be empty and the C<tokenpos>
+array will be undefined even though the the token array will have one
+element containg the tag name.
 
 =item $p->marked_sections
 
@@ -474,21 +476,10 @@ This option is only available with perl-5.8 or better.
 =item $p->xml_mode( $bool )
 
 Enabling this attribute changes the parser to allow some XML
-constructs such as I<empty element tags> and I<XML processing
-instructions>.  It disables forcing tag and attribute names to lower
-case when they are reported by the C<tagname> and C<attr> argspecs,
-and suppresses special treatment of elements that are parsed as CDATA
-for HTML.
-
-I<Empty element tags> look like start tags, but end with the character
-sequence "/>".  When recognized by C<HTML::Parser> they cause an
-artificial end event in addition to the start event.  The C<text> for
-the artificial end event will be empty and the C<tokenpos> array will
-be undefined even though the only element in the token array will have
-the correct tag name.
-
-I<XML processing instructions> are terminated by "?>" instead of a
-simple ">" as is the case for HTML.
+constructs.  This enables the behaviour controlled by individually by
+the C<case_sensitive>, C<empty_element_tag>, C<strict_names> and
+C<xml_pic> attributes and also suppresses special treatment of
+elements that are parsed as CDATA for HTML.
 
 =item $p->xml_pic
 
@@ -496,7 +487,7 @@ simple ">" as is the case for HTML.
 
 By default, I<processing instructions> are terminated by ">". When
 this attribute is enabled, processing instructions are terminated by
-"?>".
+"?>" instead.
 
 =back
 
