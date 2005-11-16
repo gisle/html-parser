@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.120 2005/11/15 10:08:11 gisle Exp $
+/* $Id: hparser.c,v 2.121 2005/11/16 11:13:08 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1261,8 +1261,15 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 
     s += 2;
 
-    while (s < end && isHCTYPE(*s, tag_name_char))
+    while (s < end && isHCTYPE(*s, tag_name_char)) {
+	if (*s == '/' && ALLOW_EMPTY_TAG(p_state)) {
+	    if ((s + 1) == end)
+		goto PREMATURE;
+	    if (*(s + 1) == '>')
+		break;
+	}
 	s++;
+    }
     PUSH_TOKEN(beg+1, s);  /* tagname */
 
     while (isHSPACE(*s))
@@ -1274,9 +1281,22 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	/* attribute */
 	char *attr_name_beg = s;
 	char *attr_name_end;
+	if (*s == '/' && ALLOW_EMPTY_TAG(p_state)) {
+	    if ((s + 1) == end)
+		goto PREMATURE;
+	    if (*(s + 1) == '>')
+		break;
+	}
 	s++;
-	while (s < end && isHCTYPE(*s, attr_name_char))
+	while (s < end && isHCTYPE(*s, attr_name_char)) {
+	    if (*s == '/' && ALLOW_EMPTY_TAG(p_state)) {
+		if ((s + 1) == end)
+		    goto PREMATURE;
+		if (*(s + 1) == '>')
+		    break;
+	    }
 	    s++;
+	}
 	if (s == end)
 	    goto PREMATURE;
 
@@ -1313,11 +1333,11 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    else {
 		char *word_start = s;
 		while (s < end && isHNOT_SPACE_GT(*s)) {
-		    if (ALLOW_EMPTY_TAG(p_state) && *s == '/') {
-			if ((s + 1) < end && *(s + 1) == '>')
-			    break;
+		    if (*s == '/' && ALLOW_EMPTY_TAG(p_state)) {
 			if ((s + 1) == end)
 			    goto PREMATURE;
+			if (*(s + 1) == '>')
+			    break;
 		    }
 		    s++;
 		}
