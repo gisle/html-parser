@@ -49,6 +49,10 @@ package main;
 @tests =
     (
      '<a ">' => ['START[a]', "\t\": \""],
+     '<a/>' => ['START[a/]',],
+     '<a />' => ['START[a]', "\t/: /"],
+     '<a a/>' => ['START[a]', "\ta/: a/"],
+     '<a a/=/>' => ['START[a]', "\ta/: /"],
      '<a x="foo&nbsp;bar">' => ['START[a]', "\tx: foo\xA0bar"],
      '<a x="foo&nbspbar">' => ['START[a]', "\tx: foo&nbspbar"],
      '<å >' => ['TEXT[<å]', 'TEXT[ >]'],
