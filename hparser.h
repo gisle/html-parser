@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.32 2005/11/15 10:08:11 gisle Exp $
+/* $Id: hparser.h,v 2.33 2005/11/17 21:07:37 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -106,7 +106,7 @@ struct p_state {
     bool case_sensitive;
     bool closing_plaintext;
     bool utf8_mode;
-    bool empty_element_tag;
+    bool empty_element_tags;
     bool xml_pic;
 
     /* other configuration stuff */

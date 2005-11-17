@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.32 2005/11/16 11:18:25 gisle Exp $
+# $Id: TokeParser.pm,v 2.33 2005/11/17 21:07:37 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.32 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.33 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -22,7 +22,7 @@ my %ARGS =
 
  # options that default on
  unbroken_text => 1,
- empty_element_tag => 1,
+ empty_element_tags => 1,
 );
 
 
@@ -204,7 +204,7 @@ it will be a filehandle of some kind.  The stream will be read() until
 EOF, but not closed.
 
 A newly constructed C<HTML::TokeParser> differ from is base classes by
-having the C<unbroken_text> and C<empty_element_tag> attributes
+having the C<unbroken_text> and C<empty_element_tags> attributes
 enabled by default. See L<HTML::Parser> for a description of these and
 other attributes that influence how the document is parsed.
 

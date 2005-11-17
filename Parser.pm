@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.46';  # $Date: 2005/11/16 11:35:23 $
+$VERSION = '3.46';  # $Date: 2005/11/17 21:07:36 $
 
 require HTML::Entities;
 
@@ -353,9 +353,9 @@ behaviour is what at least MSIE does.  Enabling this attribute makes
 closing "</plaintext>" tag effective and the parsing process will resume
 after seeing this tag.  This emulates gecko-based browsers.
 
-=item $p->empty_element_tag
+=item $p->empty_element_tags
 
-=item $p->empty_element_tag( $bool )
+=item $p->empty_element_tags( $bool )
 
 By default, empty element tags are not recognized as such and the "/"
 before ">" is just treated like a nomal name character (unless
@@ -477,7 +477,7 @@ This option is only available with perl-5.8 or better.
 
 Enabling this attribute changes the parser to allow some XML
 constructs.  This enables the behaviour controlled by individually by
-the C<case_sensitive>, C<empty_element_tag>, C<strict_names> and
+the C<case_sensitive>, C<empty_element_tags>, C<strict_names> and
 C<xml_pic> attributes and also suppresses special treatment of
 elements that are parsed as CDATA for HTML.
 

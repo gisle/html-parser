@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.121 2005/11/16 11:13:08 gisle Exp $
+/* $Id: hparser.c,v 2.122 2005/11/17 21:07:37 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -90,7 +90,7 @@ char *argname[] = {
 #define STRICT_NAMES(p_state) \
          ((p_state)->xml_mode || (p_state)->strict_names)
 #define ALLOW_EMPTY_TAG(p_state) \
-         ((p_state)->xml_mode || (p_state)->empty_element_tag)
+         ((p_state)->xml_mode || (p_state)->empty_element_tags)
 
 static void flush_pending_text(PSTATE* p_state, SV* self);
 
