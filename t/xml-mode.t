@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 4;
+use Test::More tests => 8;
 
 use HTML::Parser ();
 my $p = HTML::Parser->new(xml_mode => 1,
@@ -85,3 +85,28 @@ $p->handler("end" =>
 	        ok(!length($text));
 	    }, "tagname,text");
 $p->parse("<Xyzzy foo=bar/>and some more")->eof;
+
+# Test that we get an empty tag back
+$p = HTML::Parser->new(api_version => 3,
+	               empty_element_tags => 1);
+
+$p->handler("end" =>
+	    sub {
+		my($tagname, $text) = @_;
+		is($tagname, "xyzzy");
+	        ok(!length($text));
+	    }, "tagname,text");
+$p->parse("<Xyzzy foo=bar/>and some more")->eof;
+
+$p = HTML::Parser->new(
+    api_version => 3,
+    xml_pic => 1,
+);
+
+$p->handler(
+    "process" => sub {
+	my($text, $t0) = @_;
+	is($text, "<?foo > bar?>");
+	is($t0, "foo > bar");
+    }, "text, token0");
+$p->parse("<?foo > bar?> and then")->eof;
