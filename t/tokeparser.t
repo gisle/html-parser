@@ -76,9 +76,9 @@ $tcount++ while $p->get_tag;
 undef($p);
 
 #diag "Number of tokens found: $tcount/2 = $scount + $ecount";
-is($tcount, 36);
+is($tcount, 34);
 is($scount, 10);
-is($ecount, 8);
+is($ecount, 7);
 is($pcount, 1);
 is($tcount/2, $scount + $ecount);
 
@@ -162,8 +162,3 @@ $t = $p->get_phrase;
 is($t, "This is some italic text. This is some more text.");
 
 undef($p);
-
-
-
-
-
