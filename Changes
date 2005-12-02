@@ -1,3 +1,17 @@
+2005-12-02   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.48
+
+     Enabling empty_element_tags by default for HTML::TokeParser
+     was a mistake.  Reverted that change.
+     <https://rt.cpan.org/Ticket/Display.html?id=16164>
+
+     When processing a document with "marked_sections => 1", the
+     skipped text missed the first 3 bytes "<![".
+     <https://rt.cpan.org/Ticket/Display.html?id=16207>
+
+
+
 2005-11-22   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.47
