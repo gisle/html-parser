@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.34 2005/11/22 21:46:04 gisle Exp $
+# $Id: TokeParser.pm,v 2.35 2005/12/02 16:08:17 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.34 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.35 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -22,7 +22,6 @@ my %ARGS =
 
  # options that default on
  unbroken_text => 1,
- empty_element_tags => 1,
 );
 
 
@@ -203,10 +202,10 @@ C<HTML::TokeParser> can read() from when it needs more data.  Typically
 it will be a filehandle of some kind.  The stream will be read() until
 EOF, but not closed.
 
-A newly constructed C<HTML::TokeParser> differ from its base classes by
-having the C<unbroken_text> and C<empty_element_tags> attributes
-enabled by default. See L<HTML::Parser> for a description of these and
-other attributes that influence how the document is parsed.
+A newly constructed C<HTML::TokeParser> differ from its base classes
+by having the C<unbroken_text> attribute enabled by default. See
+L<HTML::Parser> for a description of this and other attributes that
+influence how the document is parsed.
 
 Note that the parsing result will likely not be valid if raw undecoded
 UTF-8 is used as a source.  When parsing UTF-8 encoded files turn
