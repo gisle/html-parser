@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.122 2005/11/17 21:07:37 gisle Exp $
+/* $Id: hparser.c,v 2.123 2005/12/02 17:32:02 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -992,11 +992,16 @@ static char*
 parse_marked_section(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 {
     dTHX;
-    char *s = beg;
+    char *s;
     AV* tokens = 0;
 
     if (!p_state->marked_sections)
 	return 0;
+
+    assert(beg[0] == '<');
+    assert(beg[1] == '!');
+    assert(beg[2] == '[');
+    s = beg + 3;
 
 FIND_NAMES:
     while (isHSPACE(*s))
@@ -1099,11 +1104,10 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
     if (*s == '[') {
 	/* marked section */
 	char *tmp;
-	s++;
-	tmp = parse_marked_section(p_state, s, end, utf8, self);
+	tmp = parse_marked_section(p_state, beg, end, utf8, self);
 	if (!tmp)
 	    goto DECL_FAIL;
-	return (tmp == s) ? beg : tmp;
+	return tmp;
     }
 #endif
 

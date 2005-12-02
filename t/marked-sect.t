@@ -10,7 +10,7 @@ my $p = HTML::Parser->new(start_h => [sub { $tag = shift  }, "tagname"],
                          );
 
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 SKIP: {
 eval {
@@ -88,14 +88,25 @@ is(join("", @x), <<'EOT');
 1.7:7 text "Test"
 1.11:11 end "</title>"
 1.19:19 text "\n"
-3.3:29 text "foo&aring;<a>\n"
-4.3:46 text "\n"
-5.1:48 text "\nINCLUDE\nSTUFF\n"
-8.3:66 text "\n.."
-9.2:69 start "<h1>"
-9.6:73 text "Test"
-9.10:77 end "</h1>"
-9.15:82 text "\n"
-10.0:83 end_document ""
+3.3:32 text "foo&aring;<a>\n"
+4.3:49 text "\n"
+5.4:54 text "\nINCLUDE\nSTUFF\n"
+8.3:72 text "\n.."
+9.2:75 start "<h1>"
+9.6:79 text "Test"
+9.10:83 end "</h1>"
+9.15:88 text "\n"
+10.0:89 end_document ""
 EOT
 }
+
+my $doc = "<Tag><![CDATA[This is cdata]]></Tag>";
+my $result = "";
+$p = HTML::Parser->new(
+    marked_sections => 1,
+    handlers => {
+        default => [ sub { $result .= join("",@_); }, "skipped_text,text" ]
+    }
+)->parse($doc)->eof;
+is($doc, $result);
+
