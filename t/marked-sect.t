@@ -10,13 +10,13 @@ my $p = HTML::Parser->new(start_h => [sub { $tag = shift  }, "tagname"],
                          );
 
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 
 SKIP: {
 eval {
     $p->marked_sections(1);
 };
-skip $@, 12 if $@;
+skip $@, 14 if $@;
 
 $p->parse("<![[foo]]>");
 is($text, "foo");
@@ -98,7 +98,6 @@ is(join("", @x), <<'EOT');
 9.15:88 text "\n"
 10.0:89 end_document ""
 EOT
-}
 
 my $doc = "<Tag><![CDATA[This is cdata]]></Tag>";
 my $result = "";
@@ -110,3 +109,13 @@ $p = HTML::Parser->new(
 )->parse($doc)->eof;
 is($doc, $result);
 
+$text = "";
+$p = HTML::Parser->new(
+    text_h => [sub { $text .= shift }, "dtext"],
+    marked_sections => 1,
+);
+
+$p->parse("<![CDATA[foo [1]]]>");
+is($text, "foo [1]", "CDATA text ending in square bracket");
+
+} # SKIP

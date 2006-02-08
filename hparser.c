@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.124 2006/02/08 10:25:54 gisle Exp $
+/* $Id: hparser.c,v 2.125 2006/02/08 10:45:13 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1613,20 +1613,17 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    if (*s == ']') {
 		char *end_text = s;
 		s++;
-		if (*s == ']') {
-		    s++;
-		    if (*s == '>') {
-			s++;
-			/* marked section end */
-			if (t != end_text)
-			    report_event(p_state, E_TEXT, t, end_text, utf8,
-					 0, 0, self);
-			report_event(p_state, E_NONE, end_text, s, utf8, 0, 0, self);
-			t = s;
-			SvREFCNT_dec(av_pop(p_state->ms_stack));
-			marked_section_update(p_state);
-			continue;
-		    }
+		if (*s == ']' && *(s + 1) == '>') {
+		    s += 2;
+		    /* marked section end */
+		    if (t != end_text)
+			report_event(p_state, E_TEXT, t, end_text, utf8,
+				     0, 0, self);
+		    report_event(p_state, E_NONE, end_text, s, utf8, 0, 0, self);
+		    t = s;
+		    SvREFCNT_dec(av_pop(p_state->ms_stack));
+		    marked_section_update(p_state);
+		    continue;
 		}
 	    }
 	    if (s == end) {
