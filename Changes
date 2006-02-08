@@ -1,14 +1,26 @@
+2006-01-08   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.49
+
+     Events could sometimes still fire after a handler has signaled eof.
+
+     Marked_sections with text ending in square bracket parsed wrong.
+     Fix provided by <paul.bijnens@xplanation.com>.
+     <http://rt.cpan.org/Ticket/Display.html?id=16749>
+
+
+
 2005-12-02   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.48
 
      Enabling empty_element_tags by default for HTML::TokeParser
      was a mistake.  Reverted that change.
-     <https://rt.cpan.org/Ticket/Display.html?id=16164>
+     <http://rt.cpan.org/Ticket/Display.html?id=16164>
 
      When processing a document with "marked_sections => 1", the
      skipped text missed the first 3 bytes "<![".
-     <https://rt.cpan.org/Ticket/Display.html?id=16207>
+     <http://rt.cpan.org/Ticket/Display.html?id=16207>
 
 
 
@@ -31,7 +43,7 @@
      
      Don't try to treat an literal &nbsp; as space.
      This breaks Unicode parsing.
-     https://rt.cpan.org/Ticket/Display.html?id=15068
+     <http://rt.cpan.org/Ticket/Display.html?id=15068>
 
      The unbroken_text option is now on by default
      for HTML::TokeParser.
@@ -226,7 +238,7 @@
      Improved MSIE/Mozilla compatibility.  If the same attribute
      name repeats for a start tag, use the first value instead
      of the last.  Patch by Nick Duffek <html-parser@duffek.com>.
-     <https://rt.cpan.org/Ticket/Display.html?id=5472>
+     <http://rt.cpan.org/Ticket/Display.html?id=5472>
 
 
 
