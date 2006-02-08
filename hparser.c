@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.123 2005/12/02 17:32:02 gisle Exp $
+/* $Id: hparser.c,v 2.124 2006/02/08 10:25:54 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -134,6 +134,12 @@ report_event(PSTATE* p_state,
 #else
     #define CHR_DIST(a,b) ((a) - (b))
 #endif
+
+    /* some events might still fire after a handler has signaled eof
+     * so suppress them here.
+     */
+    if (p_state->eof)
+	return;
 
     /* capture offsets */
     STRLEN offset = p_state->offset;

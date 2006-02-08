@@ -39,4 +39,16 @@ $p->handler("default" =>
 $p->parse("Foo");
 $p->eof;
 
-pass;
+# We used to sometimes trigger events after a handler signaled eof
+my $title='';
+$p = HTML::Parser->new(api_version => 3,);
+$p->handler(start=> \&title_handler, 'tagname, self');
+$p->parse("<head><title>foo</title>\n</head>");
+is($title, "foo");
+
+sub title_handler {
+    return if shift ne 'title';
+    my $self = shift; 
+    $self->handler(text => sub { $title .= shift}, 'dtext');
+    $self->handler(end => sub { shift->eof if shift eq 'title' }, 'tagname, self');
+}
