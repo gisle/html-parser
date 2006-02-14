@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.126 2006/02/08 10:54:33 gisle Exp $
+/* $Id: hparser.c,v 2.127 2006/02/14 18:02:42 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -128,6 +128,9 @@ report_event(PSTATE* p_state,
     STRLEN my_na;
     char *argspec;
     char *s;
+    STRLEN offset;
+    STRLEN line;
+    STRLEN column;
 
 #ifdef UNICODE_HTML_PARSER
     #define CHR_DIST(a,b) (utf8 ? utf8_distance((U8*)(a),(U8*)(b)) : (a) - (b))
@@ -142,9 +145,9 @@ report_event(PSTATE* p_state,
 	return;
 
     /* capture offsets */
-    STRLEN offset = p_state->offset;
-    STRLEN line = p_state->line;
-    STRLEN column = p_state->column;
+    offset = p_state->offset;
+    line = p_state->line;
+    column = p_state->column;
 
 #if 0
     {  /* used for debugging at some point */
