@@ -1,4 +1,13 @@
-2006-01-08   Gisle Aas <gisle@ActiveState.com>
+2006-02-14   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.50
+
+     The 3.49 release didn't compile with VC++ because it mixed code
+     and declarations.  Fixed by Steve Hay <steve.hay@uk.radan.com>.
+
+
+
+2006-02-08   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.49
 
