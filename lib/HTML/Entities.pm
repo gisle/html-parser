@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.32 2005/10/24 12:08:13 gisle Exp $
+# $Id: Entities.pm,v 1.33 2006/03/12 22:38:55 gisle Exp $
 
 =head1 NAME
 
@@ -75,7 +75,7 @@ C<< < >>, C<< & >>, C<< > >>, C<< ' >> and C<< " >>
 characters.  But this, for example, would encode I<just> the
 C<< < >>, C<< & >>, C<< > >>, and C<< " >> characters:
 
-  $escaped = encode_entities($input, '<>&"');
+  $encoded = encode_entities($input, '<>&"');
 
 This routine is exported by default.
 
@@ -85,8 +85,8 @@ This routine is exported by default.
 
 This routine works just like encode_entities, except that the replacement
 entities are always C<&#xI<hexnum>;> and never C<&I<entname>;>.  For
-example, C<escape_entities("r\xF4le")> returns "r&ocirc;le", but
-C<escape_entities_numeric("r\xF4le")> returns "r&#xF4;le".
+example, C<encode_entities("r\xF4le")> returns "r&ocirc;le", but
+C<encode_entities_numeric("r\xF4le")> returns "r&#xF4;le".
 
 This routine is I<not> exported by default.  But you can always
 export it with C<use HTML::Entities qw(encode_entities_numeric);>
@@ -130,7 +130,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.32 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.33 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
