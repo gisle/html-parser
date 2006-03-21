@@ -1,4 +1,4 @@
-/* $Id: util.c,v 2.28 2004/12/06 09:11:37 gisle Exp $
+/* $Id: util.c,v 2.29 2006/03/21 17:04:56 gisle Exp $
  *
  * Copyright 1999-2004, Gisle Aas.
  *
@@ -184,8 +184,11 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool allow_unterminated)
 	    while (isALNUM(*s))
 		s++;
 	    if (ent_name != s && entity2char) {
-		SV** svp = hv_fetch(entity2char, ent_name, s - ent_name, 0);
-		if (svp) {
+		SV** svp;
+		if (              (svp = hv_fetch(entity2char, ent_name, s - ent_name, 0)) ||
+		    (*s == ';' && (svp = hv_fetch(entity2char, ent_name, s - ent_name + 1, 0)))
+		   )
+		{
 		    repl = SvPV(*svp, repl_len);
 #ifdef UNICODE_HTML_PARSER
 		    repl_utf8 = SvUTF8(*svp);

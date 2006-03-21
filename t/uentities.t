@@ -2,15 +2,17 @@
 
 use HTML::Entities;
 
-use Test::More tests => 25;
+use Test::More tests => 27;
 
 SKIP: {
 skip "This perl does not support Unicode or Unicode entities not selected",
-  25 if $] < 5.008 || !&HTML::Entities::UNICODE_SUPPORT;
+  27 if $] < 5.008 || !&HTML::Entities::UNICODE_SUPPORT;
 
-is(decode_entities("&euro"), "\x{20AC}");
+is(decode_entities("&euro"), "&euro");
+is(decode_entities("&euro;"), "\x{20AC}");
 
 is(decode_entities("&aring"), "å");
+is(decode_entities("&aring;"), "å");
 
 is(decode_entities("&#500000"), chr(500000));
 

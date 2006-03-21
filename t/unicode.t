@@ -2,10 +2,10 @@
 
 use strict;
 use HTML::Parser;
-use Test::More tests => 100;
+use Test::More tests => 103;
 
 SKIP: {
-skip "This perl does not support Unicode", 100 if $] < 5.008;
+skip "This perl does not support Unicode", 103 if $] < 5.008;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -120,7 +120,7 @@ open(my $fh, ">:utf8", $file) || die;
 print $fh <<EOT;
 \x{FEFF}
 <title>\x{263A} Love! </title>
-<h1 id=&hearts\x{2665}>&hearts Love \x{2665}<h1>
+<h1 id=&hearts;\x{2665}>&hearts; Love \x{2665}<h1>
 EOT
 close($fh) || die;
 
@@ -131,7 +131,7 @@ is(@parsed, "11");
 is($parsed[6][0], "start");
 is($parsed[6][8]{id}, "\x{2665}\xE2\x99\xA5");
 is($parsed[7][0], "text");
-is($parsed[7][1], "&hearts Love \xE2\x99\xA5");
+is($parsed[7][1], "&hearts; Love \xE2\x99\xA5");
 is($parsed[7][2], "\x{2665} Love \xE2\x99\xA5");  # expected garbage
 is($parsed[10][3], -s $file);
 is(@warn, 1);
@@ -145,7 +145,7 @@ is(@parsed, "11");
 is($parsed[6][0], "start");
 is($parsed[6][8]{id}, "\x{2665}\x{2665}");
 is($parsed[7][0], "text");
-is($parsed[7][1], "&hearts Love \x{2665}");
+is($parsed[7][1], "&hearts; Love \x{2665}");
 is($parsed[7][2], "\x{2665} Love \x{2665}");
 is($parsed[10][3], (-s $file) - 2 * 4);
 is(@warn, 0);
@@ -159,12 +159,18 @@ is(@parsed, "11");
 is($parsed[6][0], "start");
 is($parsed[6][8]{id}, "\xE2\x99\xA5\xE2\x99\xA5");
 is($parsed[7][0], "text");
-is($parsed[7][1], "&hearts Love \xE2\x99\xA5");
+is($parsed[7][1], "&hearts; Love \xE2\x99\xA5");
 is($parsed[7][2], "\xE2\x99\xA5 Love \xE2\x99\xA5");
 is($parsed[10][3], -s $file);
 is(@warn, 0);
 
 unlink($file);
+
+@parsed = ();
+$p->parse(q(<a href="a=1&lang=2&times=3">foo</a>))->eof;
+is(@parsed, "5");
+is($parsed[1][0], "start");
+is($parsed[1][8]{href}, "a=1&lang=2\xd7=3");
 
 ok(!HTML::Entities::_probably_utf8_chunk(""));
 ok(!HTML::Entities::_probably_utf8_chunk("f"));
