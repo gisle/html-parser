@@ -1,12 +1,20 @@
 <html>
 <body>
 <table border=1>
-<tr><th>ent</th><th>with</th><th>without</th><th>dec</th><th>hex</th><th>hexx</th></tr>
-<tr><td>&amp;amp;</td><td>&amp;</td><td>&amp&ampamp</td><td>&#38;&#38</td><td>&#x26;&#x26</td><td>&#x26x</td></tr>
-<tr><td>&amp;apos;</td><td>&apos;</td><td>&apos&aposapos</td><td>&#39;&#39</td><td>&#x27;&#x27</td><td>&#x27x</td></tr>
-<tr><td>&amp;times;</td><td>&times;</td><td>&times&timestimes</td><td>&#215;&#215</td><td>&#XD7;&#XD7</td><td>&#XD7x</td></tr>
-<tr><td>&amp;euro;</td><td>&euro;</td><td>&euro&euroeuro</td><td>&#8364;&#8364</td><td>&#x20ac;&#x20ac</td><td>&#x20acx</td></tr>
-<tr><td>&amp;hearts;</td><td>&hearts;</td><td>&hearts&heartshearts</td><td>&#9829;&#9829</td><td>&#x2665;&#x2665</td><td>&#x2665x</td></tr>
+<tr><th>ent</th><th>with</th><th>without</th><th>dec</th><th>hex</th><th>hexx</th><th>ref</th></tr>
+<tr><td>&amp;amp;</td><td>&amp;</td><td>&amp&ampamp</td><td>&#38;&#38</td><td>&#x26;&#x26</td><td>&#x26x</td><td><a href="http://example.com?a=1&amp=2">ref</a></td></tr>
+<tr><td>&amp;apos;</td><td>&apos;</td><td>&apos&aposapos</td><td>&#39;&#39</td><td>&#x27;&#x27</td><td>&#x27x</td><td><a href="http://example.com?a=1&apos=2">ref</a></td></tr>
+<tr><td>&amp;times;</td><td>&times;</td><td>&times&timestimes</td><td>&#215;&#215</td><td>&#XD7;&#XD7</td><td>&#XD7x</td><td><a href="http://example.com?a=1&times=2">ref</a></td></tr>
+<tr><td>&amp;euro;</td><td>&euro;</td><td>&euro&euroeuro</td><td>&#8364;&#8364</td><td>&#x20ac;&#x20ac</td><td>&#x20acx</td><td><a href="http://example.com?a=1&euro=2">ref</a></td></tr>
+<tr><td>&amp;hearts;</td><td>&hearts;</td><td>&hearts&heartshearts</td><td>&#9829;&#9829</td><td>&#x2665;&#x2665</td><td>&#x2665x</td><td><a href="http://example.com?a=1&heart=2">ref</a></td></tr>
 </table>
+
+<p>
+overflow:
+3=&#3; 33=&#33; 333=&#333; 3333=&#3333; 33333=&#33333; 333333=&#333333; 3333333=&#3333333; 33333333=&#33333333; 333333333=&#333333333; 3333333333=&#3333333333; 33333333333=&#33333333333;
+
+<p>
+ref: <a href="http://example.com?a=&#xFx">&amp;#xFx</a> <a href="http://example.com?a=&#xFFx">&amp;#xFFx</a> <a href="http://example.com?a=&#xFFFx">&amp;#xFFFx</a> <a href="http://example.com?a=&#xFFFFx">&amp;#xFFFFx</a>
+
 </body>
 </html>
