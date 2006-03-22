@@ -1,12 +1,19 @@
 <html>
 <body>
+<h1>Entities expansion test page</h1>
+
+<p>The purpose of this table is to test how various browsers expands
+HTML entities in various edge cases in order to improve compatiblity
+for the perl module distribution HTML-Parser.
+
+<p>
 <table border=1>
 <tr><th>ent</th><th>with</th><th>without</th><th>dec</th><th>hex</th><th>hexx</th><th>ref</th></tr>
-<tr><td>&amp;amp;</td><td>&amp;</td><td>&amp&ampamp</td><td>&#38;&#38</td><td>&#x26;&#x26</td><td>&#x26x</td><td><a href="http://example.com?a=1&amp=2">ref</a></td></tr>
-<tr><td>&amp;apos;</td><td>&apos;</td><td>&apos&aposapos</td><td>&#39;&#39</td><td>&#x27;&#x27</td><td>&#x27x</td><td><a href="http://example.com?a=1&apos=2">ref</a></td></tr>
-<tr><td>&amp;times;</td><td>&times;</td><td>&times&timestimes</td><td>&#215;&#215</td><td>&#XD7;&#XD7</td><td>&#XD7x</td><td><a href="http://example.com?a=1&times=2">ref</a></td></tr>
-<tr><td>&amp;euro;</td><td>&euro;</td><td>&euro&euroeuro</td><td>&#8364;&#8364</td><td>&#x20ac;&#x20ac</td><td>&#x20acx</td><td><a href="http://example.com?a=1&euro=2">ref</a></td></tr>
-<tr><td>&amp;hearts;</td><td>&hearts;</td><td>&hearts&heartshearts</td><td>&#9829;&#9829</td><td>&#x2665;&#x2665</td><td>&#x2665x</td><td><a href="http://example.com?a=1&heart=2">ref</a></td></tr>
+<tr><td>&amp;amp;</td><td>&amp;</td><td>&amp&ampamp</td><td>&#38;&#38</td><td>&#x26;&#x26</td><td>&#x26x</td><td><a href="http://example.com?a=1&amp=2&ampamp=3">ref</a></td></tr>
+<tr><td>&amp;apos;</td><td>&apos;</td><td>&apos&aposapos</td><td>&#39;&#39</td><td>&#x27;&#x27</td><td>&#x27x</td><td><a href="http://example.com?a=1&apos=2&aposapos=3">ref</a></td></tr>
+<tr><td>&amp;times;</td><td>&times;</td><td>&times&timestimes</td><td>&#215;&#215</td><td>&#XD7;&#XD7</td><td>&#XD7x</td><td><a href="http://example.com?a=1&times=2&timestimes=3">ref</a></td></tr>
+<tr><td>&amp;euro;</td><td>&euro;</td><td>&euro&euroeuro</td><td>&#8364;&#8364</td><td>&#x20ac;&#x20ac</td><td>&#x20acx</td><td><a href="http://example.com?a=1&euro=2&euroeuro=3">ref</a></td></tr>
+<tr><td>&amp;hearts;</td><td>&hearts;</td><td>&hearts&heartshearts</td><td>&#9829;&#9829</td><td>&#x2665;&#x2665</td><td>&#x2665x</td><td><a href="http://example.com?a=1&heart=2&heartheart=3">ref</a></td></tr>
 </table>
 
 <p>
@@ -15,6 +22,60 @@ overflow:
 
 <p>
 ref: <a href="http://example.com?a=&#xFx">&amp;#xFx</a> <a href="http://example.com?a=&#xFFx">&amp;#xFFx</a> <a href="http://example.com?a=&#xFFFx">&amp;#xFFFx</a> <a href="http://example.com?a=&#xFFFFx">&amp;#xFFFFx</a> <a href="http://example.com?a=&#xFFFFFx">&amp;#xFFFFFx</a>
+
+<h2>Results</h2>
+
+<p>This table records observations of how various browsers behave with
+regards to expanding entities. The term "Latin-1 entites" means named
+entities that map to characters in the 0 .. 255 range.  The term
+"Unicode entities" means named entities that are not "Latin-1
+entities".
+
+<p>
+<table border=1>
+<tr>
+   <th>feature</th>
+   <th>do</th>
+   <th>don't</th>
+</tr>
+
+<tr>
+   <td>expand &amp;apos;</td>
+   <td>FireFox 1.5, Konqueror 3.4.3</td>
+   <td>MSIE 7.0 beta 2</td>
+</tr>
+
+<tr>
+   <td>expand Latin-1 entities that are not terminated by semicolon</td>
+   <td>FireFox 1.5, Konqueror 3.4.3, MSIE 7.0 beta 2</td>
+   <td>&nbsp;</td>
+</tr>
+
+<tr>
+   <td>expand prefix of Latin-1 entities in text content</td>
+   <td>Konqueror 3.4.3, MSIE 7.0 beta 2</td>
+   <td>FireFox 1.5</td>
+</tr>
+
+<tr>
+   <td>expand Unicode entities that are not terminated by semicolon in text content</td>
+   <td>FireFox 1.5</td>
+   <td>Konqueror 3.4.3, MSIE 7.0 beta 2</td>
+</tr>
+
+<tr>
+   <td>expand hex entities that are not terminated by semicolon in text content</td>
+   <td>FireFox 1.5, Konqueror 3.4.3</td>
+   <td>MSIE 7.0 beta 2</td>
+</tr>
+
+<tr>
+   <td>expand hex entities that are not terminated by semicolon in attributes</td>
+   <td>FireFox 1.5, Konqueror 3.4.3, MSIE 7.0 beta 2</td>
+   <td>&nbsp;</td>
+</tr>
+
+</table>
 
 </body>
 </html>
