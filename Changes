@@ -1,3 +1,17 @@
+2006-03-22   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.51
+
+     Named entities outside the Latin-1 range are now only expanded
+     when properly terminated with ";".  This makes HTML::Parser
+     compatible with Firefox/Konqueror/MSIE when it comes to how these
+     entities are expanded in attribute values.  Firefox does expand
+     unterminated non-Latin-1 entities in plain text, so here
+     HTML::Parser only stays compatible with Konqueror/MSIE.
+     Fixes <http://rt.cpan.org/Ticket/Display.html?id=17962>.
+
+
+
 2006-02-14   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.50
