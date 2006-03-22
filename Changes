@@ -10,6 +10,9 @@
      HTML::Parser only stays compatible with Konqueror/MSIE.
      Fixes <http://rt.cpan.org/Ticket/Display.html?id=17962>.
 
+     Fixed some documentation typos spotted by <william@knowmad.com>.
+     <http://rt.cpan.org/Ticket/Display.html?id=18062>
+
 
 
 2006-02-14   Gisle Aas <gisle@ActiveState.com>
