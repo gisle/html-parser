@@ -1,6 +1,6 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.34 2006/03/21 17:04:57 gisle Exp $
+# $Id: Entities.pm,v 1.35 2006/03/22 09:15:23 gisle Exp $
 
 =head1 NAME
 
@@ -47,15 +47,26 @@ This routine is exported by default.
 
 =item _decode_entities( $string, \%entity2char )
 
-=item _decode_entities( $string, \%entity2char, $allow_unterminated )
+=item _decode_entities( $string, \%entity2char, $expand_prefix )
 
 This will in-place replace HTML entities in $string.  The %entity2char
 hash must be provided.  Named entities not found in the %entity2char
-hash are left alone.  Numeric entities are always expanded.
+hash are left alone.  Numeric entities are expanded unless their value
+overflow.
 
-If $allow_unterminated is TRUE then we also unterminated named
-entities will also be expanded.  The longest matching name in
-%entity2char will be used.
+The keys in %entity2char are the entity names to be expanded and their
+values are what they should expand into.  The values do not have to be
+single character strings.  If a key has ";" as suffix,
+then occurrences in $string are only expanded if properly terminated
+with ";".  Entities without ";" will be expanded regardless of how
+they are terminated for compatiblity with how common browsers treat
+entities in the Latin-1 range.
+
+If $expand_prefix is TRUE then entities without trailing ";" in
+%entity2char will even be expanded as a prefix of a longer
+unrecognized name.  The longest matching name in %entity2char will be
+used. This is mainly present for compatibility with an MSIE
+misfeature.
 
    $string = "foo&nbspbar";
    _decode_entities($string, { nb => "@", nbsp => "\xA0" }, 1);
@@ -112,7 +123,7 @@ corresponding entities (and vice versa, respectively).
 
 =head1 COPYRIGHT
 
-Copyright 1995-2004 Gisle Aas. All rights reserved.
+Copyright 1995-2006 Gisle Aas. All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -130,7 +141,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.34 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.35 $ =~ /(\d+)\.(\d+)/);
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

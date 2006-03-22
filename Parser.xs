@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.134 2005/11/17 21:07:36 gisle Exp $
+/* $Id: Parser.xs,v 2.135 2006/03/22 09:15:17 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -499,7 +499,7 @@ _decode_entities(string, entities, ...)
     SV* entities
     PREINIT:
 	HV* entities_hv;
-        bool allow_unterminated = (items > 2) ? SvTRUE(ST(2)) : 0;
+        bool expand_prefix = (items > 2) ? SvTRUE(ST(2)) : 0;
     CODE:
         if (SvOK(entities)) {
 	    if (SvROK(entities) && SvTYPE(SvRV(entities)) == SVt_PVHV) {
@@ -514,7 +514,7 @@ _decode_entities(string, entities, ...)
         }
 	if (SvREADONLY(string))
 	    croak("Can't inline decode readonly string");
-	decode_entities(aTHX_ string, entities_hv, allow_unterminated);
+	decode_entities(aTHX_ string, entities_hv, expand_prefix);
 
 bool
 _probably_utf8_chunk(string)
