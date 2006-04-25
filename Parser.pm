@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.51';  # $Date: 2006/03/22 09:16:36 $
+$VERSION = '3.51';  # $Date: 2006/04/25 21:15:07 $
 
 require HTML::Entities;
 
@@ -358,7 +358,7 @@ after seeing this tag.  This emulates gecko-based browsers.
 =item $p->empty_element_tags( $bool )
 
 By default, empty element tags are not recognized as such and the "/"
-before ">" is just treated like a nomal name character (unless
+before ">" is just treated like a normal name character (unless
 C<strict_names> is enabled).  Enabling this attribute make
 C<HTML::Parser> recognize these tags.
 
