@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.51';  # $Date: 2006/04/25 21:15:07 $
+$VERSION = '3.51';  # $Date: 2006/04/26 08:00:25 $
 
 require HTML::Entities;
 
@@ -253,7 +253,7 @@ $p->parse() will return a FALSE value.
 If a code reference is passed as the argument to be parsed, then the
 chunks to be parsed are obtained by invoking this function repeatedly.
 Parsing continues until the function returns an empty (or undefined)
-result.  When this happens $p->eof is automatically signalled.
+result.  When this happens $p->eof is automatically signaled.
 
 Parsing will also abort if one of the event handlers calls $p->eof.
 
@@ -367,7 +367,7 @@ sequence "/>" instead of ">".  When recognized by C<HTML::Parser> they
 cause an artificial end event in addition to the start event.  The
 C<text> for the artificial end event will be empty and the C<tokenpos>
 array will be undefined even though the the token array will have one
-element containg the tag name.
+element containing the tag name.
 
 =item $p->marked_sections
 
@@ -609,7 +609,7 @@ C<end> events), call C<report_tags> without an argument.
 
 Internally, the system has two filter lists, one for C<report_tags>
 and one for C<ignore_tags>, and both filters are applied.  This
-effectivly gives C<ignore_tags> precendence over C<report_tags>.
+effectively gives C<ignore_tags> precedence over C<report_tags>.
 
 Examples:
 
@@ -1114,7 +1114,7 @@ It was either deleted, or not created when the object was created.
 =item API version %s not supported by HTML::Parser %s
 
 (F) The constructor option 'api_version' with an argument greater than
-or equal to 4 is reserved for future extentions.
+or equal to 4 is reserved for future extensions.
 
 =item Bad constructor option '%s'
 

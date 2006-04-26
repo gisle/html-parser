@@ -1,10 +1,10 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.36 2006/04/26 07:19:26 gisle Exp $
+# $Id: TokeParser.pm,v 2.37 2006/04/26 08:00:28 gisle Exp $
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.36 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 2.37 $ =~ /(\d+)\.(\d+)/);
 
 use strict;
 use Carp ();
@@ -188,7 +188,7 @@ The following methods are available:
 
 The object constructor argument is either a file name, a file handle
 object, or the complete document to be parsed.  Extra options can be
-provied as key/value pairs and are processed as documented by the base
+provided as key/value pairs and are processed as documented by the base
 classes.
 
 If the argument is a plain scalar, then it is taken as the name of a
