@@ -1,3 +1,16 @@
+2006-04-26   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.52
+
+     Make sure the 'start_document' fires exactly once for
+     each document parsed.  For earlier releases it did not
+     fire at all for empty documents and could fire multiple
+     times if parse was called with empty chunks.
+
+     Documentation tweaks and typo fixes.
+
+
+
 2006-03-22   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.51
