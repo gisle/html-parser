@@ -1,4 +1,4 @@
-/* $Id: hparser.h,v 2.33 2005/11/17 21:07:37 gisle Exp $
+/* $Id: hparser.h,v 2.34 2006/04/26 07:01:10 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -70,6 +70,7 @@ struct p_state {
     STRLEN offset;
     STRLEN line;
     STRLEN column;
+    bool start_document;
     bool parsing;
     bool eof;
 

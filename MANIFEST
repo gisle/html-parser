@@ -37,6 +37,7 @@ t/comment.t             Test comment parsing
 t/crashme.t             Parse random data
 t/declaration.t         Test declaration parsing
 t/default.t		Test default handler
+t/document.t		Test {start,end}_document behaviour
 t/dtext.t               Test dtext decoding of entities
 t/entities.t		Test encoding/decoding of entities
 t/entities2.t		Test _decode_entities()

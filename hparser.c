@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.127 2006/02/14 18:02:42 gisle Exp $
+/* $Id: hparser.c,v 2.128 2006/04/26 07:01:10 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1737,6 +1737,12 @@ parse(pTHX_
     U32 utf8 = 0;
     STRLEN len;
 
+    if (!p_state->start_document) {
+	char dummy[1];
+	report_event(p_state, E_START_DOCUMENT, dummy, dummy, 0, 0, 0, self);
+	p_state->start_document = 1;
+    }
+
     if (!chunk) {
 	/* eof */
 	char empty[1];
@@ -1798,6 +1804,7 @@ parse(pTHX_
 	if (p_state->line)
 	    p_state->line = 1;
 	p_state->column = 0;
+	p_state->start_document = 0;
 	p_state->literal_mode = 0;
 	p_state->is_cdata = 0;
 	return;
@@ -1816,13 +1823,10 @@ parse(pTHX_
     else {
 	beg = SvPV(chunk, len);
 	utf8 = SvUTF8(chunk);
-	if (p_state->offset == 0) {
-	    report_event(p_state, E_START_DOCUMENT, beg, beg, 0, 0, 0, self);
-
+	if (p_state->offset == 0 && DOWARN) {
 	    /* Print warnings if we find unexpected Unicode BOM forms */
 #ifdef UNICODE_HTML_PARSER
-	    if (DOWARN &&
-		p_state->argspec_entity_decode &&
+	    if (p_state->argspec_entity_decode &&
 		!p_state->utf8_mode && (
                  (!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
 		 (utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6)) ||
@@ -1832,24 +1836,22 @@ parse(pTHX_
 	    {
 		warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
 	    }
-	    if (DOWARN && utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
+	    if (utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
 		warn("Parsing string decoded with wrong endianess");
 	    }
 #endif
-	    if (DOWARN) {
-		if (!utf8 && len >= 4 &&
-		    (strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
-		     strnEQ(beg, "\xFE\xFF\x00\x00", 4))
-		    )
-		{
-		    warn("Parsing of undecoded UTF-32");
-		}
-		else if (!utf8 && len >= 2 &&
-			 (strnEQ(beg, "\xFE\xFF", 2) || strnEQ(beg, "\xFF\xFE", 2))
-		    )
-		{
-		    warn("Parsing of undecoded UTF-16");
-		}
+	    if (!utf8 && len >= 4 &&
+		(strnEQ(beg, "\x00\x00\xFE\xFF", 4) ||
+		 strnEQ(beg, "\xFE\xFF\x00\x00", 4))
+		)
+	    {
+		warn("Parsing of undecoded UTF-32");
+	    }
+	    else if (!utf8 && len >= 2 &&
+		     (strnEQ(beg, "\xFE\xFF", 2) || strnEQ(beg, "\xFF\xFE", 2))
+		)
+	    {
+		warn("Parsing of undecoded UTF-16");
 	    }
 	}
     }
