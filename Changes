@@ -1,3 +1,14 @@
+2006-04-27   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.53
+
+     When ignore_element was enabled it got confused if the
+     corresponding tags did not nest properly; the end tag
+     was treated it as if it was a start tag.
+     <http://rt.cpan.org/Ticket/Display.html?id=18936>
+
+
+
 2006-04-26   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.52
