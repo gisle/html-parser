@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use strict;
 
 use HTML::Parser;
@@ -193,3 +193,13 @@ $p->parse(<<EOT)->eof;
 
 EOT
 is(join('|', @tags), 'h1', 'ignore_tags before report_tags');
+#------------------------------------------------------
+
+$p = HTML::Parser->new(api_version => 3);
+$p->ignore_elements("script");
+my $res="";
+$p->handler(default=> sub {$res.=$_[0];}, 'text');
+$p->parse(<<'EOT')->eof;
+A <script> B </script> C </script> D <script> E </script> F
+EOT
+is($res,"A  C  D  F\n","ignore </script> without <script> correctly");

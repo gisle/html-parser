@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.128 2006/04/26 07:01:10 gisle Exp $
+/* $Id: hparser.c,v 2.129 2006/04/27 11:44:00 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -251,8 +251,10 @@ report_event(PSTATE* p_state,
 	    if (p_state->ignore_elements &&
 		hv_fetch_ent(p_state->ignore_elements, tagname, 0, 0))
 	    {
-		p_state->ignoring_element = newSVsv(tagname);
-		p_state->ignore_depth = 1;
+		if (event == E_START) {
+		    p_state->ignoring_element = newSVsv(tagname);
+		    p_state->ignore_depth = 1;
+		}
 		goto IGNORE_EVENT;
 	    }
 
