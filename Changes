@@ -1,3 +1,15 @@
+2006-04-28   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.54
+
+     Enabling of 'empty_element_tags' got the parser confused if
+     it found such a tag for elements that are normally parsed
+     in literal mode.  Of these <script src="..."/> is the only
+     one likely to be found in documents.
+     <http://rt.cpan.org//Ticket/Display.html?id=18965>
+
+
+
 2006-04-27   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.53
