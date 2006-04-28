@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.129 2006/04/27 11:44:00 gisle Exp $
+/* $Id: hparser.c,v 2.130 2006/04/28 07:52:03 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1381,10 +1381,10 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	s++;
 	/* done */
 	report_event(p_state, E_START, beg, s, utf8, tokens, num_tokens, self);
-	if (empty_tag)
+	if (empty_tag) {
 	    report_event(p_state, E_END, s, s, utf8, tokens, 1, self);
-
-	if (!p_state->xml_mode) {
+	}
+	else if (!p_state->xml_mode) {
 	    /* find out if this start tag should put us into literal_mode
 	     */
 	    int i;
