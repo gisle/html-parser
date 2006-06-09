@@ -29,7 +29,6 @@ $p->parse("</a \"foo<>\"");
 $p->parse(" \"bar>\" x>");
 $p->parse("</ foo bar>");
 $p->parse("</ \"<>\" >");
-$p->parse("<! \"<>\" >");
 $p->parse("<!--comment>text<!--comment><p");
 $p->eof;
 
@@ -41,7 +40,6 @@ is($TEXT, <<'EOT');
 [end,a,</a "foo<>" "bar>" x>]
 [comment, foo bar,</ foo bar>]
 [comment, "<>" ,</ "<>" >]
-[comment, "<>" ,<! "<>" >]
 [comment,comment,<!--comment>]
 [text,<undef>,text]
 [comment,comment,<!--comment>]

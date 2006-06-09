@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.130 2006/04/28 07:52:03 gisle Exp $
+/* $Id: hparser.c,v 2.131 2006/06/09 07:59:37 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1142,6 +1142,8 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	while (s < end && isHNAME_CHAR(*s))
 	    s++;
 	decl_id_len = s - decl_id;
+	if (s == end)
+	    goto PREMATURE;
 
 	/* just hardcode a few names as the recognized declarations */
 	if (!((decl_id_len == 7 &&
@@ -1239,7 +1241,8 @@ DECL_FAIL:
 	return 0;
 
     /* consider everything up to the first '>' a comment */
-    s = skip_until_gt(s, end);
+    while (s < end && *s != '>')
+	s++;
     if (s < end) {
 	token_pos_t token;
 	token.beg = beg + 2;
