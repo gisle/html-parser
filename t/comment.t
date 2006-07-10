@@ -12,6 +12,7 @@ $p->parse("<foo><><!><!-><!--><!---><!----><!-----><!------>");
 $p->parse("<!--+--");
 $p->parse("\n\n");
 $p->parse(">");
+$p->parse("<!a'b>");
 $p->parse("<!--foo--->");
 $p->parse("<!--foo---->");
 $p->parse("<!--foo----->-->");
@@ -20,4 +21,4 @@ $p->parse("<!3453><!-3456><!FOO><>");
 $p->eof;
 
 my $com = join(":", @com);
-is($com, "start_document[]:start[<foo>]:text[<>]::-:><!-::-:--:+:foo-:foo--:foo---:text[-->]:start[<foo>]:3453:-3456:FOO:text[<>]:end_document[]");
+is($com, "start_document[]:start[<foo>]:text[<>]::-:><!-::-:--:+:a'b:foo-:foo--:foo---:text[-->]:start[<foo>]:3453:-3456:FOO:text[<>]:end_document[]");
