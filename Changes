@@ -1,3 +1,19 @@
+2006-07-10   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.55
+
+     Treat <> at the end of document as text.  Used to be
+     reported as a comment.
+
+     Improved Firefox compatiblity for bad HTML:
+      - Unclosed <script>, <style> are now treated as empty tags.
+      - Unclosed <textarea>, <xmp> and <plaintext> treat rest as text.
+      - Unclosed <title> closes at next tag.
+
+     Make <!a'b> a comment by itself.
+
+
+
 2006-04-28   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.54
