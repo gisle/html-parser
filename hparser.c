@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.131 2006/06/09 07:59:37 gisle Exp $
+/* $Id: hparser.c,v 2.132 2006/07/10 08:41:48 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1760,9 +1760,26 @@ parse(pTHX_
 
 	    while (s < end) {
 		if (p_state->literal_mode) {
-		    if (strEQ(p_state->literal_mode, "plaintext") && !p_state->closing_plaintext)
+		    if (strEQ(p_state->literal_mode, "plaintext") ||
+			strEQ(p_state->literal_mode, "xmp") ||
+			strEQ(p_state->literal_mode, "textarea"))
+		    {
+			/* rest is considered text */
 			break;
-		    p_state->pending_end_tag = p_state->literal_mode;
+                    }
+		    if (strEQ(p_state->literal_mode, "script") ||
+			strEQ(p_state->literal_mode, "style"))
+		    {
+			/* effectively make it an empty element */
+			token_pos_t t;
+			char dummy;
+			t.beg = p_state->literal_mode;
+			t.end = p_state->literal_mode + strlen(p_state->literal_mode);
+			report_event(p_state, E_END, &dummy, &dummy, 0, &t, 1, self);
+		    }
+		    else {
+			p_state->pending_end_tag = p_state->literal_mode;
+		    }
 		    p_state->literal_mode = 0;
 		    s = parse_buf(aTHX_ p_state, s, end, utf8, self);
 		    continue;
