@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.132 2006/07/10 08:41:48 gisle Exp $
+/* $Id: hparser.c,v 2.133 2006/07/10 09:00:47 gisle Exp $
  *
  * Copyright 1999-2006, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -1792,12 +1792,15 @@ parse(pTHX_
 		}
 
 		if (!p_state->strict_comment && *s == '<') {
-		    /* some kind of unterminated markup.  Report rest as as comment */
-		    token_pos_t token;
-		    token.beg = s + 1;
-		    token.end = end;
-		    report_event(p_state, E_COMMENT, s, end, utf8, &token, 1, self);
-		    s = end;
+		    char *s1 = s + 1;
+		    if (s1 == end || isHNAME_FIRST(*s1) || *s1 == '/' || *s1 == '!' || *s1 == '?') {
+			/* some kind of unterminated markup.  Report rest as as comment */
+			token_pos_t token;
+			token.beg = s + 1;
+			token.end = end;
+			report_event(p_state, E_COMMENT, s, end, utf8, &token, 1, self);
+			s = end;
+		    }
 		}
 
 		break;
