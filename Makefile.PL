@@ -10,6 +10,7 @@ WriteMakefile(
 		    ],
     PREREQ_PM    => {
 		      'HTML::Tagset' => 3,
+                      'Test::More' => 0,    # only needed to run 'make test'
                     },
     DEFINE       => "-DMARKED_SECTION",
     dist         => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
