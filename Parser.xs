@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.135 2006/03/22 09:15:17 gisle Exp $
+/* $Id: Parser.xs,v 2.136 2007/01/12 09:04:24 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -137,7 +137,14 @@ check_handler(pTHX_ SV* h)
 static PSTATE*
 get_pstate_iv(pTHX_ SV* sv)
 {
-    PSTATE* p = INT2PTR(PSTATE*, SvIV(sv));
+    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, '~') : NULL;
+    PSTATE *p;
+
+    if (!mg)
+	croak("Lost parser state magic");
+    p = (PSTATE *)mg->mg_ptr;
+    if (!p)
+	croak("Lost parser state magic");
     if (p->signature != P_SIGNATURE)
 	croak("Bad signature in parser state object at %p", p);
     return p;
@@ -193,17 +200,117 @@ free_pstate(pTHX_ PSTATE* pstate)
     Safefree(pstate);
 }
 
-
 static int
 magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
-    free_pstate(aTHX_ get_pstate_iv(aTHX_ sv));
+    free_pstate(aTHX_ (PSTATE *)mg->mg_ptr);
     return 0;
 }
 
+#ifdef USE_ITHREADS
 
-MGVTBL vtbl_free_pstate = {0, 0, 0, 0, MEMBER_TO_FPTR(magic_free_pstate)};
+static PSTATE *
+dup_pstate(pTHX_ PSTATE *pstate, CLONE_PARAMS *params)
+{
+    PSTATE *pstate2;
+    int i;
 
+    Newz(56, pstate2, 1, PSTATE);
+    pstate2->signature = pstate->signature;
+
+    pstate2->buf = SvREFCNT_inc(sv_dup(pstate->buf, params));
+    pstate2->offset = pstate->offset;
+    pstate2->line = pstate->line;
+    pstate2->column = pstate->column;
+    pstate2->start_document = pstate->start_document;
+    pstate2->parsing = pstate->parsing;
+    pstate2->eof = pstate->eof;
+
+    pstate2->literal_mode = pstate->literal_mode;
+    pstate2->is_cdata = pstate->is_cdata;
+    pstate2->no_dash_dash_comment_end = pstate->no_dash_dash_comment_end;
+    pstate2->pending_end_tag = pstate->pending_end_tag;
+
+    pstate2->pend_text = SvREFCNT_inc(sv_dup(pstate->pend_text, params));
+    pstate2->pend_text_is_cdata = pstate->pend_text_is_cdata;
+    pstate2->pend_text_offset = pstate->pend_text_offset;
+    pstate2->pend_text_line = pstate->pend_text_offset;
+    pstate2->pend_text_column = pstate->pend_text_column;
+
+    pstate2->skipped_text = SvREFCNT_inc(sv_dup(pstate->skipped_text, params));
+
+#ifdef MARKED_SECTION
+    pstate2->ms = pstate->ms;
+    pstate2->ms_stack =
+	(AV *)SvREFCNT_inc(sv_dup((SV *)pstate->ms_stack, params));
+    pstate2->marked_sections = pstate->marked_sections;
+#endif
+
+    pstate2->strict_comment = pstate->strict_comment;
+    pstate2->strict_names = pstate->strict_names;
+    pstate2->strict_end = pstate->strict_end;
+    pstate2->xml_mode = pstate->xml_mode;
+    pstate2->unbroken_text = pstate->unbroken_text;
+    pstate2->attr_encoded = pstate->attr_encoded;
+    pstate2->case_sensitive = pstate->case_sensitive;
+    pstate2->closing_plaintext = pstate->closing_plaintext;
+    pstate2->utf8_mode = pstate->utf8_mode;
+    pstate2->empty_element_tags = pstate->empty_element_tags;
+    pstate2->xml_pic = pstate->xml_pic;
+
+    pstate2->bool_attr_val =
+	SvREFCNT_inc(sv_dup(pstate->bool_attr_val, params));
+    for (i = 0; i < EVENT_COUNT; i++) {
+	pstate2->handlers[i].cb =
+	    SvREFCNT_inc(sv_dup(pstate->handlers[i].cb, params));
+	pstate2->handlers[i].argspec =
+	    SvREFCNT_inc(sv_dup(pstate->handlers[i].argspec, params));
+    }
+    pstate2->argspec_entity_decode = pstate->argspec_entity_decode;
+
+    pstate2->report_tags =
+	(HV *)SvREFCNT_inc(sv_dup((SV *)pstate->report_tags, params));
+    pstate2->ignore_tags =
+	(HV *)SvREFCNT_inc(sv_dup((SV *)pstate->ignore_tags, params));
+    pstate2->ignore_elements =
+	(HV *)SvREFCNT_inc(sv_dup((SV *)pstate->ignore_elements, params));
+
+    pstate2->ignoring_element =
+	SvREFCNT_inc(sv_dup(pstate->ignoring_element, params));
+    pstate2->ignore_depth = pstate->ignore_depth;
+
+    if (params->flags & CLONEf_JOIN_IN) {
+	pstate2->entity2char =
+	    perl_get_hv("HTML::Entities::entity2char", TRUE);
+    } else {
+	pstate2->entity2char = (HV *)sv_dup((SV *)pstate->entity2char, params);
+    }
+    pstate2->tmp = SvREFCNT_inc(sv_dup(pstate->tmp, params));
+
+    return pstate2;
+}
+
+static int
+magic_dup_pstate(pTHX_ MAGIC *mg, CLONE_PARAMS *params)
+{
+    mg->mg_ptr = (char *)dup_pstate(aTHX_ (PSTATE *)mg->mg_ptr, params);
+    return 0;
+}
+
+#endif
+
+MGVTBL vtbl_pstate =
+{
+    0,
+    0,
+    0,
+    0,
+    MEMBER_TO_FPTR(magic_free_pstate),
+#ifdef USE_ITHREADS
+    0,
+    MEMBER_TO_FPTR(magic_dup_pstate),
+#endif
+};
 
 
 /*
@@ -235,10 +342,13 @@ _alloc_pstate(self)
 	pstate->tmp = NEWSV(0, 20);
 
 	sv = newSViv(PTR2IV(pstate));
-	sv_magic(sv, 0, '~', 0, 0);
+	sv_magic(sv, 0, '~', (char *)pstate, 0);
 	mg = mg_find(sv, '~');
         assert(mg);
-        mg->mg_virtual = &vtbl_free_pstate;
+        mg->mg_virtual = &vtbl_pstate;
+#ifdef USE_ITHREADS
+        mg->mg_flags |= MGf_DUP;
+#endif
 	SvREADONLY_on(sv);
 
 	hv_store(hv, "_hparser_xs_state", 17, newRV_noinc(sv), 0);
