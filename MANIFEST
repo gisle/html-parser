@@ -66,6 +66,7 @@ t/script.t              Test parsing of <script> with quoted strings
 t/skipped-text.t	Test skipped_text argspec
 t/stack-realloc.t	Test that stack reallocation bug don't come back
 t/textarea.t	        Test handling of <textarea>
+t/threads.t		Test thread safety
 t/tokeparser.t		Test HTML::TokeParser
 t/uentities.t           Test encoding/decoding of Unicode entities
 t/unbroken-text.t       Test unbroken_text option
