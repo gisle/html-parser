@@ -5,6 +5,9 @@
      Cloning of parser state for compatiblity with threads.
      Fixed by Bo Lindbergh <blgl@hagernas.com>.
 
+     Don't require whitespace between declaration tokens.
+     <http://rt.cpan.org/Ticket/Display.html?id=20864>
+
 
 
 2006-07-10   Gisle Aas <gisle@ActiveState.com>

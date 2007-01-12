@@ -1,6 +1,6 @@
-/* $Id: hparser.c,v 2.133 2006/07/10 09:00:47 gisle Exp $
+/* $Id: hparser.c,v 2.134 2007/01/12 10:54:06 gisle Exp $
  *
- * Copyright 1999-2006, Gisle Aas
+ * Copyright 1999-2007, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
@@ -1159,8 +1159,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	/* first word available */
 	PUSH_TOKEN(decl_id, s);
 
-	while (s < end && isHSPACE(*s)) {
-	    s++;
+	while (1) {
 	    while (s < end && isHSPACE(*s))
 		s++;
 
