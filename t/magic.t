@@ -28,7 +28,8 @@ $p->{_hparser_xs_state} = \($$x + 16);
 eval {
     $p->xml_mode(1);
 };
-like($@, qr/^Lost parser state magic/);
+print "$]\n";
+like($@, $] >= 5.008 ? qr/^Lost parser state magic/ : qr/^Bad signature in parser state object/);
 
 $p->{_hparser_xs_state} = 33;
 eval {

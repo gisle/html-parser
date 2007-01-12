@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.136 2007/01/12 09:04:24 gisle Exp $
+/* $Id: Parser.xs,v 2.137 2007/01/12 10:18:39 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -137,14 +137,18 @@ check_handler(pTHX_ SV* h)
 static PSTATE*
 get_pstate_iv(pTHX_ SV* sv)
 {
-    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, '~') : NULL;
     PSTATE *p;
+#if PATCHLEVEL < 8
+    p = INT2PTR(PSTATE*, SvIV(sv));
+#else
+    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, '~') : NULL;
 
     if (!mg)
 	croak("Lost parser state magic");
     p = (PSTATE *)mg->mg_ptr;
     if (!p)
 	croak("Lost parser state magic");
+#endif
     if (p->signature != P_SIGNATURE)
 	croak("Bad signature in parser state object at %p", p);
     return p;
@@ -203,11 +207,15 @@ free_pstate(pTHX_ PSTATE* pstate)
 static int
 magic_free_pstate(pTHX_ SV *sv, MAGIC *mg)
 {
+#if PATCHLEVEL < 8
+    free_pstate(aTHX_ get_pstate_iv(aTHX_ sv));
+#else
     free_pstate(aTHX_ (PSTATE *)mg->mg_ptr);
+#endif
     return 0;
 }
 
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && PATCHLEVEL >= 8
 
 static PSTATE *
 dup_pstate(pTHX_ PSTATE *pstate, CLONE_PARAMS *params)
@@ -306,7 +314,7 @@ MGVTBL vtbl_pstate =
     0,
     0,
     MEMBER_TO_FPTR(magic_free_pstate),
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && PATCHLEVEL >= 8
     0,
     MEMBER_TO_FPTR(magic_dup_pstate),
 #endif
@@ -342,11 +350,15 @@ _alloc_pstate(self)
 	pstate->tmp = NEWSV(0, 20);
 
 	sv = newSViv(PTR2IV(pstate));
+#if PATCHLEVEL < 8
+	sv_magic(sv, 0, '~', 0, 0);
+#else
 	sv_magic(sv, 0, '~', (char *)pstate, 0);
+#endif
 	mg = mg_find(sv, '~');
         assert(mg);
         mg->mg_virtual = &vtbl_pstate;
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && PATCHLEVEL >= 8
         mg->mg_flags |= MGf_DUP;
 #endif
 	SvREADONLY_on(sv);

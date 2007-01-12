@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan(skip_all => "Not configured for threads")
-	if $Config{useithreads} ne 'define';
+	unless $Config{useithreads} && $] >= 5.008;
     plan(tests => 1);
 }
 
