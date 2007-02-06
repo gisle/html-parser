@@ -1,4 +1,4 @@
-/* $Id: hparser.c,v 2.134 2007/01/12 10:54:06 gisle Exp $
+/* $Id: hparser.c,v 2.135 2007/02/06 20:08:08 gisle Exp $
  *
  * Copyright 1999-2007, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
@@ -455,7 +455,7 @@ report_event(PSTATE* p_state,
 		    if (tokens[i+1].beg) {
 			char *beg = tokens[i+1].beg;
 			STRLEN len = tokens[i+1].end - beg;
-			if (*beg == '"' || *beg == '\'') {
+			if (*beg == '"' || *beg == '\'' || (*beg == '`' && p_state->backquote)) {
 			    assert(len >= 2 && *beg == beg[len-1]);
 			    beg++; len -= 2;
 			}
@@ -1166,7 +1166,7 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    if (s == end)
 		goto PREMATURE;
 
-	    if (*s == '"' || *s == '\'') {
+	    if (*s == '"' || *s == '\'' || (*s == '`' && p_state->backquote)) {
 		char *str_beg = s;
 		s++;
 		while (s < end && *s != *str_beg)
@@ -1337,7 +1337,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		PUSH_TOKEN(s, s);
 		break;
 	    }
-	    if (*s == '"' || *s == '\'') {
+	    if (*s == '"' || *s == '\'' || (*s == '`' && p_state->backquote)) {
 		char *str_beg = s;
 		s++;
 		while (s < end && *s != *str_beg)

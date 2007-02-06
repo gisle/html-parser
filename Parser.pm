@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.56';  # $Date: 2007/02/06 18:09:54 $
+$VERSION = '3.56';  # $Date: 2007/02/06 20:08:07 $
 
 require HTML::Entities;
 
@@ -328,6 +328,14 @@ Methods that can be used to get and/or set parser options are:
 By default, the C<attr> and C<@attr> argspecs will have general
 entities for attribute values decoded.  Enabling this attribute leaves
 entities alone.
+
+=item $p->backquote
+
+=item $p->backquote( $bool )
+
+By default, only ' and " are recognized as quote characters around
+attribute values.  MSIE also recognize backquotes for some reason.
+Enabling this attribute provide compatiblity with this behaviour.
 
 =item $p->boolean_attribute_value( $val )
 

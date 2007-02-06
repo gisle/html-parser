@@ -1,4 +1,4 @@
-/* $Id: Parser.xs,v 2.137 2007/01/12 10:18:39 gisle Exp $
+/* $Id: Parser.xs,v 2.138 2007/02/06 20:08:08 gisle Exp $
  *
  * Copyright 1999-2005, Gisle Aas.
  * Copyright 1999-2000, Michael A. Chase.
@@ -265,6 +265,7 @@ dup_pstate(pTHX_ PSTATE *pstate, CLONE_PARAMS *params)
     pstate2->utf8_mode = pstate->utf8_mode;
     pstate2->empty_element_tags = pstate->empty_element_tags;
     pstate2->xml_pic = pstate->xml_pic;
+    pstate2->backquote = pstate->backquote;
 
     pstate2->bool_attr_val =
 	SvREFCNT_inc(sv_dup(pstate->bool_attr_val, params));
@@ -447,6 +448,7 @@ strict_comment(pstate,...)
         HTML::Parser::utf8_mode = 10
         HTML::Parser::empty_element_tags = 11
         HTML::Parser::xml_pic = 12
+	HTML::Parser::backquote = 13
     PREINIT:
 	bool *attr;
     CODE:
@@ -470,8 +472,9 @@ strict_comment(pstate,...)
 #else
 	case 10: croak("The utf8_mode does not work with this perl; perl-5.8 or better required");
 #endif
-	case 11: attr = &pstate->empty_element_tags;    break;
+	case 11: attr = &pstate->empty_element_tags;   break;
         case 12: attr = &pstate->xml_pic;              break;
+	case 13: attr = &pstate->backquote;            break;
 	default:
 	    croak("Unknown boolean attribute (%d)", ix);
         }
