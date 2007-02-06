@@ -1,4 +1,4 @@
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use strict;
 use HTML::Parser;
@@ -43,3 +43,16 @@ $doc = join(":", @a);
 is($doc, "start_document:::start:<plaintext>::text:<foo>
 :1:end:</plaintext>::text:foo::start:<b>::end:</b>::text:
 ::end_document::");
+
+@a = ();
+$p->closing_plaintext('yep, emulate gecko (2)');
+$p->parse(<<EOT)->eof;
+<plaintext><foo>
+foo<b></b>
+EOT
+
+$doc = join(":", map { defined $_ ? $_ : "" } @a);
+
+is($doc, "start_document:::start:<plaintext>::text:<foo>
+foo<b></b>
+:1:end_document::");
