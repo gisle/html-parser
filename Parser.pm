@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.56';  # $Date: 2007/01/12 09:18:31 $
+$VERSION = '3.56';  # $Date: 2007/02/06 18:09:54 $
 
 require HTML::Entities;
 
@@ -351,7 +351,7 @@ By default, "plaintext" element can never be closed. Everything up to
 the end of the document is parsed in CDATA mode.  This historical
 behaviour is what at least MSIE does.  Enabling this attribute makes
 closing "</plaintext>" tag effective and the parsing process will resume
-after seeing this tag.  This emulates gecko-based browsers.
+after seeing this tag.  This emulates early gecko-based browsers.
 
 =item $p->empty_element_tags
 
