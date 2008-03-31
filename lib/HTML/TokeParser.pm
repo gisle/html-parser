@@ -1,10 +1,8 @@
 package HTML::TokeParser;
 
-# $Id: TokeParser.pm,v 2.37 2006/04/26 08:00:28 gisle Exp $
-
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.37 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "3.57";
 
 use strict;
 use Carp ();

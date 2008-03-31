@@ -1,5 +1,4 @@
-/* $Id: util.c,v 2.30 2006/03/22 09:15:17 gisle Exp $
- *
+/* 
  * Copyright 1999-2006, Gisle Aas.
  *
  * This library is free software; you can redistribute it and/or

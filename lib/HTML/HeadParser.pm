@@ -76,7 +76,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = sprintf("%d.%02d", q$Revision: 2.22 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "3.57";
 
 =item $hp = HTML::HeadParser->new
 

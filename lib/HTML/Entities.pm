@@ -1,7 +1,5 @@
 package HTML::Entities;
 
-# $Id: Entities.pm,v 1.35 2006/03/22 09:15:23 gisle Exp $
-
 =head1 NAME
 
 HTML::Entities - Encode or decode strings with HTML entities
@@ -141,7 +139,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.35 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "3.57";
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

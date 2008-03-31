@@ -1,6 +1,6 @@
 package HTML::Parser;
 
-# Copyright 1996-2007, Gisle Aas.
+# Copyright 1996-2008, Gisle Aas.
 # Copyright 1999-2000, Michael A. Chase.
 #
 # This library is free software; you can redistribute it and/or
@@ -9,7 +9,7 @@ package HTML::Parser;
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = '3.56';  # $Date: 2007/02/06 20:08:07 $
+$VERSION = "3.57";
 
 require HTML::Entities;
 
@@ -1232,7 +1232,7 @@ be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
- Copyright 1996-2007 Gisle Aas. All rights reserved.
+ Copyright 1996-2008 Gisle Aas. All rights reserved.
  Copyright 1999-2000 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or

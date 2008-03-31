@@ -1,10 +1,8 @@
 package HTML::PullParser;
 
-# $Id: PullParser.pm,v 2.9 2006/04/26 08:00:28 gisle Exp $
-
 require HTML::Parser;
 @ISA=qw(HTML::Parser);
-$VERSION = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
+$VERSION = "3.57";
 
 use strict;
 use Carp ();
