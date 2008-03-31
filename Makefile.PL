@@ -1,4 +1,3 @@
-require 5.006;
 use strict;
 use ExtUtils::MakeMaker;
 
@@ -8,8 +7,11 @@ WriteMakefile(
     H            => [ "hparser.h", "hctype.h", "tokenpos.h", "pfunc.h",
 		      "hparser.c", "util.c",
 		    ],
+    ($ExtUtils::MakeMaker::VERSION gt '6.30'? 
+     ('LICENSE'		=> 'perl', ) : ()),
     PREREQ_PM    => {
 		      'HTML::Tagset' => 3,
+		      'XSLoader' => 0,
                       'Test::More' => 0,    # only needed to run 'make test'
                     },
     DEFINE       => "-DMARKED_SECTION",

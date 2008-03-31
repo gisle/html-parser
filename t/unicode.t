@@ -2,10 +2,12 @@
 
 use strict;
 use HTML::Parser;
-use Test::More tests => 103;
+use Test::More;
+BEGIN {
+  plan skip_all => "This perl does not support Unicode" if $] < 5.008;
+}
 
-SKIP: {
-skip "This perl does not support Unicode", 103 if $] < 5.008;
+plan tests => 103;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -180,4 +182,3 @@ ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2"));
 ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2\x99"));
 ok(!HTML::Entities::_probably_utf8_chunk("f\xE2"));
 ok(!HTML::Entities::_probably_utf8_chunk("f\xE2\x99"));
-}
