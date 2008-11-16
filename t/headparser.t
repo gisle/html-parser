@@ -52,7 +52,6 @@ my $HTML = <<'EOT';
 
 <script>
 
-   "</script>"
     ignore this
 
 </script>
@@ -66,7 +65,6 @@ Dette er vanlig tekst.  Denne teksten definerer også slutten på
 
 <style>
 
-   "</style>"
    ignore this too
 
 </style>
