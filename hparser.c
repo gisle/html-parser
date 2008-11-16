@@ -25,6 +25,7 @@ literal_mode_elem[] =
     {6, "script", 1},
     {5, "style", 1},
     {3, "xmp", 1},
+    {6, "iframe", 1},
     {9, "plaintext", 1},
     {5, "title", 0},
     {8, "textarea", 0},
@@ -1740,6 +1741,7 @@ parse(pTHX_
 		if (p_state->literal_mode) {
 		    if (strEQ(p_state->literal_mode, "plaintext") ||
 			strEQ(p_state->literal_mode, "xmp") ||
+			strEQ(p_state->literal_mode, "iframe") ||
 			strEQ(p_state->literal_mode, "textarea"))
 		    {
 			/* rest is considered text */

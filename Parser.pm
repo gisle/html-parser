@@ -690,7 +690,7 @@ The first column on a line is 0.
 Dtext causes the decoded text to be passed.  General entities are
 automatically decoded unless the event was inside a CDATA section or
 was between literal start and end tags (C<script>, C<style>,
-C<xmp>, and C<plaintext>).
+C<xmp>, C<iframe> and C<plaintext>).
 
 The Unicode character set is assumed for entity decoding.  With Perl
 version 5.6 or earlier only the Latin-1 range is supported, and
@@ -709,7 +709,7 @@ C<comment>, C<process>, C<start_document> or C<end_document>.
 
 Is_cdata causes a TRUE value to be passed if the event is inside a CDATA
 section or between literal start and end tags (C<script>,
-C<style>, C<xmp>, and C<plaintext>).
+C<style>, C<xmp>, C<iframe> and C<plaintext>).
 
 if the flag is FALSE for a text event, then you should normally
 either use C<dtext> or decode the entities yourself before the text is
