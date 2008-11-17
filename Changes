@@ -1,3 +1,19 @@
+2008-11-16   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.57
+
+     The <iframe> element content is now parsed in literal mode.
+
+     Parsing of <script> and <style> content ends on the first end tag
+     even when that tag was in a quoted string.  That seems to be the
+     behaviour of all modern browsers.
+
+     Implement backquote() attribute as requested by Alex Kapranoff.
+
+     Test and documentation tweaks from Alex Kapranoff.
+
+
+
 2007-01-12   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.56
