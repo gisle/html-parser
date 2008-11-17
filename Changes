@@ -1,3 +1,16 @@
+2008-11-17   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.58
+
+     Suppress "Parsing of undecoded UTF-8 will give garbage" warning
+     with attr_encoded [RT#29089]
+
+     HTML::HeadParser:
+       - Recognize the Unicode BOM in utf8_mode as well [RT#27522]
+       - Avoid ending up with '/' keys attribute in Link headers.
+
+
+
 2008-11-16   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.57
