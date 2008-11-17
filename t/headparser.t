@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 { package H;
   sub new { bless {}, shift; }
@@ -141,7 +141,7 @@ unlink($file) or warn "Can't unlink $file: $!";
 ok(!$p->as_string);
 
 SKIP: {
-  skip "Need Unicode support", 2 if $] < 5.008;
+  skip "Need Unicode support", 3 if $] < 5.008;
 
   # Test that the Unicode BOM does not confuse us?
   $p = HTML::HeadParser->new(H->new);
@@ -149,4 +149,25 @@ SKIP: {
   $p->eof;
 
   is($p->header("title"), "Hi <foo>");
+
+  $p = HTML::HeadParser->new(H->new);
+  $p->utf8_mode(1);
+  $p->parse(<<"EOT");  # example from http://rt.cpan.org/Ticket/Display.html?id=27522
+\xEF\xBB\xBF<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+ <head>
+ <title>
+Parkinson's disease</title>
+ <meta name="Keywords" content="brain,disease,dopamine,drug,levodopa,parkinson,patients,symptoms,,Medications, Medications">
+ </meta>
+ \t
+\t<link href="../../css/ummAdam.css" rel="stylesheet" type="text/css" />
+\t<link rel="stylesheet" rev="stylesheet" href="../../css/ummprint.css" media="print" />
+\t
+\t </head>
+ <body>
+EOT
+  $p->eof;
+
+  is($p->header("title"), "Parkinson's disease");
 }

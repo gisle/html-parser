@@ -208,8 +208,17 @@ sub end
 sub text
 {
     my($self, $text) = @_;
-    $text =~ s/\x{FEFF}//;  # drop Unicode BOM if found
     print "TEXT[$text]\n" if $DEBUG;
+    unless ($self->{first_chunk}) {
+	# drop Unicode BOM if found
+	if ($self->utf8_mode) {
+	    $text =~ s/^\xEF\xBB\xBF//;
+	}
+	else {
+	    $text =~ s/^\x{FEFF}//;
+	}
+	$self->{first_chunk}++;
+    }
     my $tag = $self->{tag};
     if (!$tag && $text =~ /\S/) {
 	# Normal text means start of body
