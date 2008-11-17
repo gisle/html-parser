@@ -7,7 +7,7 @@ BEGIN {
   plan skip_all => "This perl does not support Unicode" if $] < 5.008;
 }
 
-plan tests => 103;
+plan tests => 105;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -182,3 +182,17 @@ ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2"));
 ok(HTML::Entities::_probably_utf8_chunk("f\xE2\x99\xA5o\xE2\x99"));
 ok(!HTML::Entities::_probably_utf8_chunk("f\xE2"));
 ok(!HTML::Entities::_probably_utf8_chunk("f\xE2\x99"));
+
+$p = HTML::Parser->new(
+    api_version => 3,
+    default_h => [\@parsed, 'event, text, tag, attr'],
+    attr_encoded => 1,
+);
+
+@warn = ();
+@parsed = ();
+
+$p->parse($doc)->eof;
+
+ok(!@warn);
+is(@parsed, 9);

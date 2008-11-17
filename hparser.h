@@ -113,7 +113,7 @@ struct p_state {
     /* other configuration stuff */
     SV* bool_attr_val;
     struct p_handler handlers[EVENT_COUNT];
-    bool argspec_entity_decode;
+    int argspec_entity_decode;
 
     /* filters */
     HV* report_tags;

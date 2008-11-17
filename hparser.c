@@ -726,8 +726,12 @@ argspec_compile(SV* src, PSTATE* p_state)
 			p_state->skipped_text = newSVpvn("", 0);
                     }
                 }
-		if (a == ARG_ATTR || a == ARG_ATTRARR || a == ARG_DTEXT) {
-		    p_state->argspec_entity_decode++;
+		if (a == ARG_ATTR || a == ARG_ATTRARR) {
+		    if (p_state->argspec_entity_decode != ARG_DTEXT)
+			p_state->argspec_entity_decode = ARG_ATTR;
+		}
+		else if (a == ARG_DTEXT) {
+		    p_state->argspec_entity_decode = ARG_DTEXT;
 		}
 	    }
 	    else {
@@ -1832,6 +1836,7 @@ parse(pTHX_
 	    /* Print warnings if we find unexpected Unicode BOM forms */
 #ifdef UNICODE_HTML_PARSER
 	    if (p_state->argspec_entity_decode &&
+		!(p_state->attr_encoded && p_state->argspec_entity_decode == ARG_ATTR) &&
 		!p_state->utf8_mode && (
                  (!utf8 && len >= 3 && strnEQ(beg, "\xEF\xBB\xBF", 3)) ||
 		 (utf8 && len >= 6 && strnEQ(beg, "\xC3\xAF\xC2\xBB\xC2\xBF", 6)) ||
