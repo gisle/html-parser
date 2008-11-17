@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 { package H;
   sub new { bless {}, shift; }
@@ -141,7 +141,7 @@ unlink($file) or warn "Can't unlink $file: $!";
 ok(!$p->as_string);
 
 SKIP: {
-  skip "Need Unicode support", 3 if $] < 5.008;
+  skip "Need Unicode support", 4 if $] < 5.008;
 
   # Test that the Unicode BOM does not confuse us?
   $p = HTML::HeadParser->new(H->new);
@@ -170,4 +170,5 @@ EOT
   $p->eof;
 
   is($p->header("title"), "Parkinson's disease");
+  is($p->header("link")->[0], '<../../css/ummAdam.css>; rel="stylesheet"; type="text/css"');
 }

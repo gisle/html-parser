@@ -186,6 +186,7 @@ sub start
 	# <link href="http:..." rel="xxx" rev="xxx" title="xxx">
 	my $h_val = "<" . delete($attr->{href}) . ">";
 	for (sort keys %{$attr}) {
+	    next if $_ eq "/";  # XHTML junk
 	    $h_val .= qq(; $_="$attr->{$_}");
 	}
 	$self->{'header'}->push_header(Link => $h_val);
