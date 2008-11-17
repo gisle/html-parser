@@ -37,13 +37,17 @@ $p->eof;
 $p->parse("\xFE\xFF\0\0<head>Hi there</head>");
 $p->eof;
 
+for (@warn) {
+    s/line (\d+)/line ##/g;
+}
+
 is(join("", @warn), <<EOT);
-Parsing of undecoded UTF-8 will give garbage when decoding entities at $0 line 21.
-Parsing of undecoded UTF-8 will give garbage when decoding entities at $0 line 25.
-Parsing of undecoded UTF-16 at $0 line 28.
-Parsing of undecoded UTF-16 at $0 line 31.
-Parsing of undecoded UTF-32 at $0 line 34.
-Parsing of undecoded UTF-32 at $0 line 37.
+Parsing of undecoded UTF-8 will give garbage when decoding entities at $0 line ##.
+Parsing of undecoded UTF-8 will give garbage when decoding entities at $0 line ##.
+Parsing of undecoded UTF-16 at $0 line ##.
+Parsing of undecoded UTF-16 at $0 line ##.
+Parsing of undecoded UTF-32 at $0 line ##.
+Parsing of undecoded UTF-32 at $0 line ##.
 EOT
 
 @warn = ();
