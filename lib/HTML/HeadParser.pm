@@ -230,6 +230,10 @@ sub text
     $self->{'text'} .= $text;
 }
 
+BEGIN {
+    *utf8_mode = sub { 1 } unless HTML::Entities::UNICODE_SUPPORT;;
+}
+
 1;
 
 __END__
