@@ -7,3 +7,4 @@ hctype.h
 pfunc.h
 *.o
 *.old
+*.tar.gz
