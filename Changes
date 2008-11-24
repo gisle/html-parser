@@ -1,3 +1,13 @@
+2008-11-24   Gisle Aas <gisle@ActiveState.com>
+
+     Release 3.59
+
+     Restore perl-5.6 compatibility for HTML::HeadParser.
+
+     Improved META.yml
+
+
+
 2008-11-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.58

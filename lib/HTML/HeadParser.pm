@@ -76,7 +76,7 @@ use HTML::Entities ();
 use strict;
 use vars qw($VERSION $DEBUG);
 #$DEBUG = 1;
-$VERSION = "3.58";
+$VERSION = "3.59";
 
 =item $hp = HTML::HeadParser->new
 
