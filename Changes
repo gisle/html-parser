@@ -41,7 +41,7 @@
 
      Release 3.56
 
-     Cloning of parser state for compatiblity with threads.
+     Cloning of parser state for compatibility with threads.
      Fixed by Bo Lindbergh <blgl@hagernas.com>.
 
      Don't require whitespace between declaration tokens.
@@ -56,7 +56,7 @@
      Treat <> at the end of document as text.  Used to be
      reported as a comment.
 
-     Improved Firefox compatiblity for bad HTML:
+     Improved Firefox compatibility for bad HTML:
       - Unclosed <script>, <style> are now treated as empty tags.
       - Unclosed <textarea>, <xmp> and <plaintext> treat rest as text.
       - Unclosed <title> closes at next tag.
@@ -257,7 +257,7 @@
      garbage with older versions of perl.
 
      Emit warning if entities are decoded and something in the first
-     chunk looks like hibit UTF-8.  Previously this warning was only
+     chunk looks like hi-bit UTF-8.  Previously this warning was only
      triggered for documents with BOM.
 
 
@@ -344,7 +344,7 @@
      Release 3.37
 
      Improved handling of HTML encoded surrogate pairs and illegally
-     endoded Unicode; <http://rt.cpan.org/Ticket/Display.html?id=7785>.
+     encoded Unicode; <http://rt.cpan.org/Ticket/Display.html?id=7785>.
      Patch by John Gardiner Myers <jgmyers@proofpoint.com>.
 
      Avoid generating bad UTF8 strings when decoding entities
@@ -599,7 +599,7 @@
 
      Release 3.21
 
-     Fix a memory leak which occured when using filter methods.
+     Fix a memory leak which occurred when using filter methods.
 
      Avoid a few compiler warnings (DEC C):
         - Trailing comma found in enumerator list
@@ -1274,7 +1274,7 @@
 
    Faster HTML::LinkExtor by taking advantage of the new
    callback interface.  The module now also uses URI.pm (instead
-   of the old URI::URL) to do URI-absolutations.
+   of the old URI::URL) to absolutize URIs.
 
    Faster HTML::TokeParser by taking advantage of new
    accum interface.
@@ -1408,7 +1408,7 @@
    instead of raising an exception, and strings like "*STDIN" are not
    treated as globs any more.
 
-   HTML::LinkExtor knowns about background attribute of <tables>.
+   HTML::LinkExtor knows about background attribute of <tables>.
    Patch by Clinton Wong <clintdw@netcom.com>
 
    HTML::TokeParser will parse large inline strings much faster now.
@@ -1491,7 +1491,7 @@
 
    Release 2.16
    
-   The HTML::Parser could some times break hex entites (like &#xFFFF;)
+   The HTML::Parser could some times break hex entities (like &#xFFFF;)
    in the middle.
 
    Removed remaining forced dependencies on libwww-perl modules.  It

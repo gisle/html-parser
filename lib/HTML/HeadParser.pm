@@ -85,7 +85,7 @@ $VERSION = "3.59";
 The object constructor.  The optional $header argument should be a
 reference to an object that implement the header() and push_header()
 methods as defined by the C<HTTP::Headers> class.  Normally it will be
-of some class that isa or delegates to the C<HTTP::Headers> class.
+of some class that is a or delegates to the C<HTTP::Headers> class.
 
 If no $header is given C<HTML::HeadParser> will create an
 C<HTTP::Header> object by itself (initially empty).

@@ -2,7 +2,7 @@ TODO
 
  - limit the length of markup elements that never end.   Perhaps by
    configurable limits on the length that markup can have and still
-   be recongnized.  Report stuff as 'text' when this happens?
+   be recognized.  Report stuff as 'text' when this happens?
  - remove 255 char limit on literal argspec strings
  - implement backslash escapes in literal argspec string
  - <![%app1;[...]]> (parameter entities)

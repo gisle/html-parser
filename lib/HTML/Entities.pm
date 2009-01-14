@@ -57,7 +57,7 @@ values are what they should expand into.  The values do not have to be
 single character strings.  If a key has ";" as suffix,
 then occurrences in $string are only expanded if properly terminated
 with ";".  Entities without ";" will be expanded regardless of how
-they are terminated for compatiblity with how common browsers treat
+they are terminated for compatibility with how common browsers treat
 entities in the Latin-1 range.
 
 If $expand_prefix is TRUE then entities without trailing ";" in

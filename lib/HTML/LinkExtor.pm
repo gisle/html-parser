@@ -104,7 +104,7 @@ sub _found_link
 =item $p->links
 
 Returns a list of all links found in the document.  The returned
-values will be anonymous arrays with the follwing elements:
+values will be anonymous arrays with the following elements:
 
   [$tag, $attr => $url1, $attr2 => $url2,...]
 
@@ -155,7 +155,7 @@ received using LWP:
   }
 
   # Make the parser.  Unfortunately, we don't know the base yet
-  # (it might be diffent from $url)
+  # (it might be different from $url)
   $p = HTML::LinkExtor->new(\&callback);
 
   # Request document and parse it as it arrives

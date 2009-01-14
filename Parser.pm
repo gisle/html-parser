@@ -334,8 +334,8 @@ entities alone.
 =item $p->backquote( $bool )
 
 By default, only ' and " are recognized as quote characters around
-attribute values.  MSIE also recognize backquotes for some reason.
-Enabling this attribute provide compatiblity with this behaviour.
+attribute values.  MSIE also recognizes backquotes for some reason.
+Enabling this attribute provides compatibility with this behaviour.
 
 =item $p->boolean_attribute_value( $val )
 
@@ -1200,7 +1200,7 @@ has been opened in ":utf8" mode.
 The parser can process raw undecoded UTF-8 sanely if the C<utf8_mode>
 is enabled or if the "attr", "@attr" or "dtext" argspecs is avoided.
 
-=item Parsing string decoded with wrong endianess
+=item Parsing string decoded with wrong endianness
 
 (W) The first character in the document is U+FFFE.  This is not a
 legal Unicode character but a byte swapped BOM.  The result of parsing
