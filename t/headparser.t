@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 14;
 
 { package H;
   sub new { bless {}, shift; }
@@ -91,6 +91,7 @@ if ($p->parse($HTML)) {
 like($p->header('Title'), qr/Å være eller å ikke være/);
 is($p->header('Expires'), 'Soon');
 is($p->header('Content-Base'), 'http://www.sn.no');
+is_deeply($p->header('X-Meta-Keywords'), ['test, test, test,...', 'more']);
 like($p->header('Link'), qr/<mailto:gisle\@aas.no>/);
 
 # This header should not be present because the head ended
