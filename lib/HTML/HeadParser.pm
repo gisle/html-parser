@@ -13,6 +13,7 @@ HTML::HeadParser - Parse <HEAD> section of a HTML document
  $p->header('Title')          # to access <title>....</title>
  $p->header('Content-Base')   # to access <base href="http://...">
  $p->header('Foo')            # to access <meta http-equiv="Foo" content="...">
+ $p->header('X-Meta-Author')  # to access <meta name="author" content="...">
 
 =head1 DESCRIPTION
 
@@ -52,9 +53,14 @@ given it will have '?' as the value.
 
 =item X-Meta-Foo:
 
-All E<lt>meta> elements will initialize headers with the prefix
-"C<X-Meta->" on the name.  If the E<lt>meta> element contains a
-C<http-equiv> attribute, then it will be honored as the header name.
+All E<lt>meta> elements containing a C<name> attribute will result in
+headers using the prefix C<X-Meta-> appended with the value of the
+C<name> attribute as the name of the header, and the value of the
+C<content> attribute as the pushed header value.
+
+E<lt>meta> elements containing a C<http-equiv> attribute will result
+in headers as in above, but without the C<X-Meta-> prefix in the
+header name.
 
 =back
 
