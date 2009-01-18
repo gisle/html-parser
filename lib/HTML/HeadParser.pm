@@ -163,7 +163,12 @@ sub flush_text   # internal
 #                            SCRIPT* & META* & LINK*">
 #
 # <!ELEMENT HEAD O O  (%head.content)>
-
+#
+# From HTML 4.01:
+#
+# <!ENTITY % head.misc "SCRIPT|STYLE|META|LINK|OBJECT">
+# <!ENTITY % head.content "TITLE & BASE?">
+# <!ELEMENT HEAD O O (%head.content;) +(%head.misc;)>
 
 sub start
 {
@@ -184,7 +189,7 @@ sub start
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
 	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
-    } elsif ($tag =~ /^(?:title|script|style)$/) {
+    } elsif ($tag =~ /^(?:title|script|style|object)$/) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
     } elsif ($tag eq 'link') {

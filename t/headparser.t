@@ -56,6 +56,8 @@ my $HTML = <<'EOT';
 
 </script>
 
+<object classid="foo">
+
 <base href="http://www.sn.no">
 <meta name="Keywords" content="test, test, test,...">
 <meta name="Keywords" content="more">
