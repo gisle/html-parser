@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 { package H;
   sub new { bless {}, shift; }
@@ -55,12 +55,14 @@ my $HTML = <<'EOT';
     ignore this
 
 </script>
+<noscript> ... and this </noscript>
 
 <object classid="foo">
 
 <base href="http://www.sn.no">
 <meta name="Keywords" content="test, test, test,...">
 <meta name="Keywords" content="more">
+<meta charset="ISO-8859-1"><!-- HTML 5 -->
 
 Dette er vanlig tekst.  Denne teksten definerer også slutten på
 &lt;head> delen av dokumentet.
@@ -94,6 +96,7 @@ like($p->header('Title'), qr/Å være eller å ikke være/);
 is($p->header('Expires'), 'Soon');
 is($p->header('Content-Base'), 'http://www.sn.no');
 is_deeply($p->header('X-Meta-Keywords'), ['test, test, test,...', 'more']);
+is($p->header('X-Meta-Charset'), 'ISO-8859-1');
 like($p->header('Link'), qr/<mailto:gisle\@aas.no>/);
 
 # This header should not be present because the head ended

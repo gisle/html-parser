@@ -14,6 +14,7 @@ HTML::HeadParser - Parse <HEAD> section of a HTML document
  $p->header('Content-Base')   # to access <base href="http://...">
  $p->header('Foo')            # to access <meta http-equiv="Foo" content="...">
  $p->header('X-Meta-Author')  # to access <meta name="author" content="...">
+ $p->header('X-Meta-Charset') # to access <meta charset="...">
 
 =head1 DESCRIPTION
 
@@ -61,6 +62,10 @@ C<content> attribute as the pushed header value.
 E<lt>meta> elements containing a C<http-equiv> attribute will result
 in headers as in above, but without the C<X-Meta-> prefix in the
 header name.
+
+E<lt>meta> elements containing a C<charset> attribute will result in
+an C<X-Meta-Charset> header, using the value of the C<charset>
+attribute as the pushed header value.
 
 =back
 
@@ -169,6 +174,8 @@ sub flush_text   # internal
 # <!ENTITY % head.misc "SCRIPT|STYLE|META|LINK|OBJECT">
 # <!ENTITY % head.content "TITLE & BASE?">
 # <!ELEMENT HEAD O O (%head.content;) +(%head.misc;)>
+#
+# Added in HTML 5: noscript, eventsource, command
 
 sub start
 {
@@ -178,8 +185,15 @@ sub start
     if ($tag eq 'meta') {
 	my $key = $attr->{'http-equiv'};
 	if (!defined($key) || !length($key)) {
-	    return unless $attr->{'name'};
-	    $key = "X-Meta-\u$attr->{'name'}";
+	    if ($attr->{name}) {
+		$key = "X-Meta-\u$attr->{name}";
+	    } elsif ($attr->{charset}) { # HTML 5 <meta charset="...">
+		$key = "X-Meta-Charset";
+		$self->{header}->push_header($key => $attr->{charset});
+		return;
+	    } else {
+		return;
+	    }
 	}
 	$self->{'header'}->push_header($key => $attr->{content});
     } elsif ($tag eq 'base') {
@@ -189,7 +203,8 @@ sub start
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
 	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
-    } elsif ($tag =~ /^(?:title|script|style|object)$/) {
+    } elsif ($tag =~ /^(?:title|(?:no)?script|style|object
+		      |eventsource|command)$/x) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
     } elsif ($tag eq 'link') {
