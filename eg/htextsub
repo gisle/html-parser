@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+# Shows how to mangle all plain  text in an HTML document, using an arbitrary
+# Perl expression. Plain text is all text not within a tag declaration, i.e.
+# not in <p ...>, but possibly between <p> and </p>
+
 use strict;
 my $code = shift || usage();
 $code = 'sub edit_print { local $_ = shift; ' . $code . '; print }';
