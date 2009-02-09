@@ -98,6 +98,10 @@ newSVpvn(char *s, STRLEN len)
    #define DOWARN PL_dowarn
 #endif
 
+#ifndef CLONEf_JOIN_IN
+   #define CLONEf_JOIN_IN 0
+#endif
+
 /*
  * Include stuff.  We include .c files instead of linking them,
  * so that they don't have to pollute the external dll name space.
