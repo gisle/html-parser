@@ -446,6 +446,7 @@ sub decode_entities_old
 
 sub encode_entities
 {
+    return undef unless defined $_[0];
     my $ref;
     if (defined wantarray) {
 	my $x = $_[0];
