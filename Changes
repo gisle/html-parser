@@ -1,3 +1,25 @@
+_______________________________________________________________________________
+2009-02-09  Release 3.60
+
+Ville Skytta (5):
+      Spelling fixes.
+      Test multi-value headers.
+      Documentation improvements.
+      Do not terminate head parsing on the <object> element (added in HTML 4.0).
+      Add support for HTML 5 <meta charset> and new HEAD elements.
+
+Damyan Ivanov (1):
+      Short description of the htextsub example
+
+Mike South (1):
+      Suppress warning when encode_entities is called with undef [RT#27567]
+
+Zefram (1):
+      HTML::Parser doesn't compile with perl 5.8.0.
+
+
+
+_______________________________________________________________________________
 2008-11-24   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.59
@@ -8,6 +30,7 @@
 
 
 
+_______________________________________________________________________________
 2008-11-17   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.58
@@ -21,6 +44,7 @@
 
 
 
+_______________________________________________________________________________
 2008-11-16   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.57
@@ -37,6 +61,7 @@
 
 
 
+_______________________________________________________________________________
 2007-01-12   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.56
@@ -49,6 +74,7 @@
 
 
 
+_______________________________________________________________________________
 2006-07-10   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.55
@@ -65,6 +91,7 @@
 
 
 
+_______________________________________________________________________________
 2006-04-28   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.54
@@ -78,6 +105,7 @@
 
 
 
+_______________________________________________________________________________
 2006-04-27   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.53
@@ -90,6 +118,7 @@
 
 
 
+_______________________________________________________________________________
 2006-04-26   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.52
@@ -103,6 +132,7 @@
 
 
 
+_______________________________________________________________________________
 2006-03-22   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.51
@@ -120,6 +150,7 @@
 
 
 
+_______________________________________________________________________________
 2006-02-14   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.50
@@ -129,6 +160,7 @@
 
 
 
+_______________________________________________________________________________
 2006-02-08   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.49
@@ -141,6 +173,7 @@
 
 
 
+_______________________________________________________________________________
 2005-12-02   Gisle Aas <gisle@ActiveState.com>
 
      Release 3.48

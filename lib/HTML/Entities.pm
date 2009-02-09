@@ -139,7 +139,7 @@ require Exporter;
 @EXPORT = qw(encode_entities decode_entities _decode_entities);
 @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = "3.57";
+$VERSION = "3.60";
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities
