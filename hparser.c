@@ -658,7 +658,7 @@ IGNORE_EVENT:
 	else {
 	    SV *tmp = newSVpvn(beg, end - beg);
 	    sv_utf8_upgrade(tmp);
-	    sv_catsv(p_state->pend_text, tmp);
+	    sv_catsv(p_state->skipped_text, tmp);
 	    SvREFCNT_dec(tmp);
 	}
 #endif
