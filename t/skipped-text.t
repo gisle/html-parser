@@ -1,4 +1,4 @@
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use strict;
 use HTML::Parser;
@@ -72,3 +72,18 @@ $p->eof;
 #diag join(":", @x);
 is(join(":", @x), "X::a a:X:<a>:b bc c:X:<x>:d de:Y:");
 
+#
+# The crash that Chip found
+#
+
+my $skipped;
+my $p = HTML::Parser->new(
+    ignore_tags => ["foo"],
+    start_h => [sub {$skipped = shift}, "skipped_text"],
+);
+
+$p->parse("\x{100}<foo>");
+$p->parse("plain");
+$p->parse("<bar>");
+$p->eof;
+is($skipped, "\x{100}<foo>plain");
