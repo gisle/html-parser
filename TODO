@@ -7,7 +7,8 @@ TODO
  - implement backslash escapes in literal argspec string
  - <![%app1;[...]]> (parameter entities)
  - make literal tags configurable.  The current list is hardcoded
-   to be ""script", "style", "title", "textarea", "xmp", and "plaintext".
+   to be "script", "style", "title", "iframe", "textarea", "xmp",
+   and "plaintext".
 
 SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
  - Empty tags: <> </>  (repeat previous start tag)
