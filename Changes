@@ -1,4 +1,19 @@
 _______________________________________________________________________________
+2009-06-20  Release 3.61
+
+Gisle Aas (2):
+      Test that triggers the crash that Chip fixed
+      Complete documented list of literal tags
+
+Chip Salzenberg (1):
+      Avoid crash (referenced pend_text instead of skipped_text)
+
+Antonio Radici (1):
+      Reference HTML::LinkExttor [RT#43164]
+
+
+
+_______________________________________________________________________________
 2009-02-09  Release 3.60
 
 Ville Skytta (5):
