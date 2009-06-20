@@ -77,7 +77,7 @@ is(join(":", @x), "X::a a:X:<a>:b bc c:X:<x>:d de:Y:");
 #
 
 my $skipped;
-my $p = HTML::Parser->new(
+$p = HTML::Parser->new(
     ignore_tags => ["foo"],
     start_h => [sub {$skipped = shift}, "skipped_text"],
 );
