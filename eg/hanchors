@@ -2,6 +2,8 @@
 
 # This program will print out all <a href=".."> links in a
 # document together with the text that goes with it.
+#
+# See also HTML::LinkExtor
 
 use HTML::Parser;
 
