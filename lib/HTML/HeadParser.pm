@@ -99,7 +99,7 @@ methods as defined by the C<HTTP::Headers> class.  Normally it will be
 of some class that is a or delegates to the C<HTTP::Headers> class.
 
 If no $header is given C<HTML::HeadParser> will create an
-C<HTTP::Header> object by itself (initially empty).
+C<HTTP::Headers> object by itself (initially empty).
 
 =cut
 
