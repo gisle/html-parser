@@ -203,8 +203,7 @@ sub start
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
 	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
-    } elsif ($tag =~ /^(?:title|(?:no)?script|style|object
-		      |eventsource|command)$/x) {
+    } elsif ($tag =~ /^(?:title|noscript|object|eventsource|command)$/) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
     } elsif ($tag eq 'link') {
