@@ -175,7 +175,7 @@ sub flush_text   # internal
 # <!ENTITY % head.content "TITLE & BASE?">
 # <!ELEMENT HEAD O O (%head.content;) +(%head.misc;)>
 #
-# Added in HTML 5: noscript, eventsource, command
+# Added in HTML 5 as of WD-html5-20090423: noscript, command
 
 sub start
 {
@@ -203,7 +203,7 @@ sub start
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
 	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
-    } elsif ($tag =~ /^(?:title|noscript|object|eventsource|command)$/) {
+    } elsif ($tag =~ /^(?:title|noscript|object|command)$/) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
     } elsif ($tag eq 'link') {
