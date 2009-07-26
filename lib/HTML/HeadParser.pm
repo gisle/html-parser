@@ -111,7 +111,10 @@ sub new
 	$header = HTTP::Headers->new;
     }
 
-    my $self = $class->SUPER::new(api_version => 2,
+    my $self = $class->SUPER::new(api_version => 3,
+				  start_h => ["start", "self,tagname,attr"],
+				  end_h   => ["end",   "self,tagname"],
+				  text_h  => ["text",  "self,text"],
 				  ignore_elements => [qw(script style)],
 				 );
     $self->{'header'} = $header;
