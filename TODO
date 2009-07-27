@@ -1,5 +1,5 @@
 TODO
-
+ - Check how we compare to the HTML5 parsing rules
  - limit the length of markup elements that never end.   Perhaps by
    configurable limits on the length that markup can have and still
    be recognized.  Report stuff as 'text' when this happens?
@@ -10,16 +10,12 @@ TODO
    to be "script", "style", "title", "iframe", "textarea", "xmp",
    and "plaintext".
 
+
 SGML FEATURES WE WILL PROBABLY IGNORE FOREVER
  - Empty tags: <> </>  (repeat previous start tag)
  - <foo<bar>  (same as <foo><bar>)
  - NET tags <name/.../
  
-
-POSSIBLE OPTIMIZATIONS
- - none that I can think of right now
- - run the profiler
-
 
 MINOR "BUGS" (alias FEATURES)
  - no way to clear "boolean_attribute_value".
