@@ -240,13 +240,12 @@ to the C<HTML::Parser> object:
 
 =item $p->parse( $string )
 
-Parse $string as the next chunk of the HTML document.  The return
-value is normally a reference to the parser object (i.e. $p).
-Handlers invoked should not attempt to modify the $string in-place until
-$p->parse returns.
+Parse $string as the next chunk of the HTML document.  Handlers invoked should
+not attempt to modify the $string in-place until $p->parse returns.
 
-If an invoked event handler aborts parsing by calling $p->eof, then
-$p->parse() will return a FALSE value.
+If an invoked event handler aborts parsing by calling $p->eof, then $p->parse()
+will return a FALSE value.  Otherwise the return value is a reference to the
+parser object ($p).
 
 =item $p->parse( $code_ref )
 
