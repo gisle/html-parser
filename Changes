@@ -1,4 +1,18 @@
 _______________________________________________________________________________
+2009-08-13  Release 3.62
+
+Ville Skyttä (4):
+      HTTP::Header doc typo fix.
+      Do not bother tracking style or script, they're ignored.
+      Bring HTML 5 head elements up to date with WD-html5-20090423.
+      Improve HeadParser performance.
+
+Gisle Aas (1):
+      Doc patch: Make it clearer what the return value from ->parse is
+
+
+
+_______________________________________________________________________________
 2009-06-20  Release 3.61
 
 Gisle Aas (2):
