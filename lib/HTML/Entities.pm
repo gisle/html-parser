@@ -77,14 +77,21 @@ This routine is exported by default.
 =item encode_entities( $string, $unsafe_chars )
 
 This routine replaces unsafe characters in $string with their entity
-representation. A second argument can be given to specify which
-characters to consider unsafe (i.e., which to escape). The default set
-of characters to encode are control chars, high-bit chars, and the
-C<< < >>, C<< & >>, C<< > >>, C<< ' >> and C<< " >>
-characters.  But this, for example, would encode I<just> the
-C<< < >>, C<< & >>, C<< > >>, and C<< " >> characters:
+representation. A second argument can be given to specify which characters to
+consider unsafe.  The unsafe characters is specified using the regular
+expression character class syntax (what you find within brackets in regular
+expressions).
+
+The default set of characters to encode are control chars, high-bit chars, and
+the C<< < >>, C<< & >>, C<< > >>, C<< ' >> and C<< " >> characters.  But this,
+for example, would encode I<just> the C<< < >>, C<< & >>, C<< > >>, and C<< "
+>> characters:
 
   $encoded = encode_entities($input, '<>&"');
+
+and this would only encode non-plain ascii:
+
+  $encoded = encode_entities($input, '^\n\x20-\x25\x27-\x7e');
 
 This routine is exported by default.
 
@@ -457,7 +464,10 @@ sub encode_entities
     if (defined $_[1] and length $_[1]) {
 	unless (exists $subst{$_[1]}) {
 	    # Because we can't compile regex we fake it with a cached sub
-	    my $code = "sub {\$_[0] =~ s/([$_[1]])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
+	    my $chars = $_[1];
+	    $chars =~ s,(?<!\\)([]/]),\\$1,g;
+	    $chars =~ s,(?<!\\)\\\z,\\\\,;
+	    my $code = "sub {\$_[0] =~ s/([$chars])/\$char2entity{\$1} || num_entity(\$1)/ge; }";
 	    $subst{$_[1]} = eval $code;
 	    die( $@ . " while trying to turn range: \"$_[1]\"\n "
 	      . "into code: $code\n "
