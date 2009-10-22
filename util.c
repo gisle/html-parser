@@ -94,14 +94,14 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 	ent_start = s;
 	repl = 0;
 
-	if (*s == '#') {
+	if (s < end && *s == '#') {
 	    UV num = 0;
 	    UV prev = 0;
 	    int ok = 0;
 	    s++;
-	    if (*s == 'x' || *s == 'X') {
+	    if (s < end && (*s == 'x' || *s == 'X')) {
 		s++;
-		while (*s) {
+		while (s < end) {
 		    char *tmp = strchr(PL_hexdigit, *s);
 		    if (!tmp)
 			break;
@@ -117,7 +117,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 		}
 	    }
 	    else {
-		while (isDIGIT(*s)) {
+		while (s < end && isDIGIT(*s)) {
 		    num = num * 10 + (*s - '0');
 		    if (prev && num < prev) {
 			/* overflow */
@@ -180,7 +180,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 	}
 	else {
 	    char *ent_name = s;
-	    while (isALNUM(*s))
+	    while (s < end && isALNUM(*s))
 		s++;
 	    if (ent_name != s && entity2char) {
 		SV** svp;
@@ -216,7 +216,7 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 
 	if (repl) {
 	    char *repl_allocated = 0;
-	    if (*s == ';')
+	    if (s < end && *s == ';')
 		s++;
 	    t--;  /* '&' already copied, undo it */
 
