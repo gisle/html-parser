@@ -1,4 +1,13 @@
 _______________________________________________________________________________
+2009-10-22  Release 3.63
+
+Gisle Aas (2):
+      Take more care to prepare the char range for encode_entities [RT#50170]
+      decode_entities confused by trailing incomplete entity
+
+
+
+_______________________________________________________________________________
 2009-08-13  Release 3.62
 
 Ville Skyttä (4):
