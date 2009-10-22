@@ -14,7 +14,7 @@ HTML::Entities - Encode or decode strings with HTML entities
 
 For example, this:
 
- $input = "vis-à-vis Beyoncé's naïve\npapier-mâché résumé";
+ $input = "vis-Ã -vis BeyoncÃ©'s naÃ¯ve\npapier-mÃ¢chÃ© rÃ©sumÃ©";
  print encode_entities($input), "\n"
 
 Prints this out:
@@ -68,7 +68,7 @@ misfeature.
 
    $string = "foo&nbspbar";
    _decode_entities($string, { nb => "@", nbsp => "\xA0" }, 1);
-   print $string;  # will print "foo bar"
+   print $string;  # will print "fooÂ bar"
 
 This routine is exported by default.
 
