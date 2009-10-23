@@ -2,7 +2,7 @@
 
 use HTML::Entities;
 
-use Test::More tests => 27;
+use Test::More tests => 26;
 
 SKIP: {
 skip "This perl does not support Unicode or Unicode entities not selected",
@@ -56,8 +56,6 @@ for ([32, 48], [120, 169], [240, 250], [250, 260], [965, 975], [3000, 3005]) {
 }
 ok(!$err);
 
-
-is(decode_entities("&#56256;&#56453;"), chr(0x100085));
 
 is(decode_entities("&#56256;&#56453;"), chr(0x100085));
 
