@@ -96,7 +96,6 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 
 	if (s < end && *s == '#') {
 	    UV num = 0;
-	    UV prev = 0;
 	    int ok = 0;
 	    s++;
 	    if (s < end && (*s == 'x' || *s == 'X')) {
@@ -106,12 +105,11 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 		    if (!tmp)
 			break;
 		    num = num << 4 | ((tmp - PL_hexdigit) & 15);
-		    if (prev && num <= prev) {
+		    if (num > 0x10FFFF) {
 			/* overflow */
 			ok = 0;
 			break;
 		    }
-		    prev = num;
 		    s++;
 		    ok = 1;
 		}
@@ -119,23 +117,25 @@ decode_entities(pTHX_ SV* sv, HV* entity2char, bool expand_prefix)
 	    else {
 		while (s < end && isDIGIT(*s)) {
 		    num = num * 10 + (*s - '0');
-		    if (prev && num < prev) {
+		    if (num > 0x10FFFF) {
 			/* overflow */
 			ok = 0;
 			break;
 		    }
-		    prev = num;
 		    s++;
 		    ok = 1;
 		}
 	    }
-	    if (ok) {
+	    if (num && ok) {
 #ifdef UNICODE_HTML_PARSER
 		if (!SvUTF8(sv) && num <= 255) {
 		    buf[0] = (char) num;
 		    repl = buf;
 		    repl_len = 1;
 		    repl_utf8 = 0;
+		}
+		else if (num == 0xFFFE || num == 0xFFFF) {
+		    /* illegal */
 		}
 		else {
 		    char *tmp;
