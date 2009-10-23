@@ -1,6 +1,6 @@
 package HTML::Parser;
 
-# Copyright 1996-2008, Gisle Aas.
+# Copyright 1996-2009, Gisle Aas.
 # Copyright 1999-2000, Michael A. Chase.
 #
 # This library is free software; you can redistribute it and/or

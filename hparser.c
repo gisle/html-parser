@@ -1,5 +1,5 @@
 /* 
- * Copyright 1999-2008, Gisle Aas
+ * Copyright 1999-2009, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or

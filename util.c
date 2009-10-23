@@ -1,5 +1,5 @@
 /* 
- * Copyright 1999-2006, Gisle Aas.
+ * Copyright 1999-2009, Gisle Aas.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
