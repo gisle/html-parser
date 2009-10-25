@@ -1,4 +1,16 @@
 _______________________________________________________________________________
+2009-10-25  Release 3.64
+
+Gisle Aas (5):
+      Convert files to UTF-8
+      Don't allow decode_entities() to generate illegal Unicode chars
+      Copyright 2009
+      Remove rendundant (repeated) test
+      Make parse_file() method use 3-arg open [RT#49434]
+
+
+
+_______________________________________________________________________________
 2009-10-22  Release 3.63
 
 Gisle Aas (2):
