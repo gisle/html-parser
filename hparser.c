@@ -1847,7 +1847,7 @@ parse(pTHX_
 		warn("Parsing of undecoded UTF-8 will give garbage when decoding entities");
 	    }
 	    if (utf8 && len >= 2 && strnEQ(beg, "\xFF\xFE", 2)) {
-		warn("Parsing string decoded with wrong endianess");
+		warn("Parsing string decoded with wrong endianness");
 	    }
 #endif
 	    if (!utf8 && len >= 4 &&
