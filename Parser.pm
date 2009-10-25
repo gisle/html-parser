@@ -92,7 +92,7 @@ sub parse_file
     if (!ref($file) && ref(\$file) ne "GLOB") {
         # Assume $file is a filename
         local(*F);
-        open(F, $file) || return undef;
+        open(F, "<", $file) || return undef;
 	binmode(F);  # should we? good for byte counts
         $opened++;
         $file = *F;
