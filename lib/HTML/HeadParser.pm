@@ -178,7 +178,10 @@ sub flush_text   # internal
 # <!ENTITY % head.content "TITLE & BASE?">
 # <!ELEMENT HEAD O O (%head.content;) +(%head.misc;)>
 #
-# Added in HTML 5 as of WD-html5-20090423: noscript, command
+# From HTML 5 as of WD-html5-20090825:
+#
+# One or more elements of metadata content, [...]
+# => base, command, link, meta, noscript, script, style, title
 
 sub start
 {

@@ -891,7 +891,7 @@ likely to find is <!DOCTYPE ...>.
 Example:
 
   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-  "http://www.w3.org/TR/html40/strict.dtd">
+      "http://www.w3.org/TR/html4/strict.dtd">
 
 DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
@@ -954,7 +954,7 @@ of whitespace between two text events.
 
 =head2 Unicode
 
-The C<HTML::Parser> can parse Unicode strings when running under
+C<HTML::Parser> can parse Unicode strings when running under
 perl-5.8 or better.  If Unicode is passed to $p->parse() then chunks
 of Unicode will be reported to the handlers.  The offset and length
 argspecs will also report their position in terms of characters.
@@ -1224,10 +1224,10 @@ L<HTML::LinkExtor>, L<HTML::Form>
 
 L<HTML::TreeBuilder> (part of the I<HTML-Tree> distribution)
 
-http://www.w3.org/TR/html4
+L<http://www.w3.org/TR/html4/>
 
 More information about marked sections and processing instructions may
-be found at C<http://www.sgml.u-net.com/book/sgml-8.htm>.
+be found at L<http://www.is-thought.co.uk/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
