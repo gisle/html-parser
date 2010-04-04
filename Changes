@@ -1,4 +1,17 @@
 _______________________________________________________________________________
+2010-04-04  Release 3.65
+
+Gisle Aas (1):
+      Eliminate buggy entities_decode_old
+
+Salvatore Bonaccorso (1):
+      Fixed endianness typo [RT#50811]
+
+Ville Skyttä (1):
+      Documentation fixes.
+
+
+_______________________________________________________________________________
 2009-10-25  Release 3.64
 
 Gisle Aas (5):
