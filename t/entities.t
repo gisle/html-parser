@@ -1,6 +1,6 @@
 use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
 
-use Test::More tests => 17;
+use Test::More tests => 18;
 
 $a = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -73,6 +73,8 @@ is(encode_entities("'", "'"), "&#39;");
 
 is(decode_entities("Attention Home&#959&#969n&#1257rs...1&#1109t T&#1110&#1084e E&#957&#1257&#1075"),
   "Attention Home\x{3BF}\x{3C9}n\x{4E9}rs...1\x{455}t T\x{456}\x{43C}e E\x{3BD}\x{4E9}\x{433}");
+is(decode_entities("{&#38;amp;&#x26;amp;&amp; also &#x42f;&#339;}"),
+    "{&amp;&amp;& also \x{42F}\x{153}}");
 
 __END__
 # Quoted from rfc1866.txt

@@ -434,23 +434,6 @@ for (0 .. 255) {
 
 my %subst;  # compiled encoding regexps
 
-sub decode_entities_old
-{
-    my $array;
-    if (defined wantarray) {
-	$array = [@_]; # copy
-    } else {
-	$array = \@_;  # modify in-place
-    }
-    my $c;
-    for (@$array) {
-	s/(&\#(\d+);?)/$2 < 256 ? chr($2) : $1/eg;
-	s/(&\#[xX]([0-9a-fA-F]+);?)/$c = hex($2); $c < 256 ? chr($c) : $1/eg;
-	s/(&(\w+);?)/$entity2char{$2} || $1/eg;
-    }
-    wantarray ? @$array : $array->[0];
-}
-
 sub encode_entities
 {
     return undef unless defined $_[0];
