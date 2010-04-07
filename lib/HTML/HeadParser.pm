@@ -268,7 +268,7 @@ sub text
 }
 
 BEGIN {
-    *utf8_mode = sub { 1 } unless HTML::Entities::UNICODE_SUPPORT;;
+    *utf8_mode = sub { 1 } unless HTML::Entities::UNICODE_SUPPORT;
 }
 
 1;
