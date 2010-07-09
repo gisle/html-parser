@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 16;
 
 { package H;
   sub new { bless {}, shift; }
@@ -147,7 +147,7 @@ unlink($file) or warn "Can't unlink $file: $!";
 ok(!$p->as_string);
 
 SKIP: {
-  skip "Need Unicode support", 4 if $] < 5.008;
+  skip "Need Unicode support", 5 if $] < 5.008;
 
   # Test that the Unicode BOM does not confuse us?
   $p = HTML::HeadParser->new(H->new);
@@ -177,4 +177,20 @@ EOT
 
   is($p->header("title"), "Parkinson's disease");
   is($p->header("link")->[0], '<../../css/ummAdam.css>; rel="stylesheet"; type="text/css"');
+
+  $p = HTML::HeadParser->new(H->new);
+  $p->utf8_mode(1);
+  $p->parse(<<"EOT");   # example from http://www.mjw.com.pl/
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\r
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pl" lang="pl"> \r
+\r
+<head profile="http://gmpg.org/xfn/11">\r
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />\r
+\r
+<title> ko\xC5\x84c\xC3\xB3wki kolekcji, outlet, hurtownia odzie\xC5\xBCy Warszawa &#8211; MJW</title>\r
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />\r
+
+EOT
+    $p->eof;
+    is($p->header("title"), "ko\xC5\x84c\xC3\xB3wki kolekcji, outlet, hurtownia odzie\xC5\xBCy Warszawa \xE2\x80\x93 MJW");
 }

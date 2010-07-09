@@ -157,7 +157,10 @@ sub flush_text   # internal
     $text =~ s/\s+/ /g;
     print "FLUSH $tag => '$text'\n"  if $DEBUG;
     if ($tag eq 'title') {
+	my $decoded;
+	$decoded = utf8::decode($text) if $self->utf8_mode && defined &utf8::decode;
 	HTML::Entities::decode($text);
+	utf8::encode($text) if $decoded;
 	$self->{'header'}->push_header(Title => $text);
     }
     $self->{'tag'} = $self->{'text'} = '';
