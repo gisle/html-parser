@@ -125,6 +125,7 @@ newSVpvn(char *s, STRLEN len)
 static SV*
 check_handler(pTHX_ SV* h)
 {
+    SvGETMAGIC(h);
     if (SvROK(h)) {
 	SV* myref = SvRV(h);
 	if (SvTYPE(myref) == SVt_PVCV)
