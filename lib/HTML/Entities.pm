@@ -1,5 +1,7 @@
 package HTML::Entities;
 
+=encoding utf8
+
 =head1 NAME
 
 HTML::Entities - Encode or decode strings with HTML entities
