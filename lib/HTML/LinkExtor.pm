@@ -1,8 +1,7 @@
 package HTML::LinkExtor;
+use base 'HTML::Parser';
 
-require HTML::Parser;
-@ISA = qw(HTML::Parser);
-$VERSION = "3.60";
+our $VERSION = "3.60";
 
 =head1 NAME
 

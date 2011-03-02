@@ -1,8 +1,6 @@
 package HTML::TokeParser;
-
-require HTML::PullParser;
-@ISA=qw(HTML::PullParser);
-$VERSION = "3.57";
+use base 'HTML::PullParser';
+our $VERSION = "3.57";
 
 use strict;
 use Carp ();

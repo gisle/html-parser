@@ -137,18 +137,16 @@ modify it under the same terms as Perl itself.
 
 =cut
 
+use base 'Exporter';
 use strict;
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 use vars qw(%entity2char %char2entity);
 
-require 5.004;
-require Exporter;
-@ISA = qw(Exporter);
+require 5.006;
 
-@EXPORT = qw(encode_entities decode_entities _decode_entities);
-@EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
+our @EXPORT = qw(encode_entities decode_entities _decode_entities);
+our @EXPORT_OK = qw(%entity2char %char2entity encode_entities_numeric);
 
-$VERSION = "3.64";
+our $VERSION = "3.64";
 sub Version { $VERSION; }
 
 require HTML::Parser;  # for fast XS implemented decode_entities

@@ -1,8 +1,6 @@
 package HTML::PullParser;
-
-require HTML::Parser;
-@ISA=qw(HTML::Parser);
-$VERSION = "3.57";
+use base 'HTML::Parser';
+our $VERSION = "3.57";
 
 use strict;
 use Carp ();

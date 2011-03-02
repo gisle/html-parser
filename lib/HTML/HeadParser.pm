@@ -79,15 +79,12 @@ superclass) are available:
 =cut
 
 
-require HTML::Parser;
-@ISA = qw(HTML::Parser);
-
+use base 'HTML::Parser';
 use HTML::Entities ();
 
 use strict;
-use vars qw($VERSION $DEBUG);
-#$DEBUG = 1;
-$VERSION = "3.66";
+our $DEBUG = 0;
+our $VERSION = "3.66";
 
 =item $hp = HTML::HeadParser->new
 
