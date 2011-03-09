@@ -207,7 +207,8 @@ sub start
 	$self->{'header'}->push_header($key => $attr->{content});
     } elsif ($tag eq 'base') {
 	return unless exists $attr->{href};
-	$self->{'header'}->push_header('Content-Base' => $attr->{href});
+	(my $base = $attr->{href}) =~ s/^\s+//; $base =~ s/\s+$//; # HTML5
+	$self->{'header'}->push_header('Content-Base' => $base);
     } elsif ($tag eq 'isindex') {
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
@@ -218,7 +219,9 @@ sub start
     } elsif ($tag eq 'link') {
 	return unless exists $attr->{href};
 	# <link href="http:..." rel="xxx" rev="xxx" title="xxx">
-	my $h_val = "<" . delete($attr->{href}) . ">";
+	my $href = delete($attr->{href});
+	$href =~ s/^\s+//; $href =~ s/\s+$//; # HTML5
+	my $h_val = "<$href>";
 	for (sort keys %{$attr}) {
 	    next if $_ eq "/";  # XHTML junk
 	    $h_val .= qq(; $_="$attr->{$_}");
