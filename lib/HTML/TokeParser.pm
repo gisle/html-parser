@@ -27,17 +27,19 @@ sub new
 {
     my $class = shift;
     my %cnf;
+
     if (@_ == 1) {
 	my $type = (ref($_[0]) eq "SCALAR") ? "doc" : "file";
 	%cnf = ($type => $_[0]);
     }
     else {
+	unshift @_, (ref($_[0]) eq "SCALAR") ? "doc" : "file" if(scalar(@_) % 2 == 1);
 	%cnf = @_;
     }
 
     my $textify = delete $cnf{textify} || {img => "alt", applet => "alt"};
 
-    my $self = $class->SUPER::new(%cnf, %ARGS) || return undef;
+    my $self = $class->SUPER::new(%ARGS, %cnf) || return undef;
 
     $self->{textify} = $textify;
     $self;
