@@ -650,9 +650,7 @@ names are forced to lower case.
 General entities are decoded in the attribute values and
 one layer of matching quotes enclosing the attribute values is removed.
 
-The Unicode character set is assumed for entity decoding.  With Perl
-version 5.6 or earlier only the Latin-1 range is supported, and
-entities for characters outside the range 0..255 are left unchanged.
+The Unicode character set is assumed for entity decoding.
 
 =item C<@attr>
 

@@ -34,7 +34,7 @@ HTML::Parser to create and extract information from HTML syntax trees
 PREREQUISITES
 
 In order to install and use this package you will need Perl version
-5.6 or better.  The HTML::Tagset module should be installed.
+5.8 or better.  The HTML::Tagset module should be installed.
 
 If you intend to use the HTML::HeadParser you probably want to install
 libwww-perl too.

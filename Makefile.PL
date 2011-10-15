@@ -8,7 +8,7 @@ WriteMakefile(
     AUTHOR       => 'Gisle Aas <gisle@activestate.com>',
     LICENSE	 => 'perl',
 
-    MIN_PERL_VERSION => 5.006,
+    MIN_PERL_VERSION => 5.008,
     PREREQ_PM    => {
 		      'HTML::Tagset' => 3,
 		      'XSLoader' => 0,
