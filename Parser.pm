@@ -1192,7 +1192,7 @@ The result of decoding will be a mix of encoded and decoded characters
 for any entities that expand to characters with code above 127.  This
 is not a good thing.
 
-The solution is to use the Encode::encode_utf8() on the data before
+The solution is to apply Encode::decode_utf8() on the data before
 feeding it to the $p->parse().  For $p->parse_file() pass a file that
 has been opened in ":utf8" mode.
 
