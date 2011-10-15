@@ -2,7 +2,7 @@ package HTML::TokeParser;
 
 require HTML::PullParser;
 @ISA=qw(HTML::PullParser);
-$VERSION = "3.57";
+$VERSION = "3.69";
 
 use strict;
 use Carp ();

@@ -1,4 +1,23 @@
 _______________________________________________________________________________
+2011-10-15  Release 3.69
+
+Gisle Aas (4):
+      Documentation fix; encode_utf8 mixup [RT#71151]
+      Make it clearer that there are 2 (actually 3) options for handing "UTF-8 garbage"
+      Github is the official repo
+      Can't be bothered to try to fix the failures that occur on perl-5.6
+
+Barbie (1):
+      fix to TokeParser to correctly handle option configuration
+
+Jon Jensen (1):
+      Aesthetic change: remove extra ;
+
+Ville Skyttä (1):
+      Trim surrounding whitespace from extracted URLs.
+
+
+_______________________________________________________________________________
 2010-09-01  Release 3.68
 
 Gisle Aas (1):
