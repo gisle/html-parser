@@ -17,7 +17,7 @@ WriteMakefile(
         build_requires => { 'Test::More' => 0 },
         recommends => { 'HTTP::Headers' => 0 },
         resources => {
-            repository => 'http://gitorious.org/projects/perl-html-parser',
+            repository => 'http://github.com/gisle/html-parser',
 	    MailingList => 'mailto:libwww@perl.org',
         }
     },
