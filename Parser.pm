@@ -1192,12 +1192,14 @@ The result of decoding will be a mix of encoded and decoded characters
 for any entities that expand to characters with code above 127.  This
 is not a good thing.
 
-The solution is to apply Encode::decode_utf8() on the data before
-feeding it to the $p->parse().  For $p->parse_file() pass a file that
-has been opened in ":utf8" mode.
+The recommened solution is to apply Encode::decode_utf8() on the data before
+feeding it to the $p->parse().  For $p->parse_file() pass a file that has been
+opened in ":utf8" mode.
 
-The parser can process raw undecoded UTF-8 sanely if the C<utf8_mode>
-is enabled or if the "attr", "@attr" or "dtext" argspecs is avoided.
+The alternative solution is to enable the C<utf8_mode> and not decode before
+passing strings to $p->parse().  The parser can process raw undecoded UTF-8
+sanely if the C<utf8_mode> is enabled, or if the "attr", "@attr" or "dtext"
+argspecs are avoided.
 
 =item Parsing string decoded with wrong endianness
 
