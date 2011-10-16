@@ -1520,7 +1520,7 @@ parse_process(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	}
 	s++;
     }
-    return beg;  /* could not fix end */
+    return beg;  /* could not find end */
 }
 
 
