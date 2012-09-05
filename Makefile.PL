@@ -34,10 +34,10 @@ sub MY::postamble
 {
     '
 pfunc.h : mkpfunc
-	$(PERL) mkpfunc >pfunc.h
+	$(PERLRUN) mkpfunc >pfunc.h
 
 hctype.h : mkhctype
-	$(PERL) mkhctype >hctype.h
+	$(PERLRUN) mkhctype >hctype.h
 '
 }
 
