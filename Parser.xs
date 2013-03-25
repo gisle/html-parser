@@ -616,8 +616,13 @@ decode_entities(...)
 	for (i = 0; i < items; i++) {
 	    if (GIMME_V != G_VOID)
 	        ST(i) = sv_2mortal(newSVsv(ST(i)));
-	    else if (SvREADONLY(ST(i)))
-		croak("Can't inline decode readonly string");
+	    else {
+#ifdef SV_CHECK_THINKFIRST
+                SV_CHECK_THINKFIRST(ST(i));
+#endif
+                if (SvREADONLY(ST(i)))
+		    croak("Can't inline decode readonly string in decode_entities()");
+            }
 	    decode_entities(aTHX_ ST(i), entity2char, 0);
 	}
 	SP += items;
@@ -641,8 +646,11 @@ _decode_entities(string, entities, ...)
         else {
             entities_hv = 0;
         }
+#ifdef SV_CHECK_THINKFIRST
+        SV_CHECK_THINKFIRST(string);
+#endif
 	if (SvREADONLY(string))
-	    croak("Can't inline decode readonly string");
+	    croak("Can't inline decode readonly string in _decode_entities()");
 	decode_entities(aTHX_ string, entities_hv, expand_prefix);
 
 bool
