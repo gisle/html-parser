@@ -204,6 +204,7 @@ sub start
 		return;
 	    }
 	}
+        $key =~ s/:/-/g;
 	$self->{'header'}->push_header($key => $attr->{content});
     } elsif ($tag eq 'base') {
 	return unless exists $attr->{href};

@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 { package H;
   sub new { bless {}, shift; }
@@ -62,6 +62,7 @@ my $HTML = <<'EOT';
 <base href="http://www.sn.no">
 <meta name="Keywords" content="test, test, test,...">
 <meta name="Keywords" content="more">
+<meta name="Prefix:Keywords" content="more">
 <meta charset="ISO-8859-1"><!-- HTML 5 -->
 
 Dette er vanlig tekst.  Denne teksten definerer også slutten på
@@ -96,6 +97,7 @@ like($p->header('Title'), qr/Å være eller å ikke være/);
 is($p->header('Expires'), 'Soon');
 is($p->header('Content-Base'), 'http://www.sn.no');
 is_deeply($p->header('X-Meta-Keywords'), ['test, test, test,...', 'more']);
+is($p->header('X-Meta-Prefix-Keywords'), 'more');
 is($p->header('X-Meta-Charset'), 'ISO-8859-1');
 like($p->header('Link'), qr/<mailto:gisle\@aas.no>/);
 
