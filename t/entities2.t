@@ -8,7 +8,7 @@ use HTML::Entities qw(_decode_entities);
 eval {
     _decode_entities("&lt;", undef);
 };
-like($@, qr/^Can't inline decode readonly string/);
+like($@, qr/^(?:Can't inline decode readonly string|Modification of a read-only value attempted)/);
 
 eval {
     my $a = "";

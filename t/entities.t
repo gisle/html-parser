@@ -1,6 +1,6 @@
 use HTML::Entities qw(decode_entities encode_entities encode_entities_numeric);
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 $a = "V&aring;re norske tegn b&oslash;r &#230res";
 
@@ -53,6 +53,17 @@ $a = $plain;
 encode_entities($a);
 is($a, $ent);
 
+{   #RT #84144 - https://rt.cpan.org/Public/Bug/Display.html?id=84144
+
+    my %hash= (
+        "V&aring;re norske tegn b&oslash;r &#230res" => "Våre norske tegn bør æres"
+    );
+
+    my ($got, $eval_ok);
+    $eval_ok= eval { $got= decode_entities((keys %hash)[0]); 1 };
+    is( $eval_ok, 1, "decode_entitites() when processing a key as input");
+    is( $got, (values %hash)[0], "decode_entities() decodes a key properly");
+}
 
 # From: Bill Simpson-Young <bill.simpson-young@cmis.csiro.au>
 # Subject: HTML entities problem with 5.11
