@@ -1,4 +1,18 @@
 _______________________________________________________________________________
+2013-03-28  Release 3.70
+
+François Perrad (1):
+      Fix for cross-compiling with Buildroot
+
+Gisle Aas (1):
+      Comment typo fix
+
+Yves Orton (1):
+      Fix Issue #3 / RT #84144: HTML::Entities::decode_entities() needs
+        to call SV_CHECK_THINKFIRST() before checking READONLY flag
+
+
+_______________________________________________________________________________
 2011-10-15  Release 3.69
 
 Gisle Aas (4):
