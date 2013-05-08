@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 { package H;
   sub new { bless {}, shift; }
@@ -9,6 +9,7 @@ use Test::More tests => 16;
   sub header {
      my $self = shift;
      my $key  = uc(shift);
+     die if $key =~ /:/;
      my $old = $self->{$key};
      if (@_) { $self->{$key} = shift; }
      $old;
@@ -17,6 +18,7 @@ use Test::More tests => 16;
   sub push_header {
      my($self, $k, $v) = @_;
      $k = uc($k);
+     die if $k =~ /:/;
      if (exists $self->{$k}) {
         $self->{$k} = [ $self->{$k} ] unless ref $self->{$k};
 	push(@{$self->{$k}}, $v);
@@ -48,6 +50,7 @@ my $HTML = <<'EOT';
 <title>&Aring være eller &#229; ikke være</title>
 <meta http-equiv="Expires" content="Soon">
 <meta http-equiv="Foo" content="Bar">
+<meta name='twitter:card' content='photo' />
 <link href="mailto:gisle@aas.no" rev=made title="Gisle Aas">
 
 <script>
@@ -97,6 +100,7 @@ is($p->header('Expires'), 'Soon');
 is($p->header('Content-Base'), 'http://www.sn.no');
 is_deeply($p->header('X-Meta-Keywords'), ['test, test, test,...', 'more']);
 is($p->header('X-Meta-Charset'), 'ISO-8859-1');
+is($p->header('X-Meta-Twitter-Card'), 'photo');
 like($p->header('Link'), qr/<mailto:gisle\@aas.no>/);
 
 # This header should not be present because the head ended

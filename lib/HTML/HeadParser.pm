@@ -67,6 +67,10 @@ E<lt>meta> elements containing a C<charset> attribute will result in
 an C<X-Meta-Charset> header, using the value of the C<charset>
 attribute as the pushed header value.
 
+The ':' character can't be represented in header field names, so
+if the meta element contains this char it's substituted with '-'
+before forming the field name.
+
 =back
 
 =head1 METHODS
@@ -204,6 +208,7 @@ sub start
 		return;
 	    }
 	}
+	$key =~ s/:/-/g;
 	$self->{'header'}->push_header($key => $attr->{content});
     } elsif ($tag eq 'base') {
 	return unless exists $attr->{href};
