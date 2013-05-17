@@ -28,7 +28,7 @@ HTML::Filter - Filter HTML text through the parser
 =head1 NOTE
 
 B<This module is deprecated.> The C<HTML::Parser> now provides the
-functionally of C<HTML::Filter> much more efficiently with the the
+functionally of C<HTML::Filter> much more efficiently with the
 C<default> handler.
 
 =head1 SYNOPSIS
