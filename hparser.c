@@ -735,7 +735,7 @@ argspec_compile(SV* src, PSTATE* p_state)
 		}
 	    }
 	    else {
-		croak("Unrecognized identifier %.*s in argspec", s - name, name);
+		croak("Unrecognized identifier %.*s in argspec", (int) (s - name), name);
 	    }
 	}
 	else if (*s == '"' || *s == '\'') {
