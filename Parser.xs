@@ -312,7 +312,7 @@ magic_dup_pstate(pTHX_ MAGIC *mg, CLONE_PARAMS *params)
 
 #endif
 
-MGVTBL vtbl_pstate =
+const MGVTBL vtbl_pstate =
 {
     0,
     0,
@@ -362,7 +362,7 @@ _alloc_pstate(self)
 #endif
 	mg = mg_find(sv, '~');
         assert(mg);
-        mg->mg_virtual = &vtbl_pstate;
+        mg->mg_virtual = (MGVTBL*)&vtbl_pstate;
 #if defined(USE_ITHREADS) && PATCHLEVEL >= 8
         mg->mg_flags |= MGf_DUP;
 #endif
