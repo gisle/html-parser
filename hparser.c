@@ -14,7 +14,7 @@
 #include "tokenpos.h"  /* dTOKEN; PUSH_TOKEN() */
 
 
-static
+const static
 struct literal_tag {
     int len;
     char* str;
@@ -59,7 +59,7 @@ enum argcode {
     ARG_FLAG_FLAT_ARRAY
 };
 
-char *argname[] = {
+static const char * const argname[] = {
     /* Must be in the same order as enum argcode */
     "self",     /* ARG_SELF */
     "tokens",   /* ARG_TOKENS */   
@@ -701,7 +701,7 @@ argspec_compile(SV* src, PSTATE* p_state)
 	if (isHNAME_FIRST(*s) || *s == '@') {
 	    char *name = s;
 	    int a = ARG_SELF;
-	    char **arg_name;
+	    const char * const *arg_name;
 
 	    s++;
 	    while (isHNAME_CHAR(*s))
