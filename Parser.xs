@@ -480,7 +480,7 @@ strict_comment(pstate,...)
         case 12: attr = &pstate->xml_pic;              break;
 	case 13: attr = &pstate->backquote;            break;
 	default:
-	    croak("Unknown boolean attribute (%d)", ix);
+	    croak("Unknown boolean attribute (%d)", (int)ix);
         }
 	RETVAL = boolSV(*attr);
 	if (items > 1)
@@ -517,7 +517,7 @@ ignore_tags(pstate,...)
 	case  2: attr = &pstate->ignore_tags;     break;
 	case  3: attr = &pstate->ignore_elements; break;
 	default:
-	    croak("Unknown tag-list attribute (%d)", ix);
+	    croak("Unknown tag-list attribute (%d)", (int)ix);
 	}
 	if (GIMME_V != G_VOID)
 	    croak("Can't report tag lists yet");
