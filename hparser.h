@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2009, Gisle Aas
+ * Copyright 1999-2016, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
  * This library is free software; you can redistribute it and/or
@@ -129,4 +129,3 @@ struct p_state {
     SV* tmp;
 };
 typedef struct p_state PSTATE;
-

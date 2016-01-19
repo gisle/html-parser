@@ -1,11 +1,5 @@
 package HTML::Parser;
 
-# Copyright 1996-2009, Gisle Aas.
-# Copyright 1999-2000, Michael A. Chase.
-#
-# This library is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
-
 use strict;
 use vars qw($VERSION @ISA);
 
@@ -1231,7 +1225,7 @@ be found at L<http://www.is-thought.co.uk/book/sgml-8.htm>.
 
 =head1 COPYRIGHT
 
- Copyright 1996-2008 Gisle Aas. All rights reserved.
+ Copyright 1996-2016 Gisle Aas. All rights reserved.
  Copyright 1999-2000 Michael A. Chase.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
