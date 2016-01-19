@@ -7,7 +7,7 @@ BEGIN {
   plan skip_all => "This perl does not support Unicode" if $] < 5.008;
 }
 
-plan tests => 105;
+plan tests => 107;
 
 my @warn;
 $SIG{__WARN__} = sub {
@@ -172,7 +172,7 @@ unlink($file);
 $p->parse(q(<a href="a=1&lang=2&times=3">foo</a>))->eof;
 is(@parsed, "5");
 is($parsed[1][0], "start");
-is($parsed[1][8]{href}, "a=1&lang=2\xd7=3");
+is($parsed[1][8]{href}, "a=1&lang=2\xC3\x97=3");
 
 ok(!HTML::Entities::_probably_utf8_chunk(""));
 ok(!HTML::Entities::_probably_utf8_chunk("f"));
@@ -196,3 +196,17 @@ $p->parse($doc)->eof;
 
 ok(!@warn);
 is(@parsed, 9);
+
+@parsed = ();
+$p = HTML::Parser->new(
+     api_version => 3,
+     utf8_mode => 1,
+     unbroken_text => 1,
+     default_h => [\@parsed, 'event,dtext'],
+);
+
+$p->parse("<p>R\xC3\xA9ductions jusqu'&agrave; -70%.<p>R&eacute;ductions jusqu'&agrave; -70%.");
+$p->eof;
+
+is($parsed[2][1], "R\xC3\xA9ductions jusqu'\xC3\xA0 -70%.");
+is($parsed[4][1], "R\xC3\xA9ductions jusqu'\xC3\xA0 -70%.");

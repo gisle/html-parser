@@ -464,8 +464,10 @@ report_event(PSTATE* p_state,
 			    SvUTF8_on(attrval);
 			if (!p_state->attr_encoded) {
 #ifdef UNICODE_HTML_PARSER
-			    if (p_state->utf8_mode)
+			    if (p_state->utf8_mode) {
 				sv_utf8_decode(attrval);
+                                sv_utf8_upgrade(attrval);
+                            }
 #endif
 			    decode_entities(aTHX_ attrval, p_state->entity2char, 0);
 			    if (p_state->utf8_mode)
@@ -536,8 +538,10 @@ report_event(PSTATE* p_state,
 		    SvUTF8_on(arg);
 		if (!p_state->is_cdata) {
 #ifdef UNICODE_HTML_PARSER
-		    if (p_state->utf8_mode)
+		    if (p_state->utf8_mode) {
 			sv_utf8_decode(arg);
+                        sv_utf8_upgrade(arg);
+                    }
 #endif
 		    decode_entities(aTHX_ arg, p_state->entity2char, 1);
 		    if (p_state->utf8_mode)
