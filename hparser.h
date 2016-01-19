@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 1999-2009, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *

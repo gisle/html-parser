@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 1999-2009, Gisle Aas
  * Copyright 1999-2000, Michael A. Chase
  *
@@ -62,7 +62,7 @@ enum argcode {
 static const char * const argname[] = {
     /* Must be in the same order as enum argcode */
     "self",     /* ARG_SELF */
-    "tokens",   /* ARG_TOKENS */   
+    "tokens",   /* ARG_TOKENS */
     "tokenpos", /* ARG_TOKENPOS */
     "token0",   /* ARG_TOKEN0 */
     "tagname",  /* ARG_TAGNAME */
@@ -215,7 +215,7 @@ report_event(PSTATE* p_state,
 
     if (event == E_NONE)
 	goto IGNORE_EVENT;
-    
+
 #ifdef MARKED_SECTION
     if (p_state->ms == MS_IGNORE)
 	goto IGNORE_EVENT;
@@ -335,7 +335,7 @@ report_event(PSTATE* p_state,
     argspec = h->argspec ? SvPV(h->argspec, my_na) : "";
 
     if (SvTYPE(h->cb) == SVt_PVAV) {
-	
+
 	if (*argspec == ARG_FLAG_FLAT_ARRAY) {
 	    argspec++;
 	    array = (AV*)h->cb;
@@ -522,7 +522,7 @@ report_event(PSTATE* p_state,
 		arg = sv_2mortal(newRV_noinc((SV*)av));
 	    }
 	    break;
-	
+
 	case ARG_TEXT:
 	    arg = sv_2mortal(newSVpvn(beg, end - beg));
 	    if (utf8)
@@ -545,7 +545,7 @@ report_event(PSTATE* p_state,
 		}
 	    }
 	    break;
-      
+
 	case ARG_IS_CDATA:
 	    if (event == E_TEXT) {
 		arg = boolSV(p_state->is_cdata);
@@ -595,7 +595,7 @@ report_event(PSTATE* p_state,
 	case ARG_UNDEF:
 	    arg = sv_mortalcopy(&PL_sv_undef);
 	    break;
-      
+
 	default:
 	    arg = sv_2mortal(newSVpvf("Bad argspec %d", *s));
 	    break;
@@ -663,7 +663,7 @@ IGNORE_EVENT:
 	}
 #endif
     }
-#undef CHR_DIST    
+#undef CHR_DIST
     return;
 }
 
@@ -768,7 +768,7 @@ argspec_compile(SV* src, PSTATE* p_state)
 
 	while (isHSPACE(*s))
 	    s++;
-	
+
 	if (*s == '}' && SvPVX(argspec)[0] == ARG_FLAG_FLAT_ARRAY) {
 	    /* end of '@{ ... }' */
 	    s++;
@@ -812,7 +812,7 @@ flush_pending_text(PSTATE* p_state, SV* self)
     p_state->column        = p_state->pend_text_column;
 
     report_event(p_state, E_TEXT,
-		 SvPVX(old_pend_text), SvEND(old_pend_text), 
+		 SvPVX(old_pend_text), SvEND(old_pend_text),
 		 SvUTF8(old_pend_text), 0, 0, self);
     SvOK_off(old_pend_text);
 
@@ -945,7 +945,7 @@ parse_comment(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		goto LOCATE_END;
 	    }
 	}
-    
+
 	if (s == end)
 	    return beg;
     }
@@ -1058,11 +1058,11 @@ FIND_NAMES:
 		    /* comment finished */
 		    goto FIND_NAMES;
 		}
-	    }      
+	    }
 	}
 	else
 	    goto FAIL;
-      
+
     }
     if (*s == '[') {
 	s++;
@@ -1084,7 +1084,7 @@ FIND_NAMES:
 FAIL:
     SvREFCNT_dec(tokens);
     return 0; /* not yet implemented */
-  
+
 PREMATURE:
     SvREFCNT_dec(tokens);
     return beg;
@@ -1424,7 +1424,7 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	FREE_TOKENS;
 	return s;
     }
-  
+
     FREE_TOKENS;
     return 0;
 
@@ -1512,9 +1512,9 @@ parse_process(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		    continue;
 		token_pos.end = s - 2;
 	    }
-      
+
 	    /* a complete processing instruction seen */
-	    report_event(p_state, E_PROCESS, beg, s, utf8, 
+	    report_event(p_state, E_PROCESS, beg, s, utf8,
 			 &token_pos, 1, self);
 	    return s;
 	}
@@ -1565,7 +1565,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 
 	    end_text = s;
 	    s++;
-      
+
 	    /* here we rely on '\0' termination of perl svpv buffers */
 	    if (*s == '/') {
 		s++;
@@ -1640,7 +1640,7 @@ parse_buf(pTHX_ PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 				     0, 0, self);
 			t = s;
 			SvREFCNT_dec(av_pop(p_state->ms_stack));
-			marked_section_update(p_state);    
+			marked_section_update(p_state);
 			continue;
 		    }
 		}
@@ -1794,7 +1794,7 @@ parse(pTHX_
 		/* report rest as text */
 		report_event(p_state, E_TEXT, s, end, utf8, 0, 0, self);
 	    }
-	    
+
 	    SvREFCNT_dec(p_state->buf);
 	    p_state->buf = 0;
 	}
