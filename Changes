@@ -1,4 +1,23 @@
 _______________________________________________________________________________
+2016-01-19  Release 3.72
+
+Gisle Aas (3):
+      Avoid more clang casting warnings
+      Remove trailing whitespace
+      Ensure entities expand to utf8 sequences under 'utf8_mode' [RT#99755]
+
+David Steinbrunner (2):
+      typo fix
+      typo fixes
+
+Jacques Germishuys (1):
+      Silence clang warning
+
+bulk88 (1):
+      const+static-ing
+
+
+_______________________________________________________________________________
 2013-05-09  Release 3.71
 
 Gisle Aas (1):
