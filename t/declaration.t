@@ -1,4 +1,4 @@
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use HTML::Parser;
 my $res = "";
@@ -58,5 +58,25 @@ is($res, <<EOT);
 <"-//W3C//DTD XHTML 1.0 Strict//EN">
 <"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <[]>]
+EOT
+
+$res = "";
+$p->parse(<<EOT)->eof;
+<!DOCTYPE pbi SYSTEM "pbi.dtd" [
+<!-- the [internal] dtd -->
+<!ENTITY brackets "[]">
+] >
+<pbi>[Content]</pbi>
+EOT
+is($res, <<EOT);
+[<DOCTYPE>
+<pbi>
+<SYSTEM>
+<"pbi.dtd">
+<[
+<!-- the [internal] dtd -->
+<!ENTITY brackets "[]">
+]>]
+<pbi>[Content]</pbi>
 EOT
 

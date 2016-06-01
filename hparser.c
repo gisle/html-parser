@@ -1184,6 +1184,45 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		s++;
 		PUSH_TOKEN(str_beg, s);
 	    }
+	    else if (*s == '[') {
+		/* internal DTD section between square brackets */
+		char *intdtd_beg = s;
+		while (s < end && *s != ']') {	/* get the internal dtd - beware of nested comments and strings maybe containing a ] char */
+		    if (*s == '"' || *s == '\'' || (*s == '`' && p_state->backquote)) {	/* skip over a quoted string */
+			char *str_beg = s;
+			s++;
+			while (s < end && *s != *str_beg)
+			    s++;
+			if (s == end)
+			    goto PREMATURE;
+		    } else if (*s == '-') {	/* and skip over the commment */
+			s++;
+			if (s == end)
+			    goto PREMATURE;
+			if (*s != '-')
+			    goto FAIL;
+			s++;
+			while (1) {
+			    while (s < end && *s != '-')
+				s++;
+			    if (s == end)
+				goto PREMATURE;
+			    s++;
+			    if (s == end)
+				goto PREMATURE;
+			    if (*s == '-')
+				break;
+			}
+		    }
+		    s++;
+		    if (s == end)
+			goto PREMATURE;
+		}
+		s++;
+		if (s == end)
+		    goto PREMATURE;
+		PUSH_TOKEN(intdtd_beg, s);
+	    }
 	    else if (*s == '-') {
 		/* comment */
 		char *com_beg = s;
