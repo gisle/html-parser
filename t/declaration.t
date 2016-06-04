@@ -65,6 +65,8 @@ $p->parse(<<EOT)->eof;
 <!DOCTYPE pbi SYSTEM "pbi.dtd" [
 <!-- the [internal] dtd -->
 <!ENTITY brackets "[]">
+<!ENTITY my-ent "<!-- [foo] -->">
+<!-- end of internal dtd -->
 ] >
 <pbi>[Content]</pbi>
 EOT
@@ -76,6 +78,8 @@ is($res, <<EOT);
 <[
 <!-- the [internal] dtd -->
 <!ENTITY brackets "[]">
+<!ENTITY my-ent "<!-- [foo] -->">
+<!-- end of internal dtd -->
 ]>]
 <pbi>[Content]</pbi>
 EOT
