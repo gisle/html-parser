@@ -1269,6 +1269,9 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 	    else if (*s == '[') {
 		/* internal DTD section between square brackets */
 		char *intdtd_beg = s;
+		s++;
+		if (s == end)
+		    goto PREMATURE;
 		while (s < end && *s != ']') {	/* get the internal dtd - beware of nested comments and strings maybe containing a ] and > chars */
 		    if (*s == '"' || *s == '\'' || (*s == '`' && p_state->backquote)) {	/* skip over a quoted string */
 			char *str_beg = s;
@@ -1277,8 +1280,37 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 			    s++;
 			if (s == end)
 			    goto PREMATURE;
-		    } else if (*s == '<') {	/* and skip over the commment */
+		    }
+		    else if (*s == '-') {	/* comments inside entity decl <!ENTITY bracket "]" -- a ] char --> */
+			s++;
+			if (s == end)
+			    goto PREMATURE;
+			if (*s != '-')
+			    goto FAIL;
+			s++;
+			while (1) {
+			    while (s < end && *s != '-')
+				s++;
+			    if (s == end)
+				goto PREMATURE;
+			    s++;
+			    if (s == end)
+				goto PREMATURE;
+			    if (*s == '-')
+				break;
+			}
+			if (s == end)
+			    goto PREMATURE;
+		    }
+		    else if (*s == '<') {	/* and skip over the <!-- commment --> */
 			s = skip_to_end_comment(p_state, s, end);
+		    }
+		    else if (isALPHA(*s)) {	/* skip over any word maybe containing hyphens */
+			s++;
+			while (s < end && isHNOT_SPACE_GT(*s))
+			    s++;
+			if (s == end)
+			    goto PREMATURE;
 		    }
 		    s++;
 		    if (s == end)
