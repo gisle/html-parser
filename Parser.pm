@@ -810,8 +810,9 @@ Tokens causes a reference to an array of token strings to be passed.
 The strings are exactly as they were found in the original text,
 no decoding or case changes are applied.
 
-For C<declaration> events, the array contains each word, comment, and
-delimited string starting with the declaration type.
+For C<declaration> events, the array contains each word, comment, 
+internal dtd (including square brackets) and delimited string,
+starting with the declaration type.
 
 For C<comment> events, this contains each sub-comment.  If
 $p->strict_comments is disabled, there will be only one sub-comment.
@@ -884,8 +885,6 @@ Example:
 
   <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
       "http://www.w3.org/TR/html4/strict.dtd">
-
-DTDs inside <!DOCTYPE ...> will confuse HTML::Parser.
 
 =item C<default>
 

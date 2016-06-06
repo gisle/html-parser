@@ -957,6 +957,88 @@ parse_comment(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
     return 0;
 }
 
+static char*
+skip_to_end_comment(PSTATE* p_state, char *beg, char *end)
+{
+    char *s = beg;
+
+    ++s;
+    if (s == end || *s != '!')
+	return beg;
+    ++s;
+    if (s == end || *s != '-')
+	return beg;
+    ++s;
+    if (s == end || *s != '-')
+	return beg;
+
+    if (p_state->strict_comment) {
+	char *start_com = s;  /* also used to signal inside/outside */
+
+	while (1) {
+	    /* try to locate "--" */
+	FIND_DASH_DASH:
+	    while (s < end && *s != '-' && *s != '>')
+		s++;
+
+	    if (s == end)
+		return beg;
+
+	    if (*s == '>') {
+		if (! start_com)
+		    return s;
+		s++;
+		goto FIND_DASH_DASH;
+	    }
+
+	    s++;
+	    if (s == end)
+		return beg;
+
+	    if (*s == '-') {
+		/* two dashes in a row seen */
+		s++;
+		if (start_com)
+		    start_com = 0;
+		else
+		    start_com = s;
+	    }
+	}
+    }
+    else if (p_state->no_dash_dash_comment_end) {
+        /* a lone '>' signals end-of-comment */
+	while (s < end && *s != '>')
+	    s++;
+	if (s == end)
+	    return beg;
+	return s;
+    }
+    else { /* non-strict comment */
+	/* try to locate /--\s*>/ which signals end-of-comment */
+    LOCATE_END:
+	while (s < end && *s != '-')
+	    s++;
+	if (s < end) {
+	    s++;
+	    if (*s == '-') {
+		s++;
+		while (isHSPACE(*s))
+		    s++;
+		if (*s == '>') {
+		    return s;
+		}
+	    }
+	    if (s < end)
+		goto LOCATE_END;
+	}
+
+	if (s == end)
+	    return beg;
+    }
+
+    return 0;
+}
+
 
 #ifdef MARKED_SECTION
 
@@ -1183,6 +1265,61 @@ parse_decl(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
 		    goto PREMATURE;
 		s++;
 		PUSH_TOKEN(str_beg, s);
+	    }
+	    else if (*s == '[') {
+		/* internal DTD section between square brackets */
+		char *intdtd_beg = s;
+		s++;
+		if (s == end)
+		    goto PREMATURE;
+		while (s < end && *s != ']') {	/* get the internal dtd - beware of nested comments and strings maybe containing a ] and > chars */
+		    if (*s == '"' || *s == '\'' || (*s == '`' && p_state->backquote)) {	/* skip over a quoted string */
+			char *str_beg = s;
+			s++;
+			while (s < end && *s != *str_beg)
+			    s++;
+			if (s == end)
+			    goto PREMATURE;
+		    }
+		    else if (*s == '-') {	/* comments inside entity decl <!ENTITY bracket "]" -- a ] char --> */
+			s++;
+			if (s == end)
+			    goto PREMATURE;
+			if (*s != '-')
+			    goto FAIL;
+			s++;
+			while (1) {
+			    while (s < end && *s != '-')
+				s++;
+			    if (s == end)
+				goto PREMATURE;
+			    s++;
+			    if (s == end)
+				goto PREMATURE;
+			    if (*s == '-')
+				break;
+			}
+			if (s == end)
+			    goto PREMATURE;
+		    }
+		    else if (*s == '<') {	/* and skip over the <!-- commment --> */
+			s = skip_to_end_comment(p_state, s, end);
+		    }
+		    else if (isALPHA(*s)) {	/* skip over any word maybe containing hyphens */
+			s++;
+			while (s < end && isHNOT_SPACE_GT(*s))
+			    s++;
+			if (s == end)
+			    goto PREMATURE;
+		    }
+		    s++;
+		    if (s == end)
+			goto PREMATURE;
+		}
+		s++;
+		if (s == end)
+		    goto PREMATURE;
+		PUSH_TOKEN(intdtd_beg, s);
 	    }
 	    else if (*s == '-') {
 		/* comment */
