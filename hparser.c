@@ -1271,15 +1271,15 @@ parse_start(PSTATE* p_state, char *beg, char *end, U32 utf8, SV* self)
     int empty_tag = 0;
     dTOKENS(16);
 
-    hctype_t tag_name_first, tag_name_char;
+    hctype_t tag_name_char;
     hctype_t attr_name_first, attr_name_char;
 
     if (STRICT_NAMES(p_state)) {
-	tag_name_first = attr_name_first = HCTYPE_NAME_FIRST;
-	tag_name_char  = attr_name_char  = HCTYPE_NAME_CHAR;
+	attr_name_first = HCTYPE_NAME_FIRST;
+	tag_name_char   = attr_name_char  = HCTYPE_NAME_CHAR;
     }
     else {
-	tag_name_first = tag_name_char = HCTYPE_NOT_SPACE_GT;
+	tag_name_char   = HCTYPE_NOT_SPACE_GT;
 	attr_name_first = HCTYPE_NOT_SPACE_GT;
 	attr_name_char  = HCTYPE_NOT_SPACE_EQ_GT;
     }

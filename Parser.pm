@@ -66,7 +66,7 @@ sub init
 	if ($option =~ /^(\w+)_h$/) {
 	    $self->handler($1 => @$val);
 	}
-        elsif ($option =~ /^(text|start|end|process|declaration|comment)$/) {
+        elsif ($option =~ /^(?:text|start|end|process|declaration|comment)$/) {
 	    require Carp;
 	    Carp::croak("Bad constructor option '$option'");
         }
