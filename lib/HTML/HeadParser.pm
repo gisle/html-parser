@@ -185,10 +185,10 @@ sub flush_text   # internal
 # <!ENTITY % head.content "TITLE & BASE?">
 # <!ELEMENT HEAD O O (%head.content;) +(%head.misc;)>
 #
-# From HTML 5 as of WD-html5-20090825:
+# From HTML Living Standard as of 24 May 2017:
 #
 # One or more elements of metadata content, [...]
-# => base, command, link, meta, noscript, script, style, title
+# => base, link, meta, noscript, script, style, template, title
 
 sub start
 {
@@ -218,7 +218,7 @@ sub start
 	# This is a non-standard header.  Perhaps we should just ignore
 	# this element
 	$self->{'header'}->push_header(Isindex => $attr->{prompt} || '?');
-    } elsif ($tag =~ /^(?:title|noscript|object|command)$/) {
+    } elsif ($tag =~ /^(?:title|noscript|object|template)$/) {
 	# Just remember tag.  Initialize header when we see the end tag.
 	$self->{'tag'} = $tag;
     } elsif ($tag eq 'link') {
