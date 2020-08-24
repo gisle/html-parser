@@ -43,6 +43,7 @@ t/entities.t		Test encoding/decoding of entities
 t/entities2.t		Test _decode_entities()
 t/filter-methods.t	Test ignore_tags, ignore_elements methods.
 t/filter.t		Test HTML::Filter
+t/free.t		Test freeing of active parser
 t/handler-eof.t         Test invocation of $p->eof in handlers
 t/handler.t		Test $p->handler method
 t/headparser-http.t	Test HTML::HeadParser
